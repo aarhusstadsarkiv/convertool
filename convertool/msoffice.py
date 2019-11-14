@@ -52,7 +52,7 @@ def find_libre(system: str) -> str:
                 check=True,
             )
             # Remove trailing newline and decode stdout from byte string.
-            libre_path = cmd.stdout.rstrip().decode()
+            libre_path = '"' + cmd.stdout.rstrip().decode() + '"'
         except CalledProcessError as error:
             # Didn't find soffice.exe in the Program Files folder.
             # Return code != 0
