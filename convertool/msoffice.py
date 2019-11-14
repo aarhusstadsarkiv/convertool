@@ -99,22 +99,12 @@ def convert(system: str) -> Optional[str]:
     type (anonymous types are allowed in return)
         description
 
-    Raises
-    ------license" for more information.
-
->>> from os.path import abspath, realpath
-
->>> abspath('b')
-
-    BadException
-        description
-
     """
     script_path = os.path.dirname(os.path.realpath(__file__))
     file_dir = os.path.join(script_path, "files")
     outdir = os.path.join(script_path, "converted_files")
     libreoffice = find_libre(system)
-
+    # TODO: We need a CLI :) Also catch this subprocess run in case it fails.
     cmd = subprocess.run(
         f"{libreoffice} --headless --convert-to pdf {file_dir}/docx_test.docx --outdir {outdir}",
         shell=True,
