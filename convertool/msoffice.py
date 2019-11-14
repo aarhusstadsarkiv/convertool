@@ -111,13 +111,12 @@ def convert(system: str) -> Optional[str]:
 
     """
     script_path = os.path.dirname(os.path.realpath(__file__))
-    user_profile = os.path.join(script_path, "lotus_user")
     file_dir = os.path.join(script_path, "files")
     outdir = os.path.join(script_path, "converted_files")
     libreoffice = find_libre(system)
 
     cmd = subprocess.run(
-        f"{libreoffice} --headless --convert-to pdf {file_dir}/docx_test.docx --outdir {outdir} -env:UserInstallation=file://{user_profile}",
+        f"{libreoffice} --headless --convert-to pdf {file_dir}/docx_test.docx --outdir {outdir}",
         shell=True,
         check=True,
     )
