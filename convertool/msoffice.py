@@ -10,10 +10,10 @@ chocolatey (Windows) or snap (Linux).
 # -----------------------------------------------------------------------------
 import os
 import sys
-import platform
 import subprocess
 from subprocess import CalledProcessError
-from typing import Optional
+from typing import List
+import tqdm  # type: ignore[import]
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -24,7 +24,7 @@ def find_libre(system: str) -> str:
     """Find the LibreOffice installation. This function is OS dependent, and
     will find either `libreoffice` on Linux, or `soffice.exe` on Windows, if
     these exist. If they do not, the program will exit with an error message
-    from stderr.
+    from stderr retuned by subprocess.
 
     Parameters
     ----------
@@ -48,8 +48,8 @@ def find_libre(system: str) -> str:
             cmd = subprocess.run(
                 r"cd %programfiles% && where /r . *soffice.exe",
                 shell=True,
-                capture_output=True,
                 check=True,
+                capture_output=True,
             )
             # Remove trailing newline and decode stdout from byte string.
             libre_path = '"' + cmd.stdout.rstrip().decode() + '"'
@@ -66,7 +66,7 @@ def find_libre(system: str) -> str:
         try:
             # Find the libreoffice shell command using which.
             cmd = subprocess.run(
-                ["which", "libreoffice"], capture_output=True, check=True
+                ["which", "libreoffice"], check=True, capture_output=True
             )
             # Remove trailing newline and decode stdout from byte string.
             libre_path = cmd.stdout.rstrip().decode()
@@ -83,7 +83,7 @@ def find_libre(system: str) -> str:
     return libre_path
 
 
-def convert(system: str) -> Optional[str]:
+def convert_files(system: str, files: List[str]) -> None:
     """Function level documentation.
     Delete non-applicable sections.
 
@@ -101,27 +101,24 @@ def convert(system: str) -> Optional[str]:
 
     """
     script_path = os.path.dirname(os.path.realpath(__file__))
-    file_dir = os.path.join(script_path, "files")
     outdir = os.path.join(script_path, "converted_files")
     libreoffice = find_libre(system)
-    # TODO: We need a CLI :) Also catch this subprocess run in case it fails.
-    cmd = subprocess.run(
-        f"{libreoffice} --headless --convert-to pdf {file_dir}/docx_test.docx --outdir {outdir}",
-        shell=True,
-        check=True,
-    )
-    return None
-
-
-def main(system: str) -> Optional[str]:
-    if system in ["Windows", "Linux"]:
-        sys.exit(convert(system))
-    else:
-        exit_msg = (
-            f"Expected to run on Windows or Linux, got {system} instead."
-        )
-        sys.exit(exit_msg)
-
-
-if __name__ == "__main__":
-    main(platform.system())
+    convert = r"--convert-to pdf"
+    for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
+        try:
+            cmd = subprocess.run(
+                f"{libreoffice} --headless {convert} {file} --outdir {outdir}",
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
+            # If something goes wrong here, the process will sometimes exit
+            # with code 0, but have a message in stderr. Thus, we need to
+            # check stderr even though subprocess doesn't raise an error.
+            error_msg = cmd.stderr.rstrip().decode()
+            if error_msg:
+                sys.exit(error_msg)
+        except CalledProcessError as error:
+            error_msg = error.stderr.rstrip().decode()
+            exit_msg = f"Conversion failed with error: {error_msg}"
+            sys.exit(exit_msg)
