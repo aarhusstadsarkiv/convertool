@@ -89,12 +89,16 @@ def convert_files(system: str, files: List[str], outdir: str) -> None:
         description
 
     """
+    error_log: str = os.path.join(outdir, "convertool_log.txt")
     libreoffice = find_libre(system)
-    convert = r"--convert-to pdf"
+    convert = r"--headless --convert-to pdf"
+
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
+        # File names are weird! So we need to quote them.
+        fname = f'"{file}"'
         try:
             cmd = subprocess.run(
-                f"{libreoffice} --headless {convert} {file} --outdir {outdir}",
+                f"{libreoffice} {convert} {fname} --outdir {outdir}",
                 shell=True,
                 check=True,
                 capture_output=True,
@@ -102,10 +106,15 @@ def convert_files(system: str, files: List[str], outdir: str) -> None:
             # If something goes wrong here, the process will sometimes exit
             # with code 0, but have a message in stderr. Thus, we need to
             # check stderr even though subprocess doesn't raise an error.
-            error_msg = cmd.stderr.rstrip().decode()
+            # We let the process resume, but collect the errors to a log file.
+            error_msg = cmd.stderr.strip().decode()
             if error_msg:
-                exit_msg = f"Conversion failed with error: {error_msg}"
-                sys.exit(error_msg)
+                log_msg = (
+                    f"Conversion of {file} failed with error: {error_msg}\n"
+                )
+                with open(error_log, "a") as file:
+                    file.write(log_msg)
+
         except CalledProcessError as error:
             error_msg = error.stderr.rstrip().decode()
             exit_msg = f"Conversion failed with error: {error_msg}"
