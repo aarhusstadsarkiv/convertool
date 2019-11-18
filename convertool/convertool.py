@@ -25,8 +25,11 @@ from .utils import get_files  # type: ignore[import]
 @click.argument(
     "files", type=click.Path(exists=True, file_okay=True, resolve_path=True)
 )
+@click.argument(
+    "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
+)
 @click.pass_context
-def cli(ctx: click.core.Context, files: str) -> None:
+def cli(ctx: click.core.Context, files: str, outdir: str) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
     If FILES is a file, convertool expects a text file with a list of
@@ -37,7 +40,9 @@ def cli(ctx: click.core.Context, files: str) -> None:
         if not file_list:
             exit_msg = f"{files} is empty. Aborting."
             raise click.ClickException(exit_msg)
-        ctx.obj = {"file_list": file_list, "system": system}
+
+        # Create object with state to pass around.
+        ctx.obj = {"file_list": file_list, "system": system, "outdir": outdir}
     else:
         exit_msg = f"Expected to run on Windows or Linux, got {system}."
         raise click.ClickException(exit_msg)
@@ -47,7 +52,7 @@ def cli(ctx: click.core.Context, files: str) -> None:
 @click.pass_obj
 def msoffice(context: dict) -> None:
     """Generate reports on files and directory structure."""
-    ms_convert(context["system"], context["file_list"])
+    ms_convert(context["system"], context["file_list"], context["outdir"])
 
 
 if __name__ == "__main__":
