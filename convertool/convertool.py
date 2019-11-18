@@ -10,11 +10,11 @@ import platform
 from typing import List
 import click
 
+# Note: mypy doesn't like . imports, so we pass a type: ignore[import] comment.
+# pylint doesn't like this either. :)
 # pylint: disable=locally-disabled, relative-beyond-top-level
 from .msoffice import convert_files as ms_convert  # type: ignore[import]
 from .utils import get_files  # type: ignore[import]
-
-# Note: mypy doesn't like . imports, so we pass a type: ignore[import] comment.
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -26,13 +26,12 @@ from .utils import get_files  # type: ignore[import]
     "files", type=click.Path(exists=True, file_okay=True, resolve_path=True)
 )
 @click.pass_context
-def cli(
-    ctx: click.core.Context, files: str, system: str = platform.system()
-) -> None:
+def cli(ctx: click.core.Context, files: str) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
     If FILES is a file, convertool expects a text file with a list of
     files to convert."""
+    system: str = platform.system()
     if system in ["Windows", "Linux"]:
         file_list: List[str] = get_files(files)
         if not file_list:

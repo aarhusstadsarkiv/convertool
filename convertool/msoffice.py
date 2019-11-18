@@ -40,50 +40,39 @@ def find_libre(system: str) -> str:
     """
 
     libre_path: str = ""
+    find_libre_cmd: str = ""
 
     if system == "Windows":
-        try:
-            # Navigate to the program files folder, and try to find soffice.exe
-            # recursively.
-            cmd = subprocess.run(
-                r"cd %programfiles% && where /r . *soffice.exe",
-                shell=True,
-                check=True,
-                capture_output=True,
-            )
-            # Remove trailing newline and decode stdout from byte string.
-            libre_path = '"' + cmd.stdout.rstrip().decode() + '"'
-        except CalledProcessError as error:
-            # Didn't find soffice.exe in the Program Files folder.
-            # Return code != 0
-
-            # Remove trailing newline and decode stderr from byte string.
-            error_msg = error.stderr.rstrip().decode()
-
-            exit_msg = f"Could not find LibreOffice with error: {error_msg}"
-            sys.exit(exit_msg)
+        find_libre_cmd = r"cd %programfiles% && where /r . *soffice.exe"
     elif system == "Linux":
-        try:
-            # Find the libreoffice shell command using which.
-            cmd = subprocess.run(
-                ["which", "libreoffice"], check=True, capture_output=True
-            )
-            # Remove trailing newline and decode stdout from byte string.
-            libre_path = cmd.stdout.rstrip().decode()
-        except CalledProcessError as error:
-            # Didn't find the libreoffice shell command.
-            # Return code != 0
+        find_libre_cmd = r"which libreoffice"
+    else:
+        exit_msg = f"Expected to run on Windows or Linux, got {system}."
+        sys.exit(exit_msg)
 
-            # Remove trailing newline and decode stderr from byte string.
-            error_msg = error.stderr.rstrip().decode()
+    try:
+        # Navigate to the program files folder, and try to find soffice.exe
+        # recursively.
+        cmd = subprocess.run(
+            f"{find_libre_cmd}", shell=True, check=True, capture_output=True
+        )
+        # Remove trailing newline and decode stdout from byte string.
+        # Windows needs the quotes.
+        libre_path = f'"{cmd.stdout.strip().decode()}"'
+    except CalledProcessError as error:
+        # Didn't find executable or shell command.
+        # Return code != 0
 
-            exit_msg = f"Could not find LibreOffice with error: {error_msg}"
-            sys.exit(exit_msg)
+        # Remove trailing newline and decode stderr from byte string.
+        error_msg = error.stderr.strip().decode()
+
+        exit_msg = f"Could not find LibreOffice with error: {error_msg}"
+        sys.exit(exit_msg)
 
     return libre_path
 
 
-def convert_files(system: str, files: List[str]) -> None:
+def convert_files(system: str, files: List[str], outdir: str) -> None:
     """Function level documentation.
     Delete non-applicable sections.
 
@@ -100,8 +89,6 @@ def convert_files(system: str, files: List[str]) -> None:
         description
 
     """
-    script_path = os.path.dirname(os.path.realpath(__file__))
-    outdir = os.path.join(script_path, "converted_files")
     libreoffice = find_libre(system)
     convert = r"--convert-to pdf"
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
@@ -117,6 +104,7 @@ def convert_files(system: str, files: List[str]) -> None:
             # check stderr even though subprocess doesn't raise an error.
             error_msg = cmd.stderr.rstrip().decode()
             if error_msg:
+                exit_msg = f"Conversion failed with error: {error_msg}"
                 sys.exit(error_msg)
         except CalledProcessError as error:
             error_msg = error.stderr.rstrip().decode()
