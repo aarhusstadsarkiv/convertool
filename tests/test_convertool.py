@@ -12,5 +12,4 @@ def cli_run():
 class TestCli:
     def test_with_valid_input(self, cli_run):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        print(script_path)
-        assert False
+        valid_path = os.path.join(script_path, "test_data", "data")
