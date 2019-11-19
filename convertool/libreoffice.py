@@ -100,7 +100,7 @@ def convert_files(system: str, files: List[str], outdir: str) -> None:
         with an error code.
 
     """
-    error_log: str = os.path.join(outdir, "convertool_log.txt")
+    error_log: str = os.path.join(outdir, "_convertool_log.txt")
     libreoffice = find_libre(system)
     convert = r"--headless --convert-to pdf"
 

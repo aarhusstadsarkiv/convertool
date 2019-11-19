@@ -13,7 +13,7 @@ import click
 # Note: mypy doesn't like . imports, so we pass a type: ignore[import] comment.
 # pylint doesn't like this either. :)
 # pylint: disable=locally-disabled, relative-beyond-top-level
-from .msoffice import convert_files as ms_convert  # type: ignore[import]
+from .libreoffice import convert_files as libre_convert  # type: ignore[import]
 from .utils import get_files  # type: ignore[import]
 from .utils import check_system, WrongOSError  # type: ignore[import]
 
@@ -52,9 +52,9 @@ def cli(ctx: click.core.Context, files: str, outdir: str) -> None:
 
 @cli.command()
 @click.pass_obj
-def msoffice(context: dict) -> None:
-    """Generate reports on files and directory structure."""
-    ms_convert(context["system"], context["file_list"], context["outdir"])
+def libre(context: dict) -> None:
+    """Convert files using LibreOffice."""
+    libre_convert(context["system"], context["file_list"], context["outdir"])
 
 
 if __name__ == "__main__":
