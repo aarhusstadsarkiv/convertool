@@ -15,6 +15,7 @@ import click
 # pylint: disable=locally-disabled, relative-beyond-top-level
 from .msoffice import convert_files as ms_convert  # type: ignore[import]
 from .utils import get_files  # type: ignore[import]
+from .utils import check_system, WrongOSError  # type: ignore[import]
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -35,7 +36,11 @@ def cli(ctx: click.core.Context, files: str, outdir: str) -> None:
     If FILES is a file, convertool expects a text file with a list of
     files to convert."""
     system: str = platform.system()
-    if system in ["Windows", "Linux"]:
+    try:
+        check_system(system)
+    except WrongOSError as error:
+        raise click.ClickException(error)
+    else:
         file_list: List[str] = get_files(files)
         if not file_list:
             exit_msg = f"{files} is empty. Aborting."
@@ -43,9 +48,6 @@ def cli(ctx: click.core.Context, files: str, outdir: str) -> None:
 
         # Create object with state to pass around.
         ctx.obj = {"file_list": file_list, "system": system, "outdir": outdir}
-    else:
-        exit_msg = f"Expected to run on Windows or Linux, got {system}."
-        raise click.ClickException(exit_msg)
 
 
 @cli.command()
