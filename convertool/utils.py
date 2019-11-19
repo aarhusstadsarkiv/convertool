@@ -42,9 +42,10 @@ def get_files(input_files: str) -> List[str]:
     # Traverse given path, collect results.
     # tqdm is used to show progress of os.walk
     if os.path.isdir(input_files):
-        for root, dirs, files in tqdm.tqdm(os.walk(input_files, topdown=True)):
+        for root, _, files in tqdm.tqdm(os.walk(input_files, topdown=True)):
             for file in files:
                 file_list.append(os.path.join(root, file))
+
     if os.path.isfile(input_files):
         with open(input_files) as in_file:
             for line in in_file.readlines():
