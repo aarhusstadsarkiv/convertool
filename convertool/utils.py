@@ -17,6 +17,15 @@ class WrongOSError(Exception):
     """Implements an error to raise when the OS is not supported."""
 
 
+class ConversionError(Exception):
+    """Implements an error to raise when conversion fails."""
+
+
+class LibreError(Exception):
+    """Implements an error to raise when LibreOffice or related
+    functionality fails."""
+
+
 # -----------------------------------------------------------------------------
 # Function Definitions
 # -----------------------------------------------------------------------------
@@ -65,7 +74,8 @@ def check_system(system: str) -> None:
     Raises
     ------
     WrongOSError
-        If the system is not Windows or Linux, convertool will not work.
+        If the system is not Windows or Linux, convertool will not work,
+        and a WrongOSError is raised.
     """
     if system not in ["Windows", "Linux"]:
         raise WrongOSError(
