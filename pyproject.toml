@@ -16,7 +16,7 @@ mypy = "^0.740.0"
 pytest-cov = "^2.8.1"
 
 [tool.poetry.scripts]
-convertool = "convertool.convertool:cli"
+convertool = "convertool.cli:cli"
 
 [tool.black]
 line-length = 79

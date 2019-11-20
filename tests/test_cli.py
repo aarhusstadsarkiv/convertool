@@ -1,7 +1,7 @@
 import os
 import pytest
 from click.testing import CliRunner
-from convertool.convertool import cli
+from convertool.cli import cli
 
 
 @pytest.fixture
