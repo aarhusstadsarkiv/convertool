@@ -9,12 +9,12 @@ chocolatey (Windows) or snap (Linux).
 # Imports
 # -----------------------------------------------------------------------------
 import os
-import subprocess
 import platform
-from subprocess import CalledProcessError
+import subprocess
+from subprocess import CalledProcessError, TimeoutExpired
 from typing import List
 import tqdm
-from .utils import check_system, WrongOSError, ConversionError, LibreError
+from .utils import check_system, ConversionError, LibreError
 
 
 # -----------------------------------------------------------------------------
@@ -43,7 +43,8 @@ def find_libre(system: str = platform.system()) -> str:
     ------
     WrongOSError
         If there is an attempt to find LibreOffice on a system that is not
-        either Windows or Linux, a WrongOSError is raised.
+        either Windows or Linux, a WrongOSError is raised from
+        :func:`~convertool.utils.check_system()`.
     LibreError
         If the command to find LibreOffice on the current system fails,
         a LibreError is raised.
@@ -53,15 +54,12 @@ def find_libre(system: str = platform.system()) -> str:
     libre_path: str = ""
     find_libre_cmd: str = ""
 
-    try:
-        check_system(system)
-    except WrongOSError:
-        raise
-    else:
-        if system == "Windows":
-            find_libre_cmd = r"cd %programfiles% && where /r . *soffice.exe"
-        elif system == "Linux":
-            find_libre_cmd = r"which libreoffice"
+    check_system(system)
+
+    if system == "Windows":
+        find_libre_cmd = r"cd %programfiles% && where /r . *soffice.exe"
+    elif system == "Linux":
+        find_libre_cmd = r"which libreoffice"
 
     try:
         # Invoke the OS specific command to find libreoffice.
@@ -77,7 +75,8 @@ def find_libre(system: str = platform.system()) -> str:
     else:
         # Remove trailing newline and decode stdout from byte string.
         # Windows needs the quotes.
-        libre_path = f'"{cmd.stdout.strip().decode()}"'
+        # libre_path = f'"{cmd.stdout.strip().decode()}"'
+        libre_path = cmd.stdout.strip().decode()
 
     return libre_path
 
@@ -110,15 +109,28 @@ def convert_files(
     convert = r"--headless --convert-to pdf"
 
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
-        # File names are weird! So we need to quote them.
-        fname = f'"{file}"'
+        fsize = os.stat(file).st_size
+        timeout = 0.5
         try:
+            # cmd = subprocess.run(
+            #     f"{libre} {convert} {fname} --outdir {outdir}",
+            #     shell=True,
+            #     check=True,
+            #     timeout=timeout,
+            #     capture_output=True,
+            # )
             cmd = subprocess.run(
-                f"{libre} {convert} {fname} --outdir {outdir}",
-                shell=True,
+                [f"{libre}", convert, f"{file}", "--outdir", outdir],
                 check=True,
+                timeout=timeout,
                 capture_output=True,
             )
+        except TimeoutExpired as error:
+            # Conversion timed out. Log and continue.
+            log_msg = f"Conversion of {file} timed out after {error.timeout}s"
+            with open(error_log, "a") as file:
+                file.write(f"{log_msg}\n")
+            continue
         except CalledProcessError as error:
             error_msg = error.stderr.rstrip().decode()
             return_code = error.returncode
