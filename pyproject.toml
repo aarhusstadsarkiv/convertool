@@ -8,6 +8,7 @@ authors = ["Nina Jensen <jnik@aarhus.dk>"]
 python = "^3.7"
 click = "^7.0"
 tqdm = "^4.38"
+humanize = "^0.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
