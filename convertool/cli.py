@@ -13,6 +13,11 @@ from convertool.utils import get_files
 from convertool.utils import check_system, WrongOSError
 
 # -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
+SYSTEM = platform.system()
+
+# -----------------------------------------------------------------------------
 # Function Definitions
 # -----------------------------------------------------------------------------
 
@@ -25,20 +30,14 @@ from convertool.utils import check_system, WrongOSError
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
 @click.pass_context
-def cli(
-    ctx: click.core.Context,
-    files: str,
-    outdir: str,
-    system: str = platform.system(),
-) -> None:
+def cli(ctx: click.core.Context, files: str, outdir: str) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
     If FILES is a file, convertool expects a text file with a list of
     files to convert. OUTDIR specifies the directory in which to output
     converted files. It must be an existing directory."""
-    # system: str = platform.system()
     try:
-        check_system(system)
+        check_system(SYSTEM)
     except WrongOSError as error:
         raise click.ClickException(str(error))
     else:
