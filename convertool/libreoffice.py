@@ -9,12 +9,28 @@ chocolatey (Windows) or snap (Linux).
 # Imports
 # -----------------------------------------------------------------------------
 import os
+import math
 import platform
+import logging
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
 from typing import List
 import tqdm
-from .utils import check_system, ConversionError, LibreError
+import humanize
+from .utils import check_system, run_proc, ProcessError, CriticalProcessError
+
+# -----------------------------------------------------------------------------
+# Classes
+# -----------------------------------------------------------------------------
+
+
+class ConversionError(Exception):
+    """Implements an error to raise when conversion fails."""
+
+
+class LibreError(Exception):
+    """Implements an error to raise when LibreOffice or related
+    functionality fails."""
 
 
 # -----------------------------------------------------------------------------
@@ -75,86 +91,75 @@ def find_libre(system: str = platform.system()) -> str:
     else:
         # Remove trailing newline and decode stdout from byte string.
         # Windows needs the quotes.
-        # libre_path = f'"{cmd.stdout.strip().decode()}"'
-        libre_path = cmd.stdout.strip().decode()
+        libre_path = f'"{cmd.stdout.strip().decode()}"'
+        # libre_path = f"{cmd.stdout.strip().decode()}"
 
     return libre_path
 
 
 def convert_files(
-    files: List[str], outdir: str, libre: str = find_libre()
+    files: List[str], outdir: str, libre: str = find_libre(), timeout: int = 30
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
 
     Parameters
     ----------
-    files: List[str]
+    files : List[str]
         List of paths to files to convert.
-    outdir: str
+    outdir : str
         Directory where conversion results should be written to.
-    libre: str
+    libre : str
         Optional argument defining the path to the LibreOffice shell command or
         exe file. Defaults to
         :func:`~convertool.libreoffice.find_libre(platform.system())`
+    timeout : int
+        Optional argument defining the amount of seconds to wait for the
+        LibreOffice command to finish. Defaults to 30.
 
     Raises
     ------
     ConversionError
-        If something goes wrong in the LibreOffice convert step,
-        a ConversionError is raised with a message specifying file
-        and error from LibreOffice, if applicable.
+        If LibreOffice conversion fails a sufficient amount of times, a
+        a ConversionError is raised, because too many errors were encountered.
 
     """
-    error_log: str = os.path.join(outdir, "_convertool_log.txt")
+    # Set up logging
+    error_log: str = os.path.join(outdir, "_convertool.log")
+    logging.basicConfig(
+        filename=error_log,
+        format="%(asctime)s %(levelname)s: %(message)s",
+        datefmt="%H:%M:%S",
+        filemode="w",
+        level=logging.INFO,
+    )
+    # Counter to keep track of errors
+    err_count: int = 0
+    threshold: int = round(math.log(len(files)))
     convert = r"--headless --convert-to pdf"
 
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
-        fsize = os.stat(file).st_size
-        timeout = 0.5
+        fname = f'"{file}"'
+        proc = subprocess.Popen(
+            f"{libre} {convert} {fname} --outdir {outdir}",
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+        )
         try:
-            # cmd = subprocess.run(
-            #     f"{libre} {convert} {fname} --outdir {outdir}",
-            #     shell=True,
-            #     check=True,
-            #     timeout=timeout,
-            #     capture_output=True,
-            # )
-            cmd = subprocess.run(
-                [f"{libre}", convert, f"{file}", "--outdir", outdir],
-                check=True,
-                timeout=timeout,
-                capture_output=True,
-            )
+            run_proc(proc, timeout=timeout)
         except TimeoutExpired as error:
-            # Conversion timed out. Log and continue.
-            log_msg = f"Conversion of {file} timed out after {error.timeout}s"
-            with open(error_log, "a") as file:
-                file.write(f"{log_msg}\n")
-            continue
-        except CalledProcessError as error:
-            error_msg = error.stderr.rstrip().decode()
-            return_code = error.returncode
-
-            # LibreOffice sometimes fails without a message in stderr.
-            if not error_msg:
-                error_msg = (
-                    f"Unspecified LibreOffice error: Return code {return_code}"
+            time = f"{error.timeout} seconds"
+            fsize = humanize.naturalsize(os.stat(file).st_size)
+            logging.warning(
+                f"Conversion of {file} ({fsize}) timed out after {time}"
+            )
+        except ProcessError as error:
+            logging.warning(f"Conversion of {file} failed with error {error}")
+        except CriticalProcessError as error:
+            logging.warning(f"Conversion of {file} failed with error {error}")
+            err_count += 1
+            if err_count > threshold:
+                logging.warning(
+                    f"Error count {err_count} is over threshold of {threshold}"
                 )
-
-            # Log and raise
-            exit_msg = f"Conversion of {file} failed with error: {error_msg}"
-            with open(error_log, "a") as file:
-                file.write(f"{exit_msg}\n")
-            raise ConversionError(exit_msg)
-        else:
-            # If something goes wrong here, the process will sometimes exit
-            # with code 0, but have a message in stderr. Thus, we need to
-            # check stderr even though subprocess doesn't raise an error.
-            # We let the process resume, but collect the errors to a log file.
-            stderr_msg = cmd.stderr.strip().decode()
-            if stderr_msg:
-                log_msg = (
-                    f"Conversion of {file} failed with error: {stderr_msg}\n"
-                )
-                with open(error_log, "a") as file:
-                    file.write(log_msg)
+                raise ConversionError("Too many errors encountered.")

@@ -5,6 +5,7 @@
 # Imports
 # -----------------------------------------------------------------------------
 import os
+from subprocess import Popen, TimeoutExpired
 from typing import List
 import tqdm
 
@@ -17,13 +18,12 @@ class WrongOSError(Exception):
     """Implements an error to raise when the OS is not supported."""
 
 
-class ConversionError(Exception):
-    """Implements an error to raise when conversion fails."""
+class CriticalProcessError(Exception):
+    """Implements an error to raise when a process exits with code != 0"""
 
 
-class LibreError(Exception):
-    """Implements an error to raise when LibreOffice or related
-    functionality fails."""
+class ProcessError(Exception):
+    """Implements an error to raise when a process has messages in stderr"""
 
 
 # -----------------------------------------------------------------------------
@@ -81,3 +81,49 @@ def check_system(system: str) -> None:
         raise WrongOSError(
             f"Expected to run on Windows or Linux, got {system}."
         )
+
+
+def run_proc(proc: Popen, timeout: int) -> None:
+    """Runs a Popen process with a given timeout. Kills the process and raises
+    TimeoutExpired if the process does not finish within timeout in seconds. If
+    there are messages in stderr, these are collected and a ProcessError is
+    raised.
+
+    Parameters
+    ----------
+    proc : subprocess.Popen
+        The proc to communicate with.
+    timeout : int
+        Number of seconds before timeput.
+
+    Raises
+    ------
+    TimeoutExpired
+        If communication with the process fails to terminate within timeout
+        seconds, the process is killed and TimeoutExpired is raised.
+    ProcessError
+        If the process terminates within timeout seconds, but has messages in
+        stderr and/or exit code different from 0, a ProcessError is raised.
+    """
+    try:
+        # Communicate with process, collect stderr
+        _, errs = proc.communicate(timeout=timeout)
+    except TimeoutExpired:
+        # Process timed out. Kill and re-raise.
+        proc.kill()
+        raise
+    else:
+        exit_code = proc.returncode
+        if exit_code != 0:
+            if errs:
+                err_msg = errs.strip().decode()
+            else:
+                # There is nothing in stderr :(
+                err_msg = (
+                    f"Process exited with code {exit_code} and empty stderr"
+                )
+            raise CriticalProcessError(err_msg)
+        elif errs:
+            # Got something in stderr with exit code = 0. Decode and raise.
+            stderr_msg = errs.strip().decode()
+            raise ProcessError(stderr_msg)
