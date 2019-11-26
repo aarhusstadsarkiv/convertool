@@ -14,6 +14,7 @@ import platform
 import logging
 import subprocess
 from subprocess import CalledProcessError, TimeoutExpired
+from pathlib import Path
 from typing import List
 import tqdm
 import humanize
@@ -98,7 +99,11 @@ def find_libre(system: str = platform.system()) -> str:
 
 
 def convert_files(
-    files: List[str], outdir: str, libre: str = find_libre(), timeout: int = 30
+    files: List[str],
+    outdir: str,
+    pname: int = 0,
+    libre: str = find_libre(),
+    timeout: int = 30,
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
 
@@ -108,6 +113,8 @@ def convert_files(
         List of paths to files to convert.
     outdir : str
         Directory where conversion results should be written to.
+    pname : int
+        Number of parent directories to use in file naming. Defaults to 0.
     libre : str
         Optional argument defining the path to the LibreOffice shell command or
         exe file. Defaults to
@@ -135,12 +142,22 @@ def convert_files(
     # Counter to keep track of errors
     err_count: int = 0
     threshold: int = round(math.log(len(files)))
+    file_errs: int = 0
     convert = r"--headless --convert-to pdf"
 
+    # Log and start file conversion
+    logging.info(f"Starting conversion of {len(files)} files.")
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
+        out = Path(outdir)
         fname = f'"{file}"'
+        for i in range(pname, 0, -1):
+            try:
+                out = out.joinpath(Path(fname).parent.parts[-i])
+            except IndexError:
+                err_msg = f"Parent index {pname} out of range for {file}"
+                raise ConversionError(err_msg)
         proc = subprocess.Popen(
-            f"{libre} {convert} {fname} --outdir {outdir}",
+            f"{libre} {convert} {fname} --outdir {out}",
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
@@ -149,17 +166,27 @@ def convert_files(
             run_proc(proc, timeout=timeout)
         except TimeoutExpired as error:
             time = f"{error.timeout} seconds"
+            file_errs += 1
             fsize = humanize.naturalsize(os.stat(file).st_size)
             logging.warning(
                 f"Conversion of {file} ({fsize}) timed out after {time}"
             )
         except ProcessError as error:
+            file_errs += 1
             logging.warning(f"Conversion of {file} failed with error {error}")
         except CriticalProcessError as error:
-            logging.warning(f"Conversion of {file} failed with error {error}")
             err_count += 1
+            file_errs += 1
+            logging.warning(f"Conversion of {file} failed with error {error}")
             if err_count > threshold:
                 logging.warning(
                     f"Error count {err_count} is over threshold of {threshold}"
                 )
                 raise ConversionError("Too many errors encountered.")
+
+    # Log that we're done
+    log_msg = (
+        f"Finished converting {len(files)} files with {file_errs} errors, "
+    )
+    log_msg += f"{err_count} of which were critical."
+    logging.info(log_msg)

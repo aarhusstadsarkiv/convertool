@@ -1,3 +1,4 @@
+import sys
 import os
 import platform
 import pytest
@@ -62,3 +63,13 @@ class TestConvertFiles:
             "Conversion of bogus failed with error Error: source file"
             in log_msg[0]
         )
+
+    def test_with_invalid_pname(self):
+        with pytest.raises(ConversionError):
+            convert_files(self.files, self.out_path, pname=sys.maxsize)
+
+    def test_timeout(self, caplog):
+        convert_files(self.files, self.out_path, timeout=0)
+        log_msg = [record.message for record in caplog.records]
+        assert f"Conversion of {self.files[0]}" in log_msg[0]
+        assert f"timed out after 0 seconds" in log_msg[0]
