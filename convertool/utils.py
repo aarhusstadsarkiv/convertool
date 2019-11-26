@@ -101,9 +101,12 @@ def run_proc(proc: Popen, timeout: int) -> None:
     TimeoutExpired
         If communication with the process fails to terminate within timeout
         seconds, the process is killed and TimeoutExpired is raised.
+    CriticalProcessError
+        If the process terminates within timeout seconds, but has exit code
+        not equal to 0, a CriticalProcessError is raised.
     ProcessError
         If the process terminates within timeout seconds, but has messages in
-        stderr and/or exit code different from 0, a ProcessError is raised.
+        stderr and exit code 0, a ProcessError is raised.
     """
     try:
         # Communicate with process, collect stderr
@@ -114,16 +117,15 @@ def run_proc(proc: Popen, timeout: int) -> None:
         raise
     else:
         exit_code = proc.returncode
+        err_msg = ""
+        if errs:
+            err_msg = errs.strip().decode()
+
         if exit_code != 0:
-            if errs:
-                err_msg = errs.strip().decode()
-            else:
+            if not err_msg:
                 # There is nothing in stderr :(
-                err_msg = (
-                    f"Process exited with code {exit_code} and empty stderr"
-                )
+                err_msg = f"Exited with code {exit_code} and empty stderr"
             raise CriticalProcessError(err_msg)
-        elif errs:
+        elif err_msg:
             # Got something in stderr with exit code = 0. Decode and raise.
-            stderr_msg = errs.strip().decode()
-            raise ProcessError(stderr_msg)
+            raise ProcessError(err_msg)
