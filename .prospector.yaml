@@ -1,2 +1,5 @@
 strictness: veryhigh
 output-format: grouped
+pylint:
+  disable:
+    - logging-fstring-interpolation
