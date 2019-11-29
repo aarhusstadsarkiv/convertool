@@ -1,14 +1,21 @@
-import sys
 import os
 import platform
 import pytest
-from convertool.libreoffice import (
-    find_libre,
-    convert_files,
-    LibreError,
-    ConversionError,
-)
-from convertool.utils import get_files, WrongOSError
+from convertool.libreoffice import find_libre, libre_convert
+from convertool.utils import get_files
+from convertool.exceptions import WrongOSError, LibreError
+
+
+@pytest.fixture
+def file_handler():
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    test_path = os.path.join(script_path, "test_data")
+    valid_path = os.path.join(test_path, "data")
+    out_path = os.path.join(test_path, "out")
+    file = get_files(valid_path)[0]
+    yield out_path, file
+    for file in os.listdir(out_path):
+        os.remove(os.path.join(out_path, file))
 
 
 class TestFindLibre:
@@ -33,43 +40,24 @@ class TestFindLibre:
                 find_libre("Linux")
 
 
-class TestConvertFiles:
-    script_path = os.path.dirname(os.path.realpath(__file__))
-    test_path = os.path.join(script_path, "test_data")
-    valid_path = os.path.join(test_path, "data")
-    out_path = os.path.join(test_path, "out")
-    files = get_files(valid_path)
-
-    def test_with_valid_input(self, caplog):
-        convert_files(self.files, self.out_path)
-        test_file = os.path.join(self.out_path, "test.pdf")
-        log_msg = [record.message for record in caplog.records]
-
-        # test.pdf is a file, and there should be no log message
+class TestLibreConvert:
+    def test_with_valid_input(self, file_handler):
+        out, file = file_handler
+        libre_convert(file, out)
+        test_file = os.path.join(out, "test.pdf")
         assert os.path.isfile(test_file)
-        assert not log_msg
-        # Clean up
-        os.remove(test_file)
 
-    def test_with_invalid_command(self):
-        # This needs to be rewritten. Raises because ln(1)=0!!
-        with pytest.raises(ConversionError):
-            convert_files(self.files, self.out_path, libre="bogus")
+    def test_with_invalid_command(self, file_handler):
+        out, file = file_handler
+        with pytest.raises(LibreError):
+            libre_convert(file, out, cmd="bogus")
 
-    def test_with_invalid_file(self, caplog):
-        convert_files(["bogus"], self.out_path)
-        log_msg = [record.message for record in caplog.records]
-        assert (
-            "Conversion of bogus failed with error Error: source file"
-            in log_msg[0]
-        )
+    def test_with_invalid_file(self, file_handler):
+        out, file = file_handler
+        with pytest.raises(LibreError):
+            libre_convert("bogus", out)
 
-    def test_with_invalid_pname(self):
-        with pytest.raises(ConversionError):
-            convert_files(self.files, self.out_path, pname=sys.maxsize)
-
-    def test_timeout(self, caplog):
-        convert_files(self.files, self.out_path, timeout=0)
-        log_msg = [record.message for record in caplog.records]
-        assert f"Conversion of {self.files[0]}" in log_msg[0]
-        assert f"timed out after 0 seconds" in log_msg[0]
+    def test_timeout(self, file_handler):
+        out, file = file_handler
+        with pytest.raises(LibreError):
+            libre_convert(file, out, timeout=0)
