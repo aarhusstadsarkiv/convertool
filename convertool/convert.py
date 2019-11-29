@@ -82,6 +82,7 @@ def convert_files(
     tool: str,
     files: List[str],
     outdir: str,
+    convert_to: str,
     parents: int = 0,
     max_errs: int = 0,
 ) -> None:
@@ -100,6 +101,8 @@ def convert_files(
         A list of files to convert.
     outdir : str
         The path to which converted files should be saved.
+    convert_to : str
+        The file format to convert to.
     parents : int
         How many immediate parent directories to use for naming converted
         files. Defaults to 0.
@@ -129,11 +132,10 @@ def convert_files(
         log_file=Path(outdir).joinpath(f"_convertool_{time_now}.log"),
     )
 
-    # Check if there are files to convert.
-    if not files:
-        err_msg: str = "Got no files to convert!"
-        logger.error(err_msg)
-        raise ConversionError(err_msg)
+    # Check if output file format is supported
+    if convert_to not in ACCEPTED_OUT:
+        logger.error(f"Output to {convert_to} is not supported!")
+        raise ConversionError(f"Output to {convert_to} is not supported!")
 
     # Start conversion.
     logger.info(f"Started conversion of {len(files)} files.")
@@ -150,7 +152,10 @@ def convert_files(
         if tool == "libre":
             try:
                 libre_convert(
-                    f"{file}", out_path, timeout=calc_timeout(Path(file))
+                    f"{file}",
+                    out_path,
+                    convert_to,
+                    timeout=calc_timeout(Path(file)),
                 )
             except LibreError as error:
                 logger.warning(f"{error}")

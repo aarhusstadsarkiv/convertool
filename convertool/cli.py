@@ -11,7 +11,7 @@ from typing import List
 import click
 from click.core import Context as ClickContext
 from convertool.convert import convert_files
-from convertool.utils import get_files, check_system
+from convertool.utils import get_files, check_system, ACCEPTED_OUT
 from convertool.exceptions import WrongOSError, ConversionError
 
 # -----------------------------------------------------------------------------
@@ -32,8 +32,17 @@ from convertool.exceptions import WrongOSError, ConversionError
     show_default=True,
     help="Number of parent directories to use for output name.",
 )
+@click.option(
+    "--to",
+    "to_",
+    type=click.Choice(ACCEPTED_OUT, case_sensitive=False),
+    default="pdf",
+    help="File format to convert to. Defaults to PDF.",
+)
 @click.pass_context
-def cli(ctx: ClickContext, files: str, outdir: str, parents: int) -> None:
+def cli(
+    ctx: ClickContext, files: str, outdir: str, parents: int, to_: str
+) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
     If FILES is a file, convertool expects a text file with a list of
@@ -52,8 +61,9 @@ def cli(ctx: ClickContext, files: str, outdir: str, parents: int) -> None:
         ctx.obj = {
             "file_list": file_list,
             "outdir": outdir,
+            "convert_to": to_,
             "parents": parents,
-            "max_errs": int(math.log1p(len(file_list))),
+            "max_errs": int(math.sqrt(len(file_list))),
         }
 
 
@@ -66,6 +76,7 @@ def libre(ctx: dict) -> None:
             "libre",
             ctx["file_list"],
             ctx["outdir"],
+            ctx["convert_to"],
             ctx["parents"],
             ctx["max_errs"],
         )

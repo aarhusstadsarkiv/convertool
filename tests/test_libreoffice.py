@@ -43,21 +43,21 @@ class TestFindLibre:
 class TestLibreConvert:
     def test_with_valid_input(self, file_handler):
         out, file = file_handler
-        libre_convert(file, out)
+        libre_convert(file, out, "pdf")
         test_file = os.path.join(out, "test.pdf")
         assert os.path.isfile(test_file)
 
     def test_with_invalid_command(self, file_handler):
         out, file = file_handler
         with pytest.raises(LibreError):
-            libre_convert(file, out, cmd="bogus")
+            libre_convert(file, out, "pdf", cmd="bogus")
 
     def test_with_invalid_file(self, file_handler):
         out, file = file_handler
         with pytest.raises(LibreError):
-            libre_convert("bogus", out)
+            libre_convert("bogus", out, "pdf")
 
     def test_timeout(self, file_handler):
         out, file = file_handler
         with pytest.raises(LibreError):
-            libre_convert(file, out, timeout=0)
+            libre_convert(file, out, "pdf", timeout=0)

@@ -41,25 +41,26 @@ class TestAuxFunctions:
 class TestConvertFiles:
     def test_with_valid_input(self, file_handler, caplog):
         out, file = file_handler
-        convert_files("libre", [file], out)
+        convert_files("libre", [file], out, "pdf")
         assert "Started conversion of 1 files" in caplog.text
         assert "Finished conversion of 1 files with 0 issues" in caplog.text
 
-    def test_with_no_files(self, file_handler, caplog):
+    def test_convert_to(self, file_handler, caplog):
         out, file = file_handler
+        convert_to = "bogus"
         with pytest.raises(ConversionError):
-            convert_files("libre", [], out)
-        assert "Got no files to convert!" in caplog.text
+            convert_files("libre", [file], out, convert_to)
+        assert f"Output to {convert_to} is not supported!" in caplog.text
 
     def test_parents(self, file_handler, caplog):
         out, file = file_handler
         # Our test file does indeed have two parents, things go well
-        convert_files("libre", [file], out, parents=2)
+        convert_files("libre", [file], out, "pdf", parents=2)
         assert "Started conversion of 1 files" in caplog.text
         assert "Finished conversion of 1 files with 0 issues" in caplog.text
         # It definitely does not have sys.maxsize parents though
         with pytest.raises(ConversionError):
-            convert_files("libre", [file], out, parents=sys.maxsize)
+            convert_files("libre", [file], out, "pdf", parents=sys.maxsize)
         assert (
             f"Parent index {sys.maxsize} out of range for {file}"
             in caplog.text
@@ -70,11 +71,11 @@ class TestConvertFiles:
         fail_file = "bogus"
         # Fail
         with pytest.raises(ConversionError):
-            convert_files("libre", [fail_file], out)
+            convert_files("libre", [fail_file], out, "pdf")
         assert f"LibreConvert of {fail_file} failed with error:" in caplog.text
         assert "Error count 1 is higher than threshold of 0" in caplog.text
         with patch("convertool.convert.calc_timeout", return_value=0):
-            convert_files("libre", [file], out)
+            convert_files("libre", [file], out, "pdf")
         assert (
             f"LibreConvert of {file} timed out after 0 seconds" in caplog.text
         )

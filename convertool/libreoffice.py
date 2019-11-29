@@ -81,7 +81,11 @@ def find_libre(system: str = platform.system()) -> str:
 
 
 def libre_convert(
-    file: str, outdir: Path, cmd: str = find_libre(), timeout: int = 30
+    file: str,
+    outdir: Path,
+    convert_to: str,
+    cmd: str = find_libre(),
+    timeout: int = 30,
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
 
@@ -111,7 +115,7 @@ def libre_convert(
     # Variables
     err_msg: str = ""
 
-    cmd = f"{cmd} --headless --convert-to pdf"
+    cmd = f"{cmd} --headless --convert-to {convert_to}"
     proc = subprocess.Popen(
         f'{cmd} "{file}" --outdir {outdir}',
         shell=True,
