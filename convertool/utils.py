@@ -5,25 +5,17 @@
 # Imports
 # -----------------------------------------------------------------------------
 import os
+import platform
+import logging
+from pathlib import Path
 from subprocess import Popen, TimeoutExpired
 from typing import List
 import tqdm
+from .exceptions import WrongOSError, ProcessError
 
 # -----------------------------------------------------------------------------
 # Classes
 # -----------------------------------------------------------------------------
-
-
-class WrongOSError(Exception):
-    """Implements an error to raise when the OS is not supported."""
-
-
-class CriticalProcessError(Exception):
-    """Implements an error to raise when a process exits with code != 0"""
-
-
-class ProcessError(Exception):
-    """Implements an error to raise when a process has messages in stderr"""
 
 
 # -----------------------------------------------------------------------------
@@ -101,12 +93,9 @@ def run_proc(proc: Popen, timeout: int) -> None:
     TimeoutExpired
         If communication with the process fails to terminate within timeout
         seconds, the process is killed and TimeoutExpired is raised.
-    CriticalProcessError
-        If the process terminates within timeout seconds, but has exit code
-        not equal to 0, a CriticalProcessError is raised.
     ProcessError
         If the process terminates within timeout seconds, but has messages in
-        stderr and exit code 0, a ProcessError is raised.
+        stderr and/or exit code != 0, a ProcessError is raised.
     """
     try:
         # Communicate with process, collect stderr
@@ -118,14 +107,28 @@ def run_proc(proc: Popen, timeout: int) -> None:
     else:
         exit_code = proc.returncode
         err_msg = ""
+
+        # Check stderr/exit code from process call.
         if errs:
             err_msg = errs.strip().decode()
+        elif exit_code != 0:
+            # Fail with nothing in stderr :(
+            err_msg = f"Exited with code {exit_code} and empty stderr"
 
-        if exit_code != 0:
-            if not err_msg:
-                # There is nothing in stderr :(
-                err_msg = f"Exited with code {exit_code} and empty stderr"
-            raise CriticalProcessError(err_msg)
-        elif err_msg:
-            # Got something in stderr with exit code = 0. Decode and raise.
+        if err_msg:
             raise ProcessError(err_msg)
+
+
+def log_setup(
+    log_name: str, log_file: Path, mode: str = "w"
+) -> logging.Logger:
+    logger = logging.getLogger(log_name)
+    file_handler = logging.FileHandler(log_file, mode)
+    file_handler.setFormatter(
+        logging.Formatter(
+            fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%H:%M:%S"
+        )
+    )
+    logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
+    return logger

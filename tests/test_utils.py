@@ -1,13 +1,7 @@
 import pytest
-from subprocess import Popen, TimeoutExpired, STDOUT, PIPE
-from convertool.utils import (
-    get_files,
-    check_system,
-    WrongOSError,
-    run_proc,
-    CriticalProcessError,
-    ProcessError,
-)
+from subprocess import Popen, TimeoutExpired, PIPE
+from convertool.utils import get_files, check_system, run_proc
+from convertool.exceptions import WrongOSError, ProcessError
 
 
 class TestGetFiles:
@@ -49,7 +43,7 @@ class TestRunProc:
 
     def test_critical_error(self):
         proc = Popen(f"exit 1", shell=True)
-        with pytest.raises(CriticalProcessError):
+        with pytest.raises(ProcessError):
             run_proc(proc, timeout=30)
 
     def test_process_error(self):
