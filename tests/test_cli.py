@@ -1,5 +1,6 @@
 import sys
 import os
+from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 from convertool.cli import cli
@@ -8,6 +9,16 @@ from convertool.cli import cli
 @pytest.fixture
 def cli_run():
     return CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def clean_up_files():
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    test_path = os.path.join(script_path, "test_data")
+    out_path = os.path.join(test_path, "out")
+    yield
+    for file in os.listdir(out_path):
+        os.remove(os.path.join(out_path, file))
 
 
 class TestCli:
@@ -21,6 +32,20 @@ class TestCli:
             args = [self.valid_path, self.out_path, "libre"]
             result = cli_run.invoke(cli, args)
             assert result.exit_code == 0
+
+    def test_with_invalid_system(self, cli_run):
+        wrong_sys = "Lamix"
+        # Patch platform.system() call to return wrong_sys instead of
+        # actual system information. This will make the CLI fail.
+        with patch("platform.system", return_value=wrong_sys):
+            with cli_run.isolated_filesystem():
+                args = [self.valid_path, self.out_path, "libre"]
+                result = cli_run.invoke(cli, args)
+                assert result.exit_code != 0
+                assert (
+                    f"Expected to run on Windows or Linux, got {wrong_sys}"
+                    in result.output
+                )
 
     def test_with_invalid_files(self, cli_run):
         with cli_run.isolated_filesystem():
@@ -46,10 +71,10 @@ class TestCli:
             assert result.exit_code != 0
             assert f"{empty_test} is empty. Aborting" in result.output
 
-    def test_with_invalid_pname(self, cli_run):
+    def test_with_invalid_parents(self, cli_run):
         with cli_run.isolated_filesystem():
             args = [
-                f"--pname={sys.maxsize}",
+                f"--parents={sys.maxsize}",
                 self.valid_path,
                 self.out_path,
                 "libre",
@@ -57,6 +82,5 @@ class TestCli:
             result = cli_run.invoke(cli, args)
             assert result.exit_code != 0
             assert (
-                f"Error: Parent index {sys.maxsize} out of range for"
-                in result.output
+                f"Parent index {sys.maxsize} out of range for" in result.output
             )

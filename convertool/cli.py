@@ -6,12 +6,13 @@
 # Imports
 # -----------------------------------------------------------------------------
 import platform
+import math
 from typing import List
 import click
-from convertool.libreoffice import convert_files as libre_convert
-from convertool.libreoffice import ConversionError
-from convertool.utils import get_files
-from convertool.utils import check_system, WrongOSError
+from click.core import Context as ClickContext
+from convertool.convert import convert_files
+from convertool.utils import get_files, check_system
+from convertool.exceptions import WrongOSError, ConversionError
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -26,13 +27,13 @@ from convertool.utils import check_system, WrongOSError
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
 @click.option(
-    "--pname",
+    "--parents",
     default=0,
     show_default=True,
     help="Number of parent directories to use for output name.",
 )
 @click.pass_context
-def cli(ctx: click.core.Context, files: str, outdir: str, pname: int) -> None:
+def cli(ctx: ClickContext, files: str, outdir: str, parents: int) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
     If FILES is a file, convertool expects a text file with a list of
@@ -45,20 +46,28 @@ def cli(ctx: click.core.Context, files: str, outdir: str, pname: int) -> None:
     else:
         file_list: List[str] = get_files(files)
         if not file_list:
-            exit_msg = f"{files} is empty. Aborting."
-            raise click.ClickException(exit_msg)
+            raise click.ClickException(f"{files} is empty. Aborting.")
 
         # Create object with state to pass around.
-        ctx.obj = {"file_list": file_list, "outdir": outdir, "pname": pname}
+        ctx.obj = {
+            "file_list": file_list,
+            "outdir": outdir,
+            "parents": parents,
+            "max_errs": int(math.log1p(len(file_list))),
+        }
 
 
 @cli.command()
 @click.pass_obj
-def libre(context: dict) -> None:
+def libre(ctx: dict) -> None:
     """Convert files using LibreOffice."""
     try:
-        libre_convert(
-            context["file_list"], context["outdir"], context["pname"]
+        convert_files(
+            "libre",
+            ctx["file_list"],
+            ctx["outdir"],
+            ctx["parents"],
+            ctx["max_errs"],
         )
     except ConversionError as error:
         raise click.ClickException(str(error))
