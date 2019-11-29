@@ -43,7 +43,6 @@ class TestConvertFiles:
         out, file = file_handler
         convert_files("libre", [file], out)
         assert "Started conversion of 1 files" in caplog.text
-        assert "Now converting using LibreOffice" in caplog.text
         assert "Finished conversion of 1 files with 0 issues" in caplog.text
 
     def test_with_no_files(self, file_handler, caplog):
@@ -57,7 +56,6 @@ class TestConvertFiles:
         # Our test file does indeed have two parents, things go well
         convert_files("libre", [file], out, parents=2)
         assert "Started conversion of 1 files" in caplog.text
-        assert "Now converting using LibreOffice" in caplog.text
         assert "Finished conversion of 1 files with 0 issues" in caplog.text
         # It definitely does not have sys.maxsize parents though
         with pytest.raises(ConversionError):
