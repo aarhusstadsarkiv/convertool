@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List
 import tqdm
 from .libreoffice import libre_convert
-from .utils import log_setup, create_outdir
+from .utils import log_setup, create_outdir, ACCEPTED_OUT
 from .exceptions import LibreError, ConversionError
 
 # -----------------------------------------------------------------------------
@@ -19,7 +19,7 @@ from .exceptions import LibreError, ConversionError
 # -----------------------------------------------------------------------------
 
 
-def calc_timeout(file: Path, base_timeout: int = 5) -> int:
+def calc_timeout(file: Path, base_timeout: int = 10) -> int:
     """Calculates a timeout value based on file size and a base timeout.
 
     Parameters
@@ -27,7 +27,7 @@ def calc_timeout(file: Path, base_timeout: int = 5) -> int:
     file : Path
         The file from which timeout should be calculated.
     base_timeout : int
-        The base timeout. Defaults to 5.
+        The base timeout. Defaults to 10.
 
     Returns
     -------
