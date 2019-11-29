@@ -5,7 +5,6 @@
 # Imports
 # -----------------------------------------------------------------------------
 import os
-import platform
 import logging
 from pathlib import Path
 from subprocess import Popen, TimeoutExpired
@@ -73,6 +72,38 @@ def check_system(system: str) -> None:
         raise WrongOSError(
             f"Expected to run on Windows or Linux, got {system}."
         )
+
+
+def create_outdir(file: Path, outdir: Path, parents: int = 0) -> Path:
+    """Create the output directory for a file, where parents are the number of
+    parents to use when naming the output directory.
+
+    Parameters
+    ----------
+    file : Path
+        The file for which to create an output directory.
+    outdir : Path
+        The current output directory.
+    parents : int
+        The number of parents to use when creating the output directory.
+        Defaults to 0.
+
+    Raises
+    ------
+    IndexError
+        If the number of parents used for naming exceeds the number of actual
+        parents a file has, and index error is thrown.
+    """
+    for i in range(parents, 0, -1):
+        try:
+            subdir = Path(f"{file}").parent.parts[-i]
+        except IndexError:
+            err_msg = f"Parent index {parents} out of range for {file}"
+            raise IndexError(err_msg)
+        else:
+            outdir = outdir.joinpath(subdir)
+
+    return outdir
 
 
 def run_proc(proc: Popen, timeout: int) -> None:

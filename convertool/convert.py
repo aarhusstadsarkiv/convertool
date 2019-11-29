@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List
 import tqdm
 from .libreoffice import libre_convert
-from .utils import log_setup
+from .utils import log_setup, create_outdir
 from .exceptions import LibreError, ConversionError
 
 # -----------------------------------------------------------------------------
@@ -121,6 +121,7 @@ def convert_files(
     time_now: float = time.time()
     err_count: int = 0
     warn_count: int = 0
+    log_msg: str
 
     # Set up logging
     logger: Logger = log_setup(
@@ -128,30 +129,31 @@ def convert_files(
         log_file=Path(outdir).joinpath(f"_convertool_{time_now}.log"),
     )
 
+    # Check if there are files to convert.
     if not files:
         err_msg: str = "Got no files to convert!"
         logger.error(err_msg)
         raise ConversionError(err_msg)
 
+    # Start conversion.
     logger.info(f"Started conversion of {len(files)} files.")
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
-        out_path = Path(outdir)
-        for i in range(parents, 0, -1):
-            try:
-                subdir = Path(f"{file}").parent.parts[-i]
-            except IndexError:
-                err_msg = f"Parent index {parents} out of range for {file}"
-                logger.error(err_msg)
-                raise ConversionError(err_msg)
-            else:
-                out_path = out_path.joinpath(subdir)
+
+        # Create new output path.
+        try:
+            out_path: Path = create_outdir(Path(file), Path(outdir), parents)
+        except IndexError as error:
+            logger.error(error)
+            raise ConversionError(error)
+
+        # Convert with LibreOffice
         if tool == "libre":
             try:
                 libre_convert(
                     f"{file}", out_path, timeout=calc_timeout(Path(file))
                 )
             except LibreError as error:
-                logger.warning(f"{error.message}")
+                logger.warning(f"{error}")
                 if not error.timeout:
                     err_count += 1
                 else:
@@ -160,9 +162,9 @@ def convert_files(
                 if errors:
                     logger.error(errors)
                     raise ConversionError(errors)
-    iss_count: int = err_count + warn_count
-    log_msg: str = (
-        f"Finished conversion of {len(files)} files with {iss_count} issues, "
-    )
+
+    # We are done! Log before we finish.
+    log_msg = f"Finished conversion of {len(files)} files "
+    log_msg += f"with {err_count + warn_count} issues, "
     log_msg += f"{err_count} of which were critical."
     logger.info(log_msg)
