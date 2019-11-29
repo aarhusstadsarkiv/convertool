@@ -28,5 +28,5 @@ class LibreError(ConvertoolError):
     functionality fails."""
 
     def __init__(self, message: str, timeout: bool = False):
+        super().__init__(message)
         self.timeout = timeout
-        self.message = message
