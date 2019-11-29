@@ -3,3 +3,4 @@ output-format: grouped
 pylint:
   disable:
     - logging-fstring-interpolation
+    - too-many-arguments
