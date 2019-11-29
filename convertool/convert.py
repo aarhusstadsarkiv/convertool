@@ -139,7 +139,7 @@ def convert_files(
     logger.info(f"Started conversion of {len(files)} files.")
     for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
 
-        # Create new output path.
+        # Create new output path based on parent naming.
         try:
             out_path: Path = create_outdir(Path(file), Path(outdir), parents)
         except IndexError as error:
