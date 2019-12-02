@@ -8,7 +8,7 @@
 import time
 from logging import Logger
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import tqdm
 from .libreoffice import libre_convert
 from .utils import log_setup, create_outdir, ACCEPTED_OUT
@@ -83,6 +83,7 @@ def convert_files(
     files: List[str],
     outdir: str,
     convert_to: str,
+    encoding: Optional[int] = None,
     parents: int = 0,
     max_errs: int = 0,
 ) -> None:
@@ -155,6 +156,7 @@ def convert_files(
                     f"{file}",
                     out_path,
                     convert_to,
+                    encoding=encoding,
                     timeout=calc_timeout(Path(file)),
                 )
             except LibreError as error:

@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 import platform
 import math
-from typing import List
+from typing import List, Optional
 import click
 from click.core import Context as ClickContext
 from convertool.convert import convert_files
@@ -27,21 +27,32 @@ from convertool.exceptions import WrongOSError, ConversionError
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
 @click.option(
+    "--encoding",
+    "enc",
+    type=int,
+    default=None,
+    help="Index of encoding to use for LibreOffice's infilter. Default: None.",
+)
+@click.option(
     "--parents",
     default=0,
-    show_default=True,
-    help="Number of parent directories to use for output name.",
+    help="Number of parent directories to use for output name. Default: 0",
 )
 @click.option(
     "--to",
     "to_",
     type=click.Choice(ACCEPTED_OUT, case_sensitive=False),
     default="pdf",
-    help="File format to convert to. Defaults to PDF.",
+    help="File format to convert to. Default: PDF.",
 )
 @click.pass_context
 def cli(
-    ctx: ClickContext, files: str, outdir: str, parents: int, to_: str
+    ctx: ClickContext,
+    files: str,
+    outdir: str,
+    parents: int,
+    to_: str,
+    enc: Optional[int],
 ) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
@@ -63,6 +74,7 @@ def cli(
             "outdir": outdir,
             "convert_to": to_,
             "parents": parents,
+            "encoding": enc,
             "max_errs": int(math.sqrt(len(file_list))),
         }
 
@@ -77,6 +89,7 @@ def libre(ctx: dict) -> None:
             ctx["file_list"],
             ctx["outdir"],
             ctx["convert_to"],
+            ctx["encoding"],
             ctx["parents"],
             ctx["max_errs"],
         )
