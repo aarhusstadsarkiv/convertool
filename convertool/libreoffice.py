@@ -134,8 +134,6 @@ def libre_convert(
     else:
         convert_cmd = f'{cmd} "{file}" --outdir {outdir}'
 
-    print(convert_cmd)
-
     proc = subprocess.Popen(
         convert_cmd,
         shell=True,
