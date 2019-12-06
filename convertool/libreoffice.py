@@ -120,7 +120,7 @@ def libre_convert(
     # Variables
     err_msg: str = ""
 
-    cmd = f"{cmd} --headless --convert-to {convert_to}"
+    cmd: str = f"{cmd} --headless --convert-to {convert_to}"
 
     # LibreOffice doesn't actually care what it gets in the infilter call;
     # if it doesn't find the filter you specify, it just uses the default.
