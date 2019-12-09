@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
@@ -17,8 +18,12 @@ def clean_up_files():
     test_path = os.path.join(script_path, "test_data")
     out_path = os.path.join(test_path, "out")
     yield
+    logging.shutdown()
     for file in os.listdir(out_path):
-        os.remove(os.path.join(out_path, file))
+        try:
+            os.remove(os.path.join(out_path, file))
+        except PermissionError:
+            pass
 
 
 class TestCli:
