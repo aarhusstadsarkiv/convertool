@@ -93,8 +93,8 @@ def libre_convert(
 
     Parameters
     ----------
-    files : List[str]
-        List of paths to files to convert.
+    file : str
+        File to convert
     outdir : str
         Directory where conversion results should be written to.
     convert_to : str
@@ -120,7 +120,7 @@ def libre_convert(
     # Variables
     err_msg: str = ""
 
-    cmd: str = f"{cmd} --headless --convert-to {convert_to}"
+    cmd = f"{cmd} --headless --convert-to {convert_to}"
 
     # LibreOffice doesn't actually care what it gets in the infilter call;
     # if it doesn't find the filter you specify, it just uses the default.
