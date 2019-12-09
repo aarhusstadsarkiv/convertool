@@ -30,3 +30,8 @@ class LibreError(ConvertoolError):
     def __init__(self, message: str, timeout: bool = False):
         super().__init__(message)
         self.timeout = timeout
+
+
+class SymphonyError(ConvertoolError):
+    """Implements an error to raise when Symphony or related
+    functionality fails."""
