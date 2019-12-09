@@ -11,8 +11,14 @@ from pathlib import Path
 from typing import List, Optional
 import tqdm
 from .libreoffice import libre_convert
+from .symphony import symphony_convert
 from .utils import log_setup, create_outdir, ACCEPTED_OUT
-from .exceptions import LibreError, ConversionError
+from .exceptions import (
+    LibreError,
+    SymphonyError,
+    ConversionError,
+    WrongOSError,
+)
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -165,10 +171,23 @@ def convert_files(
                     err_count += 1
                 else:
                     warn_count += 1
-                errors: str = check_errors(err_count, max_errs)
-                if errors:
-                    logger.error(errors)
-                    raise ConversionError(errors)
+
+        # Convert with IBM Symphony
+        if tool == "symph":
+            try:
+                symphony_convert(Path(file), out_path)
+            except SymphonyError as error:
+                logger.warning(f"{error}")
+                err_count += 1
+            except WrongOSError as error:
+                logger.error(error)
+                raise ConversionError(error)
+
+        # Check if too many errors have occurred.
+        errors: str = check_errors(err_count, max_errs)
+        if errors:
+            logger.error(errors)
+            raise ConversionError(errors)
 
     # We are done! Log before we finish.
     log_msg = f"Finished conversion of {len(files)} files "
