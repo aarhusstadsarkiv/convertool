@@ -103,6 +103,9 @@ def create_outdir(file: Path, outdir: Path, parents: int = 0) -> Path:
         else:
             outdir = outdir.joinpath(subdir)
 
+    # Create the resulting output directory
+    outdir.mkdir(parents=True, exist_ok=True)
+
     return outdir
 
 
