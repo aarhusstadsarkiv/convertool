@@ -17,6 +17,7 @@ from convertool.exceptions import SymphonyError, WrongOSError
 # Globals
 # -----------------------------------------------------------------------------
 pyautogui.PAUSE = 0.3
+pyautogui.FAILSAFE = False
 
 # -----------------------------------------------------------------------------
 # Function Definitions
