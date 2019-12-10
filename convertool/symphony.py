@@ -35,10 +35,11 @@ def save_as(file: str) -> None:
     copypaste(file)
 
 
-def find_symphony(system: str = platform.system()) -> str:
+def find_symphony() -> str:
 
     # Initialise variables
     exe_path: str = ""
+    system: str = platform.system()
 
     # System specific functionality.
     if system == "Windows":
@@ -82,7 +83,7 @@ def symphony_convert(file: Path, outdir: Path) -> None:
 
     # Open IBM Symphony and do unholy things with pyautogui
     try:
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.run(cmd, shell=True, check=True, capture_output=True)
     except CalledProcessError as error:
         error_msg = error.stderr.strip().decode()
         raise SymphonyError(
