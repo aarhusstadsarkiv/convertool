@@ -108,10 +108,11 @@ def symphony_convert(file: Path, outdir: Path) -> None:
         subprocess.run(
             "taskkill /f /im symphony*", shell=True, capture_output=True
         )
+        time.sleep(0.1)
         subprocess.run(
             "taskkill /f /im soffice*", shell=True, capture_output=True
         )
-        time.sleep(0.1)
+        time.sleep(0.5)
 
         # If outfile does not exist after the above, we probably have a
         # problem.
