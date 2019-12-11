@@ -27,13 +27,6 @@ from convertool.exceptions import WrongOSError, ConversionError
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
 @click.option(
-    "--encoding",
-    "enc",
-    type=int,
-    default=None,
-    help="Index of encoding to use for LibreOffice's infilter. Default: None.",
-)
-@click.option(
     "--parents",
     default=0,
     help="Number of parent directories to use for output name. Default: 0",
@@ -45,6 +38,22 @@ from convertool.exceptions import WrongOSError, ConversionError
     default="pdf",
     help="File format to convert to. Default: PDF.",
 )
+@click.option(
+    "--encoding",
+    "enc",
+    type=int,
+    default=None,
+    help="Index of encoding to use for LibreOffice's infilter. Default: None.",
+)
+@click.option(
+    "--threshold",
+    "max_errs",
+    type=int,
+    default=None,
+    help="How many errors the conversion process should accept. "
+    "If None (default), it will be calculated as sqrt(#files) and "
+    "rounded to the nearest integer.",
+)
 @click.pass_context
 def cli(
     ctx: ClickContext,
@@ -53,6 +62,7 @@ def cli(
     parents: int,
     to_: str,
     enc: Optional[int],
+    max_errs: Optional[int],
 ) -> None:
     """Convert files from a folder or a list. If FILES is a folder,
     convertool will convert every file in this folder and subfolders.
@@ -67,6 +77,8 @@ def cli(
         file_list: List[str] = get_files(files)
         if not file_list:
             raise click.ClickException(f"{files} is empty. Aborting.")
+        if not max_errs:
+            max_errs = int(math.sqrt(len(file_list)))
 
         # Create object with state to pass around.
         ctx.obj = {
@@ -75,7 +87,7 @@ def cli(
             "convert_to": to_,
             "parents": parents,
             "encoding": enc,
-            "max_errs": int(math.sqrt(len(file_list))),
+            "max_errs": max_errs,
         }
 
 
