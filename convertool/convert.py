@@ -167,10 +167,10 @@ def convert_files(
                 )
             except LibreError as error:
                 logger.warning(f"{error}")
-                if not error.timeout:
-                    err_count += 1
-                else:
+                if error.timeout:
                     warn_count += 1
+                else:
+                    err_count += 1
 
         # Convert with IBM Symphony
         if tool == "symph":
