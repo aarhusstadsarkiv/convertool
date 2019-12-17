@@ -47,7 +47,7 @@ def get_files(input_files: str) -> List[str]:
                 file_list.append(os.path.join(root, file))
 
     if os.path.isfile(input_files):
-        with open(input_files) as in_file:
+        with open(input_files, encoding="utf-8") as in_file:
             for line in in_file.readlines():
                 file_list.append(line.strip())
 
