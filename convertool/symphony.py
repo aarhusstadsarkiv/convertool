@@ -72,10 +72,12 @@ def find_symphony() -> str:
         return exe_path
 
 
-def symphony_convert(file: Path, outdir: Path) -> None:
+def symphony_convert(
+    file: Path, outdir: Path, convert_to: str = "odt"
+) -> None:
     # Initialise variables
     cmd: str = find_symphony()
-    outfile: Path = outdir.joinpath(f"{file.stem}.odt")
+    outfile: Path = outdir.joinpath(f"{file.stem}.{convert_to}")
 
     # If outfile exists, delete it first.
     if outfile.is_file():
@@ -98,11 +100,11 @@ def symphony_convert(file: Path, outdir: Path) -> None:
         # Symphony opens an extra menu when ctrl+o is used for... reasons.
         # Esc closes it.
         pyautogui.press("escape")
-        time.sleep(1)
+        time.sleep(3)
 
         # Save the file as ODT.
         save_as(str(outfile))
-        time.sleep(0.25)
+        time.sleep(1)
 
         # Kill Symphony
         subprocess.run(
