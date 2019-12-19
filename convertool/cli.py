@@ -134,6 +134,42 @@ def symph(ctx: dict) -> None:
         raise click.ClickException(str(error))
 
 
+@cli.command()
+@click.pass_obj
+def img(ctx: dict) -> None:
+    """Convert image files."""
+    try:
+        convert_files(
+            "img",
+            ctx["file_list"],
+            ctx["outdir"],
+            ctx["convert_to"],
+            ctx["encoding"],
+            ctx["parents"],
+            ctx["max_errs"],
+        )
+    except ConversionError as error:
+        raise click.ClickException(str(error))
+
+
+@cli.command()
+@click.pass_obj
+def copy(ctx: dict) -> None:
+    """Convert image files."""
+    try:
+        convert_files(
+            "copy",
+            ctx["file_list"],
+            ctx["outdir"],
+            ctx["convert_to"],
+            ctx["encoding"],
+            ctx["parents"],
+            ctx["max_errs"],
+        )
+    except ConversionError as error:
+        raise click.ClickException(str(error))
+
+
 # @cli.command()
 # @click.pass_obj
 # def ods(ctx: dict) -> None:
