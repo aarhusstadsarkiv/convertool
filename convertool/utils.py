@@ -6,6 +6,7 @@
 # -----------------------------------------------------------------------------
 import os
 import logging
+import shutil
 from pathlib import Path
 from subprocess import Popen, TimeoutExpired
 from typing import List
@@ -15,7 +16,7 @@ from .exceptions import WrongOSError, ProcessError
 # -----------------------------------------------------------------------------
 # Globals
 # -----------------------------------------------------------------------------
-ACCEPTED_OUT = ["pdf", "ods"]
+ACCEPTED_OUT = ["pdf", "ods", "odt", "html", "png", "tiff"]
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -107,6 +108,19 @@ def create_outdir(file: Path, outdir: Path, parents: int = 0) -> Path:
     outdir.mkdir(parents=True, exist_ok=True)
 
     return outdir
+
+
+def copy_file(file: Path, outdir: Path) -> None:
+    """Copies a file to the given output directory.
+
+     Parameters
+    ----------
+    file : Path
+        The file to copy.
+    outdir : Path
+        The output directory.
+    """
+    shutil.copy2(file, outdir)
 
 
 def run_proc(proc: Popen, timeout: int) -> None:
