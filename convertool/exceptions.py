@@ -35,3 +35,7 @@ class LibreError(ConvertoolError):
 class SymphonyError(ConvertoolError):
     """Implements an error to raise when Symphony or related
     functionality fails."""
+
+
+class ImageError(ConvertoolError):
+    """Implements an error to raise when image conversion fails."""
