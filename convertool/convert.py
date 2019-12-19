@@ -12,12 +12,14 @@ from typing import List, Optional
 import tqdm
 from .libreoffice import libre_convert
 from .symphony import symphony_convert
-from .utils import log_setup, create_outdir, ACCEPTED_OUT
+from .image import image_convert
+from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
 from .exceptions import (
     LibreError,
     SymphonyError,
     ConversionError,
     WrongOSError,
+    ImageError,
 )
 
 # -----------------------------------------------------------------------------
@@ -155,6 +157,9 @@ def convert_files(
             logger.error(error)
             raise ConversionError(error)
 
+        if tool == "copy":
+            copy_file(Path(file), out_path)
+
         # Convert with LibreOffice
         if tool == "libre":
             try:
@@ -174,20 +179,30 @@ def convert_files(
 
         # Convert with IBM Symphony
         if tool == "symph":
+            if convert_to.lower() not in ["odt", "ods"]:
+                error: str = f"Cannot use Symphony to convert to {convert_to}."
+                logger.error(error)
+                raise ConversionError(error)
             try:
-                symphony_convert(Path(file), out_path)
+                symphony_convert(Path(file), out_path, convert_to)
             except SymphonyError as error:
-                logger.warning(f"{error}")
+                logger.warning(error)
                 err_count += 1
             except WrongOSError as error:
                 logger.error(error)
                 raise ConversionError(error)
 
-        # Check if too many errors have occurred.
-        errors: str = check_errors(err_count, max_errs)
-        if errors:
-            logger.error(errors)
-            raise ConversionError(errors)
+        # Convert images
+        if tool == "img":
+            if convert_to.lower() not in ["png", "tiff", "pdf"]:
+                error: str = f"Cannot convert images to {convert_to}."
+                logger.error(error)
+                raise ConversionError(error)
+            try:
+                image_convert(Path(file), out_path, convert_to)
+            except ImageError as error:
+                logger.warning(error)
+                err_count += 1
 
     # We are done! Log before we finish.
     log_msg = f"Finished conversion of {len(files)} files "
