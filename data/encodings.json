@@ -1,6 +1,6 @@
 {
     "Encodings": {
-        "Unknown": 0,
+        "Unknown":                                       0,
         "Windows-1252/WinLatin 1 (Western)":             1,
         "Apple Macintosh (Western)":                     2,
         "DOS/OS2-437/US (Western)":                      3,
