@@ -203,6 +203,11 @@ def convert_files(
             except ImageError as error:
                 logger.warning(error)
                 err_count += 1
+        # Check if too many errors have occurred.
+        errors: str = check_errors(err_count, max_errs)
+        if errors:
+            logger.error(errors)
+            raise ConversionError(errors)
 
     # We are done! Log before we finish.
     log_msg = f"Finished conversion of {len(files)} files "
