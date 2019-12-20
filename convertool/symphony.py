@@ -16,7 +16,7 @@ from convertool.exceptions import SymphonyError, WrongOSError
 # -----------------------------------------------------------------------------
 # Globals
 # -----------------------------------------------------------------------------
-pyautogui.PAUSE = 0.3
+pyautogui.PAUSE = 0.4
 pyautogui.FAILSAFE = False
 
 # -----------------------------------------------------------------------------
@@ -93,18 +93,18 @@ def symphony_convert(
         )
     else:
         # Wait a bit, then open the file
-        time.sleep(1)
+        time.sleep(1.5)
         pyautogui.hotkey("ctrl", "o")
         copypaste(str(file))
 
         # Symphony opens an extra menu when ctrl+o is used for... reasons.
         # Esc closes it.
         pyautogui.press("escape")
-        time.sleep(3)
+        time.sleep(2)
 
         # Save the file as ODT.
         save_as(str(outfile))
-        time.sleep(1)
+        time.sleep(2)
 
         # Kill Symphony
         subprocess.run(
