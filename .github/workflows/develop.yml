@@ -14,21 +14,21 @@ jobs:
           python-version: 3.7
       - name: Install & run flake8
         run: |
-          pip install flake8 --user --quiet
+          pip install flake8 --quiet
           flake8 convertool/
           flake8 tests/
       - name: Install & run black
         run: |
-          pip install black --user --quiet
+          pip install black --quiet
           black --check convertool/
           black --check tests/
       - name: Install & run mypy
         run: |
-          pip install mypy --user --quiet
+          pip install mypy --quiet
           mypy convertool/
           mypy tests/
       - name: Install & run prospector
         run: |
-          pip install prospector --user --quiet
+          pip install prospector --quiet
           prospector -M
 
