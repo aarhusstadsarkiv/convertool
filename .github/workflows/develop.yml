@@ -28,6 +28,7 @@ jobs:
           mypy convertool/
           mypy tests/
       - name: Install & run prospector
+        run: |
         pip install prospector --user --quiet
         prospector -M
 
