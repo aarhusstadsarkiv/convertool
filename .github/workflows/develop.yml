@@ -14,4 +14,4 @@ jobs:
           python-version: 3.7
       - name: Test setup
         run: |
-          python --version
+          flake8 --version
