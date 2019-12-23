@@ -17,6 +17,7 @@ jobs:
           pip install flake8 --quiet
           flake8 convertool/
           flake8 tests/
+          pip uninstall flake8
       - name: Install & run black
         run: |
           pip install black --quiet
