@@ -12,6 +12,22 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
-      - name: Test setup
+      - name: Install & run flake8
         run: |
-          flake8 --version
+          pip install flake8 --user --quiet
+          flake8 convertool/
+          flake8 tests/
+      - name: Install & run black
+        run: |
+          pip install black --user --quiet
+          black --check convertool/
+          black --check tests/
+      - name: Install & run mypy
+        run: |
+          pip install mypy --user --quiet
+          mypy convertool/
+          mypy tests/
+      - name: Install & run prospector
+        pip install prospector --user --quiet
+        prospector -M
+
