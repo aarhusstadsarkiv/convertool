@@ -180,9 +180,9 @@ def convert_files(
         # Convert with IBM Symphony
         if tool == "symph":
             if convert_to.lower() not in ["odt", "ods"]:
-                error: str = f"Cannot use Symphony to convert to {convert_to}."
-                logger.error(error)
-                raise ConversionError(error)
+                err_msg = f"Cannot use Symphony to convert to {convert_to}."
+                logger.error(err_msg)
+                raise ConversionError(err_msg)
             try:
                 symphony_convert(Path(file), out_path, convert_to)
             except SymphonyError as error:
@@ -195,9 +195,9 @@ def convert_files(
         # Convert images
         if tool == "img":
             if convert_to.lower() not in ["png", "tiff", "pdf"]:
-                error: str = f"Cannot convert images to {convert_to}."
-                logger.error(error)
-                raise ConversionError(error)
+                err_msg = f"Cannot convert images to {convert_to}."
+                logger.error(err_msg)
+                raise ConversionError(err_msg)
             try:
                 image_convert(Path(file), out_path, convert_to)
             except ImageError as error:
