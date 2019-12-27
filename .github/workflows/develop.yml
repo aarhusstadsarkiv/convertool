@@ -72,3 +72,36 @@ jobs:
         run: |
           source $HOME/.poetry/env
           poetry run prospector -M -i .venv/
+  test:
+    name: Run tests & get coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install & set up poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+          source $HOME/.poetry/env
+          poetry config virtualenvs.in-project true
+      - name: Set up cache
+        uses: actions/cache@v1
+        with:
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        run: |
+          source $HOME/.poetry/env
+          poetry install
+      - name: Test and generate coverage report
+        run: poetry run pytest --cov=digiarch --cov-report=xml
+      - name: Upload to codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true

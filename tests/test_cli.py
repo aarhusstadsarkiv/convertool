@@ -17,6 +17,10 @@ def clean_up_files():
     script_path = os.path.dirname(os.path.realpath(__file__))
     test_path = os.path.join(script_path, "test_data")
     out_path = os.path.join(test_path, "out")
+    try:
+        os.mkdir(out_path)
+    except Exception:
+        pass
     yield
     logging.shutdown()
     for file in os.listdir(out_path):
