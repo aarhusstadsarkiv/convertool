@@ -37,14 +37,7 @@ jobs:
           source $HOME/.poetry/env
           flake8 --exclude .venv
           poetry run black --check . --exclude .venv
-      - name: Run mypy
-        run: |
-          source $HOME/.poetry/env
-          poetry run mypy .
-      - name: Run prospector
-        run: |
-          source $HOME/.poetry/env
-          poetry run prospector -M -i .venv/
+
   check:
     name: Check types & code
     runs-on: ubuntu-latest
