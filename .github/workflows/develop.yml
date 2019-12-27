@@ -30,7 +30,6 @@ jobs:
           mypy tests/
       - name: Install & run prospector
         run: |
-          ls -a
           pip install prospector --quiet
-          prospector -M .
+          prospector -M --profile=.prospector.yaml
 
