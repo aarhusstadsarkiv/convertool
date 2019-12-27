@@ -33,16 +33,18 @@ jobs:
           pip install flake8 --quiet
       - name: Check linting
         run: |
-          flake8 convertool/
-          flake8 tests/
-          poetry run black --check convertool/
-          poetry run black --check tests/
+          source $HOME/.poetry/env
+          flake8 --exclude .venv/
+          poetry run black --check . --exclude .venv/
       - name: Run mypy
         run: |
+          source $HOME/.poetry/env
           poetry run mypy convertool/
           poetry run mypy tests/
       - name: Run prospector
-        run: poetry run prospector -M -i .venv/
+        run: |
+        source $HOME/.poetry/env
+        poetry run prospector -M -i .venv/
   # check:
   #   runs-on: ubuntu-latest
   #   steps:
