@@ -43,8 +43,8 @@ jobs:
           poetry run mypy tests/
       - name: Run prospector
         run: |
-        source $HOME/.poetry/env
-        poetry run prospector -M -i .venv/
+          source $HOME/.poetry/env
+          poetry run prospector -M -i .venv/
   # check:
   #   runs-on: ubuntu-latest
   #   steps:
