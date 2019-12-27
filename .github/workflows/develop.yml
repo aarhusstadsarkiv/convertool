@@ -3,6 +3,26 @@ name: Develop
 on: [push]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install tools
+        run: |
+          pip install flake8 black -y --quiet
+      - name: Run flake8
+        run: |
+          flake8 convertool/
+          flake8 tests/
+      - name: Run black
+        run: |
+          black --check convertool/
+          black --check tests/
   check:
     runs-on: ubuntu-latest
     steps:
@@ -12,24 +32,13 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
-      - name: Install & run flake8
+      - name: Install tools
+        run: pip install mypy prospector --quiet
+      - name: Run mypy
         run: |
-          pip install flake8 --quiet
-          flake8 convertool/
-          flake8 tests/
-          pip uninstall flake8 -y
-      - name: Install & run black
-        run: |
-          pip install black --quiet
-          black --check convertool/
-          black --check tests/
-      - name: Install & run mypy
-        run: |
-          pip install mypy --quiet
           mypy convertool/
           mypy tests/
-      - name: Install & run prospector
+      - name: Run prospector
         run: |
-          pip install prospector --quiet
           prospector -M
 
