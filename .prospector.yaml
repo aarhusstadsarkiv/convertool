@@ -2,5 +2,6 @@ strictness: veryhigh
 output-format: grouped
 pylint:
   disable:
-    - logging-fstring-interpolation
+    - logging-format-interpolation
     - too-many-arguments
+    - import-error

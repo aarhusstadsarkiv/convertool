@@ -31,5 +31,5 @@ jobs:
       - name: Install & run prospector
         run: |
           pip install prospector --quiet
-          prospector -M --profile=.prospector.yaml
+          prospector -M
 
