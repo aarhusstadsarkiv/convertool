@@ -55,5 +55,6 @@
 #                 diff = (csize - osize) / ((osize + csize) / 2) * 100
 
 #                 f.write(
-#                     f"{opath}|{nsize(osize)}|{nsize(csize)}|{round(diff,2)}\n"
+#                     f"{opath}|{nsize(osize)}|
+# {nsize(csize)}|{round(diff,2)}\n"
 #                 )

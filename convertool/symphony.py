@@ -107,6 +107,7 @@ def symphony_convert(
         time.sleep(1)
 
         # Kill Symphony
+        # pylint: disable=subprocess-run-check
         subprocess.run(
             "taskkill /f /im symphony*", shell=True, capture_output=True
         )
@@ -115,6 +116,7 @@ def symphony_convert(
             "taskkill /f /im soffice*", shell=True, capture_output=True
         )
         time.sleep(0.5)
+        # pylint: enable=subprocess-run-check
 
         # If outfile does not exist after the above, we probably have a
         # problem.
