@@ -28,15 +28,13 @@ jobs:
         run: |
           source $HOME/.poetry/env
           poetry install
-      - name: Check directory
-        run: ls -a
-      # - name: Install flake8
-      #   run: |
-      #     pip install flake8 --quiet
-      # - name: Check linting
-      #   run: |
-      #     source $HOME/.poetry/env
-      #     flake8 --exclude .venv/
+      - name: Install flake8
+        run: |
+          pip install flake8 --quiet
+      - name: Check linting
+        run: |
+          source $HOME/.poetry/env
+          flake8 --exclude .venv
       #     poetry run black --check . --exclude .venv/
       # - name: Run mypy
       #   run: |
