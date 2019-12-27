@@ -30,7 +30,7 @@ jobs:
           mypy tests/
       - name: Install & run prospector
         run: |
-          pwd
+          ls -a
           pip install prospector --quiet
           prospector -M .
 
