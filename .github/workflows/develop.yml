@@ -99,7 +99,9 @@ jobs:
           source $HOME/.poetry/env
           poetry install
       - name: Test and generate coverage report
-        run: poetry run pytest --cov=digiarch --cov-report=xml
+        run: |
+          source $HOME/.poetry/env
+          poetry run pytest --cov=digiarch --cov-report=xml
       - name: Upload to codecov
         uses: codecov/codecov-action@v1
         with:
