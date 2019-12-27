@@ -31,12 +31,12 @@ jobs:
           pip install flake8 --quiet
       - name: Check linting
         run: |
-          flake8
-          poetry run black --check .
+          flake8 --ignore .venv/
+          poetry run black --check . --exclude .venv/
       - name: Run mypy
         run: poetry run mypy .
       - name: Run prospector
-        run: poetry run prospector -M 
+        run: poetry run prospector -M -i .venv/
   # check:
   #   runs-on: ubuntu-latest
   #   steps:
