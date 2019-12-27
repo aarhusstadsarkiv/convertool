@@ -39,7 +39,7 @@ jobs:
       - name: Run mypy
         run: |
           source $HOME/.poetry/env
-          poetry run mypy
+          poetry run mypy .
       # - name: Run prospector
       #   run: |
       #     source $HOME/.poetry/env
