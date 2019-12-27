@@ -28,23 +28,25 @@ jobs:
         run: |
           source $HOME/.poetry/env
           poetry install
-      - name: Install flake8
-        run: |
-          pip install flake8 --quiet
-      - name: Check linting
-        run: |
-          source $HOME/.poetry/env
-          flake8 --exclude .venv/
-          poetry run black --check . --exclude .venv/
-      - name: Run mypy
-        run: |
-          source $HOME/.poetry/env
-          poetry run mypy convertool/
-          poetry run mypy tests/
-      - name: Run prospector
-        run: |
-          source $HOME/.poetry/env
-          poetry run prospector -M -i .venv/
+      - name: Check directory
+        run: ls -a
+      # - name: Install flake8
+      #   run: |
+      #     pip install flake8 --quiet
+      # - name: Check linting
+      #   run: |
+      #     source $HOME/.poetry/env
+      #     flake8 --exclude .venv/
+      #     poetry run black --check . --exclude .venv/
+      # - name: Run mypy
+      #   run: |
+      #     source $HOME/.poetry/env
+      #     poetry run mypy convertool/
+      #     poetry run mypy tests/
+      # - name: Run prospector
+      #   run: |
+      #     source $HOME/.poetry/env
+      #     poetry run prospector -M -i .venv/
   # check:
   #   runs-on: ubuntu-latest
   #   steps:
