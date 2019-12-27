@@ -3,7 +3,7 @@ name: Develop
 on: [push]
 
 jobs:
-  init:
+  lint-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 
@@ -12,38 +12,47 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
-      - name: Install tools
+      - name: Install & set up poetry
         run: |
-          pip install flake8 black --quiet
-
-  lint:
-    runs-on: ubuntu-latest
-    needs: init
-    steps:
-      - name: Run flake8
-        run: |
-          flake8 convertool/
-          flake8 tests/
-      - name: Run black
-        run: |
-          black --check convertool/
-          black --check tests/
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 
-        uses: actions/checkout@v1
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+          source $HOME/.poetry/env
+          poetry config virtualenvs.in-project true
+      - name: Set up cache
+        uses: actions/cache@v1
         with:
-          python-version: 3.7
-      - name: Install tools
-        run: pip install mypy prospector --quiet
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        run: |
+          source $HOME/.poetry/env
+          poetry install
+      - name: Install flake8
+        run: |
+          pip install flake8 --quiet
+      - name: Check linting
+        run: |
+          flake8
+          poetry run black --check .
       - name: Run mypy
-        run: |
-          mypy convertool/
-          mypy tests/
+        run: poetry run mypy .
       - name: Run prospector
-        run: |
-          prospector -M
+        run: poetry run prospector -M 
+  # check:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout 
+  #       uses: actions/checkout@v1
+  #     - name: Set up Python 3.7
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: 3.7
+  #     - name: Install tools
+  #       run: pip install mypy prospector --quiet
+  #     - name: Run mypy
+  #       run: |
+  #         mypy convertool/
+  #         mypy tests/
+  #     - name: Run prospector
+  #       run: |
+  #         prospector -M
 
