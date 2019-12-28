@@ -186,7 +186,9 @@ def convert_files(
                     err_count += 1
 
         # Convert with IBM Symphony
-        if tool == "symph" and SYMPHONY_IMPORTED:
+        if tool == "symph":
+            if not SYMPHONY_IMPORTED:
+                raise ConversionError(SYMPHONY_ERROR)
             if convert_to.lower() not in ["odt", "ods"]:
                 err_msg = f"Cannot use Symphony to convert to {convert_to}."
                 logger.error(err_msg)
@@ -199,8 +201,6 @@ def convert_files(
             except WrongOSError as error:
                 logger.error(error)
                 raise ConversionError(error)
-        else:
-            raise ConversionError(SYMPHONY_ERROR)
 
         # Convert images
         if tool == "img":

@@ -10,7 +10,7 @@ import math
 from typing import List, Optional
 import click
 from click.core import Context as ClickContext
-from convertool.convert import convert_files
+from convertool.convert import convert_files, SYMPHONY_IMPORTED, SYMPHONY_ERROR
 from convertool.utils import get_files, check_system, ACCEPTED_OUT
 from convertool.exceptions import WrongOSError, ConversionError
 
