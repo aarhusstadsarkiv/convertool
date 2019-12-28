@@ -4,13 +4,19 @@ from subprocess import CalledProcessError
 from pathlib import Path
 import pyperclip
 from unittest.mock import patch
-from convertool.symphony import (
-    copypaste,
-    save_as,
-    find_symphony,
-    symphony_convert,
-)
 from convertool.exceptions import SymphonyError, WrongOSError
+
+try:
+    from convertool.symphony import (
+        copypaste,
+        save_as,
+        find_symphony,
+        symphony_convert,
+    )
+except SymphonyError as error:
+    pytest.skip(
+        f"Symphony not imported due to {error}", allow_module_level=True
+    )
 
 
 @pytest.fixture()
