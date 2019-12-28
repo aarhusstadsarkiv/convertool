@@ -22,7 +22,7 @@ from .exceptions import (
 )
 
 SYMPHONY_IMPORTED: bool = True
-SYMPHONY_ERROR: Optional[str] = None
+SYMPHONY_ERROR: str = ""
 
 try:
     from .symphony import symphony_convert
