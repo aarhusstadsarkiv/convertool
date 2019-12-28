@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import List, Optional
 import tqdm
 from .libreoffice import libre_convert
-from .symphony import symphony_convert
 from .image import image_convert
 from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
 from .exceptions import (
@@ -22,6 +21,10 @@ from .exceptions import (
     ImageError,
 )
 
+try:
+    from .symphony import symphony_convert
+except SymphonyError as error:
+    raise ConversionError(error)
 # -----------------------------------------------------------------------------
 # Function Definitions
 # -----------------------------------------------------------------------------
