@@ -10,17 +10,9 @@ import math
 from typing import List, Optional
 import click
 from click.core import Context as ClickContext
+from convertool.convert import convert_files
 from convertool.utils import get_files, check_system, ACCEPTED_OUT
-from convertool.exceptions import WrongOSError, ConversionError, SymphonyError
-
-SYMPHONY_IMPORTED: bool = True
-SYMPHONY_ERROR: Optional[str] = None
-
-try:
-    from convertool.convert import convert_files
-except SymphonyError as error:
-    SYMPHONY_IMPORTED = False
-    SYMPHONY_ERROR = str(error)
+from convertool.exceptions import WrongOSError, ConversionError
 
 # -----------------------------------------------------------------------------
 # Function Definitions

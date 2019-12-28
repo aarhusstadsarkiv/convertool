@@ -10,7 +10,6 @@ from logging import Logger
 from pathlib import Path
 from typing import List, Optional
 import tqdm
-from .symphony import symphony_convert
 from .libreoffice import libre_convert
 from .image import image_convert
 from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
@@ -21,6 +20,15 @@ from .exceptions import (
     WrongOSError,
     ImageError,
 )
+
+SYMPHONY_IMPORTED: bool = True
+SYMPHONY_ERROR: Optional[str] = None
+
+try:
+    from .symphony import symphony_convert
+except SymphonyError as error:
+    SYMPHONY_IMPORTED = False
+    SYMPHONY_ERROR = str(error)
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -178,7 +186,7 @@ def convert_files(
                     err_count += 1
 
         # Convert with IBM Symphony
-        if tool == "symph":
+        if tool == "symph" and SYMPHONY_IMPORTED:
             if convert_to.lower() not in ["odt", "ods"]:
                 err_msg = f"Cannot use Symphony to convert to {convert_to}."
                 logger.error(err_msg)
@@ -191,6 +199,8 @@ def convert_files(
             except WrongOSError as error:
                 logger.error(error)
                 raise ConversionError(error)
+        else:
+            raise ConversionError(SYMPHONY_ERROR)
 
         # Convert images
         if tool == "img":
