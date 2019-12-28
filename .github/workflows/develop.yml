@@ -99,7 +99,7 @@ jobs:
           source $HOME/.poetry/env
           poetry install
       - name: Install LibreOffice
-        run: snap install libreoffice
+        run: sudo snap install libreoffice
       - name: Test and generate coverage report
         run: |
           source $HOME/.poetry/env
