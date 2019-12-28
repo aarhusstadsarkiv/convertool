@@ -9,9 +9,13 @@ import time
 import subprocess
 from subprocess import CalledProcessError
 from pathlib import Path
-import pyautogui
 import pyperclip
 from convertool.exceptions import SymphonyError, WrongOSError
+
+try:
+    import pyautogui
+except Exception as e:
+    raise SymphonyError(f"Failed to import pyautogui with error: {e}")
 
 # -----------------------------------------------------------------------------
 # Globals
@@ -107,6 +111,7 @@ def symphony_convert(
         time.sleep(2)
 
         # Kill Symphony
+        # pylint: disable=subprocess-run-check
         subprocess.run(
             "taskkill /f /im symphony*", shell=True, capture_output=True
         )
@@ -115,6 +120,7 @@ def symphony_convert(
             "taskkill /f /im soffice*", shell=True, capture_output=True
         )
         time.sleep(0.5)
+        # pylint: enable=subprocess-run-check
 
         # If outfile does not exist after the above, we probably have a
         # problem.

@@ -87,12 +87,14 @@ def kill_libre(proc: subprocess.Popen) -> None:
     # Clean up proc
     proc.kill()
     # Make sure all LibreOffice related functionality is killed
+    # pylint: disable=subprocess-run-check
     if system == "Windows":
         subprocess.run(
             "taskkill /f /im soffice*", shell=True, capture_output=True
         )
     if system == "Linux":
         subprocess.run("pkill soffice", shell=True, capture_output=True)
+    # pylint: enable=subprocess-run-check
 
 
 def libre_convert(

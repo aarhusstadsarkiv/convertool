@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import List, Optional
 import tqdm
 from .libreoffice import libre_convert
-from .symphony import symphony_convert
 from .image import image_convert
 from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
 from .exceptions import (
@@ -21,6 +20,15 @@ from .exceptions import (
     WrongOSError,
     ImageError,
 )
+
+SYMPHONY_IMPORTED: bool = True
+SYMPHONY_ERROR: str = ""
+
+try:
+    from .symphony import symphony_convert
+except SymphonyError as error:
+    SYMPHONY_IMPORTED = False
+    SYMPHONY_ERROR = str(error)
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -179,10 +187,12 @@ def convert_files(
 
         # Convert with IBM Symphony
         if tool == "symph":
+            if not SYMPHONY_IMPORTED:
+                raise ConversionError(SYMPHONY_ERROR)
             if convert_to.lower() not in ["odt", "ods"]:
-                error: str = f"Cannot use Symphony to convert to {convert_to}."
-                logger.error(error)
-                raise ConversionError(error)
+                err_msg = f"Cannot use Symphony to convert to {convert_to}."
+                logger.error(err_msg)
+                raise ConversionError(err_msg)
             try:
                 symphony_convert(Path(file), out_path, convert_to)
             except SymphonyError as error:
@@ -195,14 +205,20 @@ def convert_files(
         # Convert images
         if tool == "img":
             if convert_to.lower() not in ["png", "tiff", "pdf"]:
-                error: str = f"Cannot convert images to {convert_to}."
-                logger.error(error)
-                raise ConversionError(error)
+                err_msg = f"Cannot convert images to {convert_to}."
+                logger.error(err_msg)
+                raise ConversionError(err_msg)
             try:
                 image_convert(Path(file), out_path, convert_to)
             except ImageError as error:
                 logger.warning(error)
                 err_count += 1
+        # Check if too many errors have occurred.
+        errors: str = check_errors(err_count, max_errs)
+        if errors:
+            logger.error(errors)
+            raise ConversionError(errors)
+
         # Check if too many errors have occurred.
         errors: str = check_errors(err_count, max_errs)
         if errors:
