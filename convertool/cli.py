@@ -10,9 +10,17 @@ import math
 from typing import List, Optional
 import click
 from click.core import Context as ClickContext
-from convertool.convert import convert_files
 from convertool.utils import get_files, check_system, ACCEPTED_OUT
-from convertool.exceptions import WrongOSError, ConversionError
+from convertool.exceptions import WrongOSError, ConversionError, SymphonyError
+
+SYMPHONY_IMPORTED: bool = True
+SYMPHONY_ERROR: Optional[str] = None
+
+try:
+    from convertool.convert import convert_files
+except SymphonyError as error:
+    SYMPHONY_IMPORTED = False
+    SYMPHONY_ERROR = str(error)
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -113,6 +121,8 @@ def libre(ctx: dict) -> None:
 @click.pass_obj
 def symph(ctx: dict) -> None:
     """Convert files using IBM Symphony"""
+    if not SYMPHONY_IMPORTED:
+        raise click.ClickException(SYMPHONY_ERROR)
     click.confirm(
         f"{click.style('WARNING!', fg='red', bold=True)} Conversion using "
         "Symphony can take a while and your computer CANNOT be used while "
