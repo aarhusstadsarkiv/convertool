@@ -23,8 +23,8 @@ from .exceptions import (
 
 try:
     from .symphony import symphony_convert
-except SymphonyError as error:
-    raise ConversionError(error)
+except SymphonyError:
+    pass
 # -----------------------------------------------------------------------------
 # Function Definitions
 # -----------------------------------------------------------------------------
