@@ -9,9 +9,13 @@ import time
 import subprocess
 from subprocess import CalledProcessError
 from pathlib import Path
-import pyautogui
 import pyperclip
 from convertool.exceptions import SymphonyError, WrongOSError
+
+try:
+    import pyautogui
+except Exception as e:
+    raise SymphonyError(f"Failed to import pyautogui with error: {e}")
 
 # -----------------------------------------------------------------------------
 # Globals
