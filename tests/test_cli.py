@@ -61,16 +61,16 @@ class TestCli:
             args = ["bogus", self.out_path, "libre"]
             result = cli_run.invoke(cli, args)
             assert result.exit_code != 0
-            assert 'Error: Invalid value for "FILES"' in result.output
-            assert 'Path "bogus" does not exist.' in result.output
+            assert "Error: Invalid value for 'FILES'" in result.output
+            assert "Path 'bogus' does not exist." in result.output
 
     def test_with_invalid_outdir(self, cli_run):
         with cli_run.isolated_filesystem():
             args = [self.valid_path, "bogus", "libre"]
             result = cli_run.invoke(cli, args)
             assert result.exit_code != 0
-            assert 'Error: Invalid value for "OUTDIR"' in result.output
-            assert 'Directory "bogus" does not exist.' in result.output
+            assert "Error: Invalid value for 'OUTDIR'" in result.output
+            assert "Directory 'bogus' does not exist." in result.output
 
     def test_with_empty_filedir(self, cli_run):
         empty_test = os.path.join(self.test_path, "test_empty.txt")
