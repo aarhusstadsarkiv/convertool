@@ -46,7 +46,7 @@ class TestFindLibre:
 class TestLibreConvert:
     def test_with_valid_input(self, file_handler):
         out, file = file_handler
-        libre_convert(file, out, "pdf")
+        libre_convert(file, out, "pdf", cmd=find_libre())
         test_file = os.path.join(out, "test.pdf")
         assert os.path.isfile(test_file)
 
@@ -60,15 +60,15 @@ class TestLibreConvert:
         # This only fails on Linux because LibreOffice is AMAZING
         if platform.system() == "Linux":
             with pytest.raises(LibreError):
-                libre_convert("bogus", out, "pdf")
+                libre_convert("bogus", out, "pdf", cmd=find_libre())
 
     def test_encoding(self, file_handler):
         out, file = file_handler
-        libre_convert(file, out, "pdf", encoding=2)
+        libre_convert(file, out, "pdf", encoding=2, cmd=find_libre())
         test_file = os.path.join(out, "test.pdf")
         assert os.path.isfile(test_file)
 
     def test_timeout(self, file_handler):
         out, file = file_handler
         with pytest.raises(LibreError):
-            libre_convert(file, out, "pdf", timeout=0)
+            libre_convert(file, out, "pdf", timeout=0, cmd=find_libre())

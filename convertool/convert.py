@@ -10,7 +10,7 @@ from logging import Logger
 from pathlib import Path
 from typing import List, Optional
 import tqdm
-from .libreoffice import libre_convert
+from .libreoffice import libre_convert, find_libre
 from .image import image_convert
 from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
 from .exceptions import (
@@ -175,6 +175,7 @@ def convert_files(
                     f"{file}",
                     out_path,
                     convert_to,
+                    cmd=find_libre(),
                     encoding=encoding,
                     timeout=calc_timeout(Path(file)),
                 )

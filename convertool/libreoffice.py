@@ -57,7 +57,7 @@ def find_libre(system: str = platform.system()) -> str:
     check_system(system)
 
     if system == "Windows":
-        find_libre_cmd = r"cd %programfiles% && where /r . *soffice.exe"
+        find_libre_cmd = r"where.exe *soffice.exe"
     elif system == "Linux":
         find_libre_cmd = r"which libreoffice"
 
@@ -101,8 +101,8 @@ def libre_convert(
     file: str,
     outdir: Path,
     convert_to: str,
+    cmd: str,
     encoding: Optional[int] = None,
-    cmd: str = find_libre(),
     timeout: int = 30,
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
