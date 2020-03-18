@@ -81,20 +81,21 @@ def find_libre(system: str = platform.system()) -> str:
     return libre_path
 
 
-def kill_libre(proc: subprocess.Popen) -> None:
-    system: str = platform.system()
+# def kill_libre(proc: subprocess.Popen) -> None:
+#     # system: str = platform.system()
 
-    # Clean up proc
-    proc.kill()
-    # Make sure all LibreOffice related functionality is killed
-    # pylint: disable=subprocess-run-check
-    if system == "Windows":
-        subprocess.run(
-            "taskkill /f /im soffice*", shell=True, capture_output=True
-        )
-    if system == "Linux":
-        subprocess.run("pkill soffice", shell=True, capture_output=True)
-    # pylint: enable=subprocess-run-check
+#     # Clean up proc
+#     proc.kill()
+#     _, _ = proc.communicate()
+#     # Make sure all LibreOffice related functionality is killed
+#     # pylint: disable=subprocess-run-check
+#     # if system == "Windows":
+#     #     subprocess.run(
+#     #         "taskkill /f /im soffice*", shell=True, capture_output=True
+#     #     )
+#     # if system == "Linux":
+#     #     subprocess.run("pkill soffice", shell=True, capture_output=True)
+#     # pylint: enable=subprocess-run-check
 
 
 def libre_convert(
@@ -160,11 +161,12 @@ def libre_convert(
     try:
         run_proc(proc, timeout=timeout)
     except ProcessError as error:
-        kill_libre(proc)
+        proc.kill()
         err_msg = f"LibreConvert of {file} failed with error: {error}"
         raise LibreError(err_msg)
     except TimeoutExpired as error:
-        kill_libre(proc)
+        proc.kill()
+        _, _ = proc.communicate()
         err_msg = (
             f"LibreConvert of {file} timed out after {error.timeout} seconds."
         )
