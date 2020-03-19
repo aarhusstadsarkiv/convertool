@@ -22,15 +22,11 @@ ACCEPTED_OUT = ["pdf", "ods", "odt", "odp", "html", "png", "tiff"]
 
 class File(BaseModel):
     path: FilePath
-    outdir: DirectoryPath
+    encoding: Optional[int]
     parent_dirs: int = 0
-    encoding: Optional[int] = None
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self.file_outdir: Path = create_outdir(
-            self.path, self.outdir, self.parent_dirs
-        )
+    def get_file_outdir(self, outdir: Path) -> Path:
+        return create_outdir(self.path, outdir, self.parents)
 
 
 class FileConv(BaseModel):
