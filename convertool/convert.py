@@ -10,10 +10,11 @@ from logging import Logger
 from pathlib import Path
 from typing import List, Optional
 import tqdm
-from .libreoffice import libre_convert, find_libre
-from .image import image_convert
-from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
-from .exceptions import (
+from convertool.libreoffice import libre_convert, find_libre
+from convertool.image import image_convert
+from convertool.utils import log_setup, create_outdir, copy_file
+from convertool.internals import ACCEPTED_OUT
+from convertool.exceptions import (
     LibreError,
     SymphonyError,
     ConversionError,
