@@ -7,7 +7,7 @@
 import math
 from pathlib import Path
 from typing import Optional, List, Any
-from pydantic import BaseModel, FilePath, DirectoryPath
+from pydantic import BaseModel, FilePath
 from convertool.utils import create_outdir
 
 # -----------------------------------------------------------------------------
@@ -26,7 +26,7 @@ class File(BaseModel):
     parent_dirs: int = 0
 
     def get_file_outdir(self, outdir: Path) -> Path:
-        return create_outdir(self.path, outdir, self.parents)
+        return create_outdir(self.path, outdir, self.parent_dirs)
 
 
 class FileConv(BaseModel):
