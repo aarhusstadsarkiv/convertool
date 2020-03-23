@@ -1,19 +1,29 @@
 import math
+import pytest
 from pathlib import Path
+from pydantic import ValidationError
 from convertool.internals import File, FileConv
 
 
 class TestFile:
     def test_init(self, file_handler):
         _, file_path = file_handler
+
+        # Required only
         file_0 = File(path=file_path)
         assert file_0.path == Path(file_path)
         assert file_0.encoding is None
         assert file_0.parent_dirs == 0
+
+        # With optional
         file_1 = File(path=file_path, encoding=2, parent_dirs=2)
         assert file_1.path == Path(file_path)
         assert file_1.encoding == 2
         assert file_1.parent_dirs == 2
+
+        # Path is not a file
+        with pytest.raises(ValidationError, match="File does not exist"):
+            File(path="Not a file")
 
     def test_get_file_outdir(self, file_handler):
         out_path, file_path = file_handler
@@ -34,10 +44,14 @@ class TestFile:
 class TestFileConv:
     def test_init(self, file_handler):
         _, file_path = file_handler
+
+        # Required only
         file_0 = File(path=file_path)
         file_conv_0 = FileConv(files=[file_0])
         assert file_conv_0.files == [file_0]
         assert file_conv_0.max_errs == int(math.sqrt(len([file_0])))
+
+        # With optional
         file_conv_1 = FileConv(files=[file_0], max_errs=2)
         assert file_conv_1.files == [file_0]
         assert file_conv_1.max_errs == 2
