@@ -15,20 +15,10 @@ from .image import image_convert
 from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
 from .exceptions import (
     LibreError,
-    SymphonyError,
     ConversionError,
-    WrongOSError,
     ImageError,
 )
 
-SYMPHONY_IMPORTED: bool = True
-SYMPHONY_ERROR: str = ""
-
-try:
-    from .symphony import symphony_convert
-except SymphonyError as error:
-    SYMPHONY_IMPORTED = False
-    SYMPHONY_ERROR = str(error)
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -185,23 +175,6 @@ def convert_files(
                     warn_count += 1
                 else:
                     err_count += 1
-
-        # Convert with IBM Symphony
-        if tool == "symph":
-            if not SYMPHONY_IMPORTED:
-                raise ConversionError(SYMPHONY_ERROR)
-            if convert_to.lower() not in ["odt", "ods"]:
-                err_msg = f"Cannot use Symphony to convert to {convert_to}."
-                logger.error(err_msg)
-                raise ConversionError(err_msg)
-            try:
-                symphony_convert(Path(file), out_path, convert_to)
-            except SymphonyError as error:
-                logger.warning(error)
-                err_count += 1
-            except WrongOSError as error:
-                logger.error(error)
-                raise ConversionError(error)
 
         # Convert images
         if tool == "img":
