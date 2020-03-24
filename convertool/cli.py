@@ -5,15 +5,17 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-import platform
 import math
+import platform
 from typing import List, Optional
+
 import click
 from click.core import Context as ClickContext
-from convertool.internals import ACCEPTED_OUT
+
 from convertool.convert import convert_files
-from convertool.utils import get_files, check_system
-from convertool.exceptions import WrongOSError, ConversionError
+from convertool.exceptions import ConversionError, WrongOSError
+from convertool.internals import ACCEPTED_OUT
+from convertool.utils import check_system, get_files
 
 # -----------------------------------------------------------------------------
 # Function Definitions

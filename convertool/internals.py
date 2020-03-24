@@ -6,8 +6,10 @@
 # -----------------------------------------------------------------------------
 import math
 from pathlib import Path
-from typing import Optional, List, Any
+from typing import Any, List, Optional
+
 from pydantic import BaseModel, validator
+
 from convertool.utils import create_outdir
 
 # -----------------------------------------------------------------------------

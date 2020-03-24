@@ -1,8 +1,9 @@
-import pytest
-import sys
 import platform
-from unittest.mock import patch
+import sys
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 from convertool.convert import calc_timeout, check_errors, convert_files
 from convertool.exceptions import ConversionError
 

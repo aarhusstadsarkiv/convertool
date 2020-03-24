@@ -1,7 +1,9 @@
 import math
-import pytest
 from pathlib import Path
+
 from pydantic import ValidationError
+
+import pytest
 from convertool.internals import File, FileConv
 
 

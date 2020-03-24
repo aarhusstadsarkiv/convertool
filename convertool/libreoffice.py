@@ -10,12 +10,12 @@ chocolatey (Windows) or snap (Linux).
 # -----------------------------------------------------------------------------
 import platform
 import subprocess
-from subprocess import CalledProcessError, TimeoutExpired
 from pathlib import Path
+from subprocess import CalledProcessError, TimeoutExpired
 from typing import Optional
-from .utils import check_system, run_proc
-from .exceptions import LibreError, ProcessError
 
+from .exceptions import LibreError, ProcessError
+from .utils import check_system, run_proc
 
 # -----------------------------------------------------------------------------
 # Function Definitions
