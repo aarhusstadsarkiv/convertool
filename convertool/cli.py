@@ -10,7 +10,9 @@ import math
 from typing import List, Optional
 import click
 from click.core import Context as ClickContext
-from convertool.convert import convert_files, SYMPHONY_IMPORTED, SYMPHONY_ERROR
+from convertool.convert import (
+    convert_files,
+)  # SYMPHONY_IMPORTED, SYMPHONY_ERROR
 from convertool.utils import get_files, check_system, ACCEPTED_OUT
 from convertool.exceptions import WrongOSError, ConversionError
 
@@ -109,31 +111,31 @@ def libre(ctx: dict) -> None:
         raise click.ClickException(str(error))
 
 
-@cli.command()
-@click.pass_obj
-def symph(ctx: dict) -> None:
-    """Convert files using IBM Symphony"""
-    if not SYMPHONY_IMPORTED:
-        raise click.ClickException(SYMPHONY_ERROR)
-    click.confirm(
-        f"{click.style('WARNING!', fg='red', bold=True)} Conversion using "
-        "Symphony can take a while and your computer CANNOT be used while "
-        "this process is running.\n"
-        "Do you wish to continue?",
-        abort=True,
-    )
-    try:
-        convert_files(
-            "symph",
-            ctx["file_list"],
-            ctx["outdir"],
-            ctx["convert_to"],
-            ctx["encoding"],
-            ctx["parents"],
-            ctx["max_errs"],
-        )
-    except ConversionError as error:
-        raise click.ClickException(str(error))
+# @cli.command()
+# @click.pass_obj
+# def symph(ctx: dict) -> None:
+#     """Convert files using IBM Symphony"""
+#     if not SYMPHONY_IMPORTED:
+#         raise click.ClickException(SYMPHONY_ERROR)
+#     click.confirm(
+#         f"{click.style('WARNING!', fg='red', bold=True)} Conversion using "
+#         "Symphony can take a while and your computer CANNOT be used while "
+#         "this process is running.\n"
+#         "Do you wish to continue?",
+#         abort=True,
+#     )
+#     try:
+#         convert_files(
+#             "symph",
+#             ctx["file_list"],
+#             ctx["outdir"],
+#             ctx["convert_to"],
+#             ctx["encoding"],
+#             ctx["parents"],
+#             ctx["max_errs"],
+#         )
+#     except ConversionError as error:
+#         raise click.ClickException(str(error))
 
 
 @cli.command()
