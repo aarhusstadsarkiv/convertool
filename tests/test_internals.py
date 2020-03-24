@@ -4,7 +4,15 @@ from pathlib import Path
 from pydantic import ValidationError
 
 import pytest
-from convertool.internals import File, FileConv
+from convertool.internals import FileInfo, File, FileConv
+
+
+class TestFileInfo:
+    def test_init(self, file_handler):
+        _, file_path = file_handler
+        file_info = FileInfo(path=file_path, name="test")
+        print(file_info)
+        assert False
 
 
 class TestFile:
@@ -22,6 +30,10 @@ class TestFile:
         assert file_1.path == Path(file_path)
         assert file_1.encoding == 2
         assert file_1.parent_dirs == 2
+
+        print(file_0)
+        print(file_1)
+        assert False
 
         # Path is not a file
         with pytest.raises(ValidationError, match="File does not exist"):
