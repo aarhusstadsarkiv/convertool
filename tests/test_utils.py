@@ -37,7 +37,7 @@ class TestRunProc:
         run_proc(proc, timeout=30)
 
     def test_timeout(self):
-        proc = Popen(f"exit 0", shell=True)
+        proc = Popen(f"sleep 10", shell=True)
         with pytest.raises(TimeoutExpired):
             run_proc(proc, timeout=0)
 
