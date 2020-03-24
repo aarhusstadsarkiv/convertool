@@ -24,6 +24,7 @@ convertool = "convertool.cli:cli"
 
 [tool.black]
 line-length = 79
+exclude = ".venv"
 
 [build-system]
 requires = ["poetry>=0.12"]
