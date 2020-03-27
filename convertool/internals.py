@@ -6,9 +6,9 @@
 # -----------------------------------------------------------------------------
 import math
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 
 from convertool.utils import create_outdir
 
@@ -46,11 +46,16 @@ class FileInfo(BaseModel):
             raise ValueError("File does not exist.")
         return path.resolve()
 
-    @validator("name")
-    def name_overwrite(cls, name: str) -> str:
-        if name:
-            print(f"Warning! name={name} will be overwritten during init.")
-        return ""
+    @root_validator
+    def overwrite(cls, values: Dict[Any, Any]) -> Dict[Any, Any]:
+        for field, value in values.items():
+            if field in {"name", "ext", "size"} and value:
+                print(
+                    "Warning! "
+                    f"{field}={value} will be overwritten during init."
+                )
+                values[field] = ""
+        return values
 
     def __init__(self, **data: Any):
         super().__init__(**data)
