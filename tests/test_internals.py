@@ -4,15 +4,26 @@ from pathlib import Path
 from pydantic import ValidationError
 
 import pytest
-from convertool.internals import FileInfo, File, FileConv
+from convertool.internals import FileInfo, File, FileConv, size_fmt
 
 
 class TestFileInfo:
     def test_init(self, file_handler):
         _, file_path = file_handler
-        file_info = FileInfo(path=file_path, name="test")
-        print(file_info)
-        assert False
+        file_info = FileInfo(path=file_path)
+        file_path = Path(file_path)
+        assert file_info.path == file_path
+        assert file_info.name == file_path.name
+        assert file_info.ext == file_path.suffix.lower()
+        assert file_info.size == size_fmt(file_path.stat().st_size)
+
+    def test_validators(self, file_handler, capsys):
+        with pytest.raises(ValidationError, match="File does not exist"):
+            FileInfo(path="test", name="test", ext="test", size="test")
+        captured = capsys.readouterr()
+        assert "Warning! name=test will be overwritten" in captured.out
+        assert "Warning! ext=test will be overwritten" in captured.out
+        assert "Warning! size=test will be overwritten" in captured.out
 
 
 class TestFile:
@@ -30,14 +41,6 @@ class TestFile:
         assert file_1.path == Path(file_path)
         assert file_1.encoding == 2
         assert file_1.parent_dirs == 2
-
-        print(file_0)
-        print(file_1)
-        assert False
-
-        # Path is not a file
-        with pytest.raises(ValidationError, match="File does not exist"):
-            File(path="Not a file")
 
     def test_get_file_outdir(self, file_handler):
         out_path, file_path = file_handler
