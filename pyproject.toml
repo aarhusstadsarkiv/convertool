@@ -15,7 +15,7 @@ humanize = "^2.2.0"
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 pytest-cov = "^2.8.1"
-mypy = "^0.740.0"
+mypy = "^0.770"
 black = {version = "^19.10b0", allow-prereleases = true}
 
 [tool.poetry.scripts]
