@@ -79,11 +79,14 @@ toml = ["toml"]
 
 [[package]]
 category = "main"
-description = "python humanize utilities"
+description = "Python humanize utilities"
 name = "humanize"
 optional = false
-python-versions = "*"
-version = "0.5.1"
+python-versions = ">=3.5"
+version = "2.2.0"
+
+[package.extras]
+tests = ["freezegun", "pytest", "pytest-cov"]
 
 [[package]]
 category = "dev"
@@ -307,7 +310,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "bc4930b6813d4687f49bae0ebdf2aebec1bbf9d696407d54410bb7d63483f6f0"
+content-hash = "66ed528e1681d237a0266d5bfff74105c74ef05a8f065ebee6fcea7425cc9af8"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -369,7 +372,8 @@ coverage = [
     {file = "coverage-5.0.4.tar.gz", hash = "sha256:1b60a95fc995649464e0cd48cecc8288bac5f4198f21d04b8229dc4097d76823"},
 ]
 humanize = [
-    {file = "humanize-0.5.1.tar.gz", hash = "sha256:a43f57115831ac7c70de098e6ac46ac13be00d69abbf60bdcac251344785bb19"},
+    {file = "humanize-2.2.0-py3-none-any.whl", hash = "sha256:0b3157df0f3fcdcb7611180d305a23fd4b6290eb23586e058762f8576348fbab"},
+    {file = "humanize-2.2.0.tar.gz", hash = "sha256:de8ef6ffee618a9d369b3d1fb1359780ccaa2cc76a0e777c6ff21f04d19a0eb8"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-1.5.0-py2.py3-none-any.whl", hash = "sha256:b97607a1a18a5100839aec1dc26a1ea17ee0d93b20b0f008d80a5a050afb200b"},
