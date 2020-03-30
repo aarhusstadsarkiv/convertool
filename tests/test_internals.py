@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 import pytest
-from convertool.internals import FileInfo, File, FileConv, size_fmt
+from convertool.internals import File, FileConv, FileInfo, size_fmt
 
 
 class TestFileInfo:
