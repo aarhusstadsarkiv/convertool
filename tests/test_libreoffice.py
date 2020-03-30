@@ -1,9 +1,10 @@
 import os
 import platform
+
 import pytest
+from convertool.exceptions import LibreError, WrongOSError
 from convertool.libreoffice import find_libre, libre_convert
 from convertool.utils import get_files
-from convertool.exceptions import WrongOSError, LibreError
 
 
 @pytest.fixture

@@ -4,19 +4,16 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-import os
 import logging
+import os
 import shutil
 from pathlib import Path
 from subprocess import Popen, TimeoutExpired
 from typing import List
-import tqdm
-from .exceptions import WrongOSError, ProcessError
 
-# -----------------------------------------------------------------------------
-# Globals
-# -----------------------------------------------------------------------------
-ACCEPTED_OUT = ["pdf", "ods", "odt", "html", "png", "tiff"]
+import tqdm
+
+from .exceptions import ProcessError, WrongOSError
 
 # -----------------------------------------------------------------------------
 # Function Definitions

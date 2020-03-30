@@ -1,7 +1,8 @@
+from subprocess import PIPE, Popen, TimeoutExpired
+
 import pytest
-from subprocess import Popen, TimeoutExpired, PIPE
-from convertool.utils import get_files, check_system, run_proc
-from convertool.exceptions import WrongOSError, ProcessError
+from convertool.exceptions import ProcessError, WrongOSError
+from convertool.utils import check_system, get_files, run_proc
 
 
 class TestGetFiles:

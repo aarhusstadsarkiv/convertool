@@ -5,16 +5,17 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-import platform
 import math
+import platform
 from typing import List, Optional
+
 import click
 from click.core import Context as ClickContext
-from convertool.convert import (
-    convert_files,
-)  # SYMPHONY_IMPORTED, SYMPHONY_ERROR
-from convertool.utils import get_files, check_system, ACCEPTED_OUT
-from convertool.exceptions import WrongOSError, ConversionError
+
+from convertool.convert import convert_files
+from convertool.exceptions import ConversionError, WrongOSError
+from convertool.internals import ACCEPTED_OUT
+from convertool.utils import check_system, get_files
 
 # -----------------------------------------------------------------------------
 # Function Definitions

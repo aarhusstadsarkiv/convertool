@@ -9,16 +9,13 @@ import time
 from logging import Logger
 from pathlib import Path
 from typing import List, Optional
-import tqdm
-from .libreoffice import libre_convert, find_libre
-from .image import image_convert
-from .utils import log_setup, create_outdir, copy_file, ACCEPTED_OUT
-from .exceptions import (
-    LibreError,
-    ConversionError,
-    ImageError,
-)
 
+import tqdm
+from convertool.exceptions import ConversionError, ImageError, LibreError
+from convertool.image import image_convert
+from convertool.internals import ACCEPTED_OUT
+from convertool.libreoffice import find_libre, libre_convert
+from convertool.utils import copy_file, create_outdir, log_setup
 
 # -----------------------------------------------------------------------------
 # Function Definitions

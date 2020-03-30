@@ -7,7 +7,9 @@
 # -----------------------------------------------------------------------------
 import subprocess
 from pathlib import Path
+
 from PIL import Image
+
 from .exceptions import ImageError
 
 # -----------------------------------------------------------------------------
