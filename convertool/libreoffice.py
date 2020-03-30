@@ -14,8 +14,9 @@ from pathlib import Path
 from subprocess import CalledProcessError, TimeoutExpired
 from typing import Optional
 
-from .exceptions import LibreError, ProcessError
-from .utils import check_system, run_proc
+from convertool.exceptions import LibreError, ProcessError
+from convertool.internals import File
+from convertool.utils import check_system, run_proc
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -99,12 +100,7 @@ def find_libre(system: str = platform.system()) -> str:
 
 
 def libre_convert(
-    file: str,
-    outdir: Path,
-    convert_to: str,
-    cmd: str,
-    encoding: Optional[int] = None,
-    timeout: int = 30,
+    file: File, convert_to: str, outdir: Path, cmd: str, timeout: int = 30,
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
 
@@ -136,7 +132,7 @@ def libre_convert(
 
     # Variables
     err_msg: str = ""
-
+    file_out = file.get_file_outdir(outdir)
     cmd = f"{cmd} --headless --convert-to {convert_to}"
 
     # LibreOffice doesn't actually care what it gets in the infilter call;
@@ -144,12 +140,13 @@ def libre_convert(
     # As such, the convert command using --infilter will work no matter what
     # value encoding actually has. This doesn't seem particularly safe, so we
     # might want to type check the encoding input.
-    if encoding is not None:
+    if file.encoding is not None:
         convert_cmd = (
-            f'{cmd} "{file}" --infilter=:{encoding} --outdir {outdir}'
+            f'{cmd} "{file.path}"'
+            f"--infilter=:{file.encoding} --outdir {file_out}"
         )
     else:
-        convert_cmd = f'{cmd} "{file}" --outdir {outdir}'
+        convert_cmd = f'{cmd} "{file.path}" --outdir {file_out}'
 
     proc = subprocess.Popen(
         convert_cmd,
@@ -162,12 +159,13 @@ def libre_convert(
         run_proc(proc, timeout=timeout)
     except ProcessError as error:
         proc.kill()
-        err_msg = f"LibreConvert of {file} failed with error: {error}"
+        err_msg = f"LibreConvert of {file.path} failed with error: {error}"
         raise LibreError(err_msg)
     except TimeoutExpired as error:
         proc.kill()
         _, _ = proc.communicate()
         err_msg = (
-            f"LibreConvert of {file} timed out after {error.timeout} seconds."
+            f"LibreConvert of {file.path} "
+            f"timed out after {error.timeout} seconds."
         )
         raise LibreError(err_msg, timeout=True)
