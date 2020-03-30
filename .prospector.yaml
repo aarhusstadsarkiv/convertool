@@ -1,7 +1,0 @@
-strictness: veryhigh
-output-format: grouped
-pylint:
-  disable:
-    - logging-format-interpolation
-    - too-many-arguments
-    - import-error
