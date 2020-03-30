@@ -142,7 +142,7 @@ def libre_convert(
     # might want to type check the encoding input.
     if file.encoding is not None:
         convert_cmd = (
-            f'{cmd} "{file.path}"'
+            f'{cmd} "{file.path}" '
             f"--infilter=:{file.encoding} --outdir {file_out}"
         )
     else:

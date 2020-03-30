@@ -67,12 +67,12 @@ class TestLibreConvert:
     #         with pytest.raises(LibreError):
     #             libre_convert("bogus", out, "pdf", cmd=find_libre())
 
-    # def test_encoding(self, file_handler):
-    #     out, file_path = file_handler
-    #     file = File(path=file_path, encoding=2)
-    #     libre_convert(file, "pdf", Path(out), cmd=find_libre())
-    #     test_file = os.path.join(out, "test.pdf")
-    #     assert os.path.isfile(test_file)
+    def test_encoding(self, file_handler):
+        out, file_path = file_handler
+        file = File(path=file_path, encoding=2)
+        libre_convert(file, "pdf", Path(out), cmd=find_libre())
+        test_file = os.path.join(out, "test.pdf")
+        assert os.path.isfile(test_file)
 
     def test_timeout(self, file_handler):
         out, file_path = file_handler
