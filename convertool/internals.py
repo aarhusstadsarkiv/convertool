@@ -37,8 +37,8 @@ class FileInfo(BaseModel):
     name: str = ""
     ext: str = ""
     size: str = ""
-    checksum: Optional[str] = None
-    identification: Optional[Identification] = None
+    checksum: Optional[str]
+    identification: Optional[Identification]
 
     @validator("path")
     def path_must_be_file(cls, path: Path) -> Path:
@@ -60,7 +60,7 @@ class FileInfo(BaseModel):
     def __init__(self, **data: Any):
         super().__init__(**data)
 
-        # Resolve path, init fields
+        # Init fields
         self.name = self.path.name
         self.ext = self.path.suffix.lower()
         self.size = size_fmt(self.path.stat().st_size)
