@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, root_validator, validator
 
-from convertool.utils import create_outdir
 
 # -----------------------------------------------------------------------------
 # Globals
@@ -76,11 +75,13 @@ class File(FileInfo):
 
 class FileConv(BaseModel):
     files: List[File]
-    max_errs: Optional[int]
+    out_dir: Path
+    convert_to: str
+    max_errs: int = -1
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        if not self.max_errs:
+        if self.max_errs < 0:
             self.max_errs = int(math.sqrt(len(self.files)))
 
 
@@ -107,3 +108,38 @@ def size_fmt(size: float) -> str:
             break
         size /= 1024.0
     return f"{size:.1f} {unit}"
+
+
+def create_outdir(file: Path, outdir: Path, parents: int = 0) -> Path:
+    """Create the output directory for a file, where parents are the number of
+    parents to use when naming the output directory.
+
+    Parameters
+    ----------
+    file : Path
+        The file for which to create an output directory.
+    outdir : Path
+        The current output directory.
+    parents : int
+        The number of parents to use when creating the output directory.
+        Defaults to 0.
+
+    Raises
+    ------
+    IndexError
+        If the number of parents used for naming exceeds the number of actual
+        parents a file has, and index error is thrown.
+    """
+    for i in range(parents, 0, -1):
+        try:
+            subdir = Path(f"{file}").parent.parts[-i]
+        except IndexError:
+            err_msg = f"Parent index {parents} out of range for {file}"
+            raise IndexError(err_msg)
+        else:
+            outdir = outdir.joinpath(subdir)
+
+    # Create the resulting output directory
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    return outdir

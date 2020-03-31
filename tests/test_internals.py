@@ -44,10 +44,10 @@ class TestFile:
 
     def test_get_file_outdir(self, file_handler):
         out_path, file_path = file_handler
-        file = File(path=file_path)
+        file = File(path=file_path, convert_to="odt")
         file_out = file.get_file_outdir(Path(out_path))
         assert file_out == Path(out_path)
-        file = File(path=file_path, parent_dirs=2)
+        file = File(path=file_path, convert_to="odt", parent_dirs=2)
         file_out = file.get_file_outdir(Path(out_path))
         assert (
             file_out
@@ -60,15 +60,20 @@ class TestFile:
 
 class TestFileConv:
     def test_init(self, file_handler):
-        _, file_path = file_handler
+        out_path, file_path = file_handler
 
         # Required only
         file_0 = File(path=file_path)
-        file_conv_0 = FileConv(files=[file_0])
+        file_conv_0 = FileConv(
+            files=[file_0], convert_to="odt", out_dir=out_path
+        )
         assert file_conv_0.files == [file_0]
+        assert file_conv_0.convert_to == "odt"
         assert file_conv_0.max_errs == int(math.sqrt(len([file_0])))
 
         # With optional
-        file_conv_1 = FileConv(files=[file_0], max_errs=2)
+        file_conv_1 = FileConv(
+            files=[file_0], convert_to="odt", out_dir=out_path, max_errs=2
+        )
         assert file_conv_1.files == [file_0]
         assert file_conv_1.max_errs == 2

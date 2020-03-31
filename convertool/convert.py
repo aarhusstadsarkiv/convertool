@@ -8,14 +8,14 @@
 import time
 from logging import Logger
 from pathlib import Path
-from typing import List, Optional
 
 import tqdm
-from convertool.exceptions import ConversionError, ImageError, LibreError
-from convertool.image import image_convert
-from convertool.internals import ACCEPTED_OUT
+from convertool.exceptions import ConversionError, LibreError
+
+# from convertool.image import image_convert
+from convertool.internals import ACCEPTED_OUT, FileConv
 from convertool.libreoffice import find_libre, libre_convert
-from convertool.utils import copy_file, create_outdir, log_setup
+from convertool.utils import copy_file, log_setup
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -81,15 +81,7 @@ def check_errors(err_count: int, max_errs: int) -> str:
     return exit_msg
 
 
-def convert_files(
-    tool: str,
-    files: List[str],
-    outdir: str,
-    convert_to: str,
-    encoding: Optional[int] = None,
-    parents: int = 0,
-    max_errs: int = 0,
-) -> None:
+def convert_files(tool: str, file_conv: FileConv) -> None:
     """Convert a list of files and output the result to the specified output
     directory using a pre-specified tool. Optionally define the number of
     parent directories that must be used when outputting a resulting file.
@@ -133,21 +125,27 @@ def convert_files(
     # Set up logging
     logger: Logger = log_setup(
         log_name="Conversion",
-        log_file=Path(outdir).joinpath(f"_convertool_{time_now}.log"),
+        log_file=Path(file_conv.out_dir).joinpath(
+            f"_convertool_{time_now}.log"
+        ),
     )
 
     # Check if output file format is supported
-    if convert_to not in ACCEPTED_OUT:
-        logger.error(f"Output to {convert_to} is not supported!")
-        raise ConversionError(f"Output to {convert_to} is not supported!")
+    if file_conv.convert_to not in ACCEPTED_OUT:
+        logger.error(f"Output to {file_conv.convert_to} is not supported!")
+        raise ConversionError(
+            f"Output to {file_conv.convert_to} is not supported!"
+        )
 
     # Start conversion.
-    logger.info(f"Started conversion of {len(files)} files.")
-    for file in tqdm.tqdm(files, desc="Converting files", unit="file"):
+    logger.info(f"Started conversion of {len(file_conv.files)} files.")
+    for file in tqdm.tqdm(
+        file_conv.files, desc="Converting files", unit="file"
+    ):
 
         # Create new output path based on parent naming.
         try:
-            out_path: Path = create_outdir(Path(file), Path(outdir), parents)
+            out_path: Path = file.get_file_outdir(file_conv.out_dir)
         except IndexError as error:
             logger.error(error)
             raise ConversionError(error)
@@ -159,12 +157,11 @@ def convert_files(
         if tool == "libre":
             try:
                 libre_convert(
-                    f"{file}",
-                    out_path,
-                    convert_to,
+                    file,
+                    file_conv.convert_to,
+                    file_conv.out_dir,
                     cmd=find_libre(),
-                    encoding=encoding,
-                    timeout=calc_timeout(Path(file)),
+                    timeout=calc_timeout(file.path),
                 )
             except LibreError as error:
                 logger.warning(f"{error}")
@@ -174,25 +171,25 @@ def convert_files(
                     err_count += 1
 
         # Convert images
-        if tool == "img":
-            if convert_to.lower() not in ["png", "tiff", "pdf"]:
-                err_msg = f"Cannot convert images to {convert_to}."
-                logger.error(err_msg)
-                raise ConversionError(err_msg)
-            try:
-                image_convert(Path(file), out_path, convert_to)
-            except ImageError as error:
-                logger.warning(error)
-                err_count += 1
+        # if tool == "img":
+        #     if convert_to.lower() not in ["png", "tiff", "pdf"]:
+        #         err_msg = f"Cannot convert images to {convert_to}."
+        #         logger.error(err_msg)
+        #         raise ConversionError(err_msg)
+        #     try:
+        #         image_convert(Path(file), out_path, convert_to)
+        #     except ImageError as error:
+        #         logger.warning(error)
+        #         err_count += 1
 
         # Check if too many errors have occurred.
-        errors: str = check_errors(err_count, max_errs)
+        errors: str = check_errors(err_count, file_conv.max_errs)
         if errors:
             logger.error(errors)
             raise ConversionError(errors)
 
     # We are done! Log before we finish.
-    log_msg = f"Finished conversion of {len(files)} files "
+    log_msg = f"Finished conversion of {len(file_conv.files)} files "
     log_msg += f"with {err_count + warn_count} issues, "
     log_msg += f"{err_count} of which were critical."
     logger.info(log_msg)

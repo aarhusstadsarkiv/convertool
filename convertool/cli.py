@@ -14,7 +14,7 @@ from click.core import Context as ClickContext
 
 from convertool.convert import convert_files
 from convertool.exceptions import ConversionError, WrongOSError
-from convertool.internals import ACCEPTED_OUT
+from convertool.internals import ACCEPTED_OUT, FileConv
 from convertool.utils import check_system, get_files
 
 # -----------------------------------------------------------------------------
@@ -83,31 +83,29 @@ def cli(
         if not max_errs:
             max_errs = int(math.sqrt(len(file_list)))
 
-        # Create object with state to pass around.
-        ctx.obj = {
-            "file_list": file_list,
-            "outdir": outdir,
-            "convert_to": to_,
-            "parents": parents,
-            "encoding": enc,
-            "max_errs": max_errs,
-        }
+        files_ = [
+            {"path": file_path, "encoding": enc, "parent_dirs": parents}
+            for file_path in file_list
+        ]
+        ctx.obj = FileConv(files=files_, convert_to=to_, out_dir=outdir)
+        # print(file_conv)
+        # # Create object with state to pass around.
+        # ctx.obj = {
+        #     "file_list": file_list,
+        #     "outdir": outdir,
+        #     "convert_to": to_,
+        #     "parents": parents,
+        #     "encoding": enc,
+        #     "max_errs": max_errs,
+        # }
 
 
 @cli.command()
 @click.pass_obj
-def libre(ctx: dict) -> None:
+def libre(file_conv: FileConv) -> None:
     """Convert files using LibreOffice."""
     try:
-        convert_files(
-            "libre",
-            ctx["file_list"],
-            ctx["outdir"],
-            ctx["convert_to"],
-            ctx["encoding"],
-            ctx["parents"],
-            ctx["max_errs"],
-        )
+        convert_files("libre", file_conv)
     except ConversionError as error:
         raise click.ClickException(str(error))
 
@@ -139,40 +137,40 @@ def libre(ctx: dict) -> None:
 #         raise click.ClickException(str(error))
 
 
-@cli.command()
-@click.pass_obj
-def img(ctx: dict) -> None:
-    """Convert image files."""
-    try:
-        convert_files(
-            "img",
-            ctx["file_list"],
-            ctx["outdir"],
-            ctx["convert_to"],
-            ctx["encoding"],
-            ctx["parents"],
-            ctx["max_errs"],
-        )
-    except ConversionError as error:
-        raise click.ClickException(str(error))
+# @cli.command()
+# @click.pass_obj
+# def img(ctx: dict) -> None:
+#     """Convert image files."""
+#     try:
+#         convert_files(
+#             "img",
+#             ctx["file_list"],
+#             ctx["outdir"],
+#             ctx["convert_to"],
+#             ctx["encoding"],
+#             ctx["parents"],
+#             ctx["max_errs"],
+#         )
+#     except ConversionError as error:
+#         raise click.ClickException(str(error))
 
 
-@cli.command()
-@click.pass_obj
-def copy(ctx: dict) -> None:
-    """Convert image files."""
-    try:
-        convert_files(
-            "copy",
-            ctx["file_list"],
-            ctx["outdir"],
-            ctx["convert_to"],
-            ctx["encoding"],
-            ctx["parents"],
-            ctx["max_errs"],
-        )
-    except ConversionError as error:
-        raise click.ClickException(str(error))
+# @cli.command()
+# @click.pass_obj
+# def copy(ctx: dict) -> None:
+#     """Convert image files."""
+#     try:
+#         convert_files(
+#             "copy",
+#             ctx["file_list"],
+#             ctx["outdir"],
+#             ctx["convert_to"],
+#             ctx["encoding"],
+#             ctx["parents"],
+#             ctx["max_errs"],
+#         )
+#     except ConversionError as error:
+#         raise click.ClickException(str(error))
 
 
 # @cli.command()
