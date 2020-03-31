@@ -8,12 +8,12 @@
 import time
 from logging import Logger
 from pathlib import Path
-from typing import List, Optional
 
 import tqdm
-from convertool.exceptions import ConversionError, ImageError, LibreError
-from convertool.image import image_convert
-from convertool.internals import ACCEPTED_OUT, create_outdir, FileConv
+from convertool.exceptions import ConversionError, LibreError
+
+# from convertool.image import image_convert
+from convertool.internals import ACCEPTED_OUT, FileConv
 from convertool.libreoffice import find_libre, libre_convert
 from convertool.utils import copy_file, log_setup
 

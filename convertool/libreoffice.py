@@ -12,7 +12,6 @@ import platform
 import subprocess
 from pathlib import Path
 from subprocess import CalledProcessError, TimeoutExpired
-from typing import Optional
 
 from convertool.exceptions import LibreError, ProcessError
 from convertool.internals import File

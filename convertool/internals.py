@@ -77,11 +77,11 @@ class FileConv(BaseModel):
     files: List[File]
     out_dir: Path
     convert_to: str
-    max_errs: Optional[int]
+    max_errs: int = -1
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        if not self.max_errs:
+        if self.max_errs < 0:
             self.max_errs = int(math.sqrt(len(self.files)))
 
 
