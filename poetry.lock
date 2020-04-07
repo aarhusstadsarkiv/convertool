@@ -83,7 +83,7 @@ description = "Python humanize utilities"
 name = "humanize"
 optional = false
 python-versions = ">=3.5"
-version = "2.2.0"
+version = "2.3.0"
 
 [package.extras]
 tests = ["freezegun", "pytest", "pytest-cov"]
@@ -323,7 +323,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "268a0cf9eb1eec3da425f862853cd776610022e2ac273afecb004830c20d23b0"
+content-hash = "5b3cc61ce81c046ec738074c2c1ec66a113691c8c517ae3b3cc6b751590cef1a"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -385,8 +385,8 @@ coverage = [
     {file = "coverage-5.0.4.tar.gz", hash = "sha256:1b60a95fc995649464e0cd48cecc8288bac5f4198f21d04b8229dc4097d76823"},
 ]
 humanize = [
-    {file = "humanize-2.2.0-py3-none-any.whl", hash = "sha256:0b3157df0f3fcdcb7611180d305a23fd4b6290eb23586e058762f8576348fbab"},
-    {file = "humanize-2.2.0.tar.gz", hash = "sha256:de8ef6ffee618a9d369b3d1fb1359780ccaa2cc76a0e777c6ff21f04d19a0eb8"},
+    {file = "humanize-2.3.0-py3-none-any.whl", hash = "sha256:bc2a1ff065977011de2bc36197a4b14730c54bfc46ab12a153376684573a2dab"},
+    {file = "humanize-2.3.0.tar.gz", hash = "sha256:98b7ac9d1a70ad62175c8e0dd44beebbd92418727fc4e214468dfb2baa8ebfb5"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-1.5.0-py2.py3-none-any.whl", hash = "sha256:b97607a1a18a5100839aec1dc26a1ea17ee0d93b20b0f008d80a5a050afb200b"},
