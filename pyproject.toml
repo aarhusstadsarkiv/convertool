@@ -7,7 +7,7 @@ authors = ["Nina Jensen <jnik@aarhus.dk>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 click = "^7.1"
-tqdm = "^4.45.0"
+tqdm = "^4.46.0"
 pillow = "^7.1.2"
 humanize = "^2.4.0"
 pydantic = "^1.5"
