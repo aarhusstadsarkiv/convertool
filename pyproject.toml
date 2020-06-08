@@ -18,6 +18,7 @@ pytest = "^5.4"
 pytest-cov = "^2.9.0"
 mypy = "^0.770"
 black = {version = "^19.10b0", allow-prereleases = true}
+flake8 = "^3.8.2"
 
 [tool.poetry.scripts]
 convertool = "convertool.cli:cli"
