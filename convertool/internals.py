@@ -6,9 +6,9 @@
 # -----------------------------------------------------------------------------
 import math
 from pathlib import Path
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, validator, root_validator
+from pydantic import BaseModel, root_validator, validator
 
 
 # -----------------------------------------------------------------------------
