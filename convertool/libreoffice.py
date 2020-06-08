@@ -147,14 +147,13 @@ def libre_convert(
     else:
         convert_cmd = f'{cmd} "{file.path}" --outdir {file_out}'
 
-    proc = subprocess.Popen(
-        convert_cmd,
-        shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-    )
-
     try:
+        proc = subprocess.Popen(
+            convert_cmd,
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+        )
         run_proc(proc, timeout=timeout)
     except ProcessError as error:
         proc.kill()
