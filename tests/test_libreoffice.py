@@ -1,6 +1,8 @@
 import os
 import platform
 from pathlib import Path
+from subprocess import CalledProcessError
+from unittest.mock import patch
 
 import pytest
 from convertool.exceptions import LibreError, WrongOSError
@@ -35,15 +37,14 @@ class TestFindLibre:
             find_libre("not an os")
 
     def test_wrong_cmd(self):
-        curr_system = platform.system()
-        if curr_system == "Linux":
-            # The Windows command will fail
+        with patch(
+            "subprocess.run",
+            side_effect=CalledProcessError(
+                returncode=1, cmd="Fail", stderr=b"Fail"
+            ),
+        ):
             with pytest.raises(LibreError):
-                find_libre("Windows")
-        elif curr_system == "Windows":
-            # The Linux command will fail
-            with pytest.raises(LibreError):
-                find_libre("Linux")
+                find_libre()
 
 
 class TestLibreConvert:

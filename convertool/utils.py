@@ -6,7 +6,8 @@
 # -----------------------------------------------------------------------------
 import logging
 import os
-import shutil
+
+# import shutil
 from pathlib import Path
 from subprocess import Popen, TimeoutExpired
 from typing import List
@@ -107,17 +108,17 @@ def create_outdir(file: Path, outdir: Path, parents: int = 0) -> Path:
     return outdir
 
 
-def copy_file(file: Path, outdir: Path) -> None:
-    """Copies a file to the given output directory.
+# def copy_file(file: Path, outdir: Path) -> None:
+#     """Copies a file to the given output directory.
 
-     Parameters
-    ----------
-    file : Path
-        The file to copy.
-    outdir : Path
-        The output directory.
-    """
-    shutil.copy2(file, outdir)
+#      Parameters
+#     ----------
+#     file : Path
+#         The file to copy.
+#     outdir : Path
+#         The output directory.
+#     """
+#     shutil.copy2(file, outdir)
 
 
 def run_proc(proc: Popen, timeout: int) -> None:

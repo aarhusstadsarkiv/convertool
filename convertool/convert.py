@@ -5,17 +5,22 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
+
+from tempfile import TemporaryDirectory
 import time
 from logging import Logger
 from pathlib import Path
 
 import tqdm
+from pdf2image import convert_from_path
 from convertool.exceptions import ConversionError, LibreError
 
 # from convertool.image import image_convert
 from convertool.internals import ACCEPTED_OUT, FileConv
 from convertool.libreoffice import find_libre, libre_convert
-from convertool.utils import copy_file, log_setup
+
+# from convertool.utils import copy_file, log_setup
+from convertool.utils import log_setup
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -144,14 +149,14 @@ def convert_files(tool: str, file_conv: FileConv) -> None:
     ):
 
         # Create new output path based on parent naming.
-        try:
-            out_path: Path = file.get_file_outdir(file_conv.out_dir)
-        except IndexError as error:
-            logger.error(error)
-            raise ConversionError(error)
+        # try:
+        #     out_path: Path = file.get_file_outdir(file_conv.out_dir)
+        # except IndexError as error:
+        #     logger.error(error)
+        #     raise ConversionError(error)
 
-        if tool == "copy":
-            copy_file(Path(file), out_path)
+        # if tool == "copy":
+        #     copy_file(Path(file), out_path)
 
         # Convert with LibreOffice
         if tool == "libre":
@@ -169,6 +174,29 @@ def convert_files(tool: str, file_conv: FileConv) -> None:
                     warn_count += 1
                 else:
                     err_count += 1
+            except IndexError as error:
+                logger.error(error)
+                raise ConversionError(error)
+
+        if tool == "context":
+            try:
+                with TemporaryDirectory() as temp_path:
+                    if file.ext == ".pdf":
+                        logger.info(f"Converting {file.path}")
+                        file_out = file.get_file_outdir(file_conv.out_dir)
+                        images = convert_from_path(
+                            file.path, output_folder=temp_path
+                        )
+                        outfile = str(file_out / f"{file.path.stem}.tiff")
+                        images[0].save(
+                            outfile,
+                            save_all=True,
+                            compression="tiff_lzw",
+                            append_images=images[1:],
+                        )
+            except Exception as error:
+                logger.warning(f"{error}")
+                err_count += 1
 
         # Convert images
         # if tool == "img":

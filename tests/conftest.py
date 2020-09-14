@@ -23,8 +23,34 @@ def file_handler():
     test_path = os.path.join(script_path, "test_data")
     valid_path = os.path.join(test_path, "data")
     out_path = os.path.join(test_path, "out")
-    file = get_files(valid_path)[0]
-    yield out_path, file
+    # file = get_files(valid_path)[0]
+    files = get_files(valid_path)
+    for file in files:
+        if ".docx" in file:
+            in_file = file
+    yield out_path, in_file
+    logging.shutdown()
+    for file in os.listdir(out_path):
+        try:
+            os.remove(os.path.join(out_path, file))
+        except IsADirectoryError:
+            shutil.rmtree(os.path.join(out_path, file))
+        except PermissionError:
+            pass
+
+
+@pytest.fixture
+def pdf_file_handler():
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    test_path = os.path.join(script_path, "test_data")
+    valid_path = os.path.join(test_path, "data")
+    out_path = os.path.join(test_path, "out")
+    # file = get_files(valid_path)[0]
+    files = get_files(valid_path)
+    for file in files:
+        if ".pdf" in file:
+            in_file = file
+    yield out_path, in_file
     logging.shutdown()
     for file in os.listdir(out_path):
         try:

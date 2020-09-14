@@ -68,3 +68,12 @@ class TestConvertFiles:
         assert (
             f"LibreConvert of {file} timed out after 0 seconds" in caplog.text
         )
+
+    def test_context_convert(self, pdf_file_handler, caplog):
+        out, file = pdf_file_handler
+        file_conv = FileConv(
+            files=[{"path": file}], convert_to="tiff", out_dir=out
+        )
+        convert_files("context", file_conv)
+        assert "Started conversion of 1 files" in caplog.text
+        assert "Finished conversion of 1 files with 0 issues" in caplog.text

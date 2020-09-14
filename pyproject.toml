@@ -7,18 +7,19 @@ authors = ["Nina Jensen <jnik@aarhus.dk>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 click = "^7.1"
-tqdm = "^4.46.0"
-pillow = "^7.1.2"
-humanize = "^2.4.0"
-pydantic = "^1.5"
+tqdm = "^4.49.0"
+pillow = "^7.2.0"
+humanize = "^2.6.0"
+pydantic = "^1.6"
+pdf2image = "^1.14.0"
 
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.4"
-pytest-cov = "^2.9.0"
-mypy = "^0.770"
-black = {version = "^19.10b0", allow-prereleases = true}
-flake8 = "^3.8.2"
+pytest = "^6.0"
+pytest-cov = "^2.10.1"
+mypy = "^0.782"
+black = {version = "^20.8b1", allow-prereleases = true}
+flake8 = "^3.8.3"
 
 [tool.poetry.scripts]
 convertool = "convertool.cli:cli"

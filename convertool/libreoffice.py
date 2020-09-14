@@ -99,7 +99,11 @@ def find_libre(system: str = platform.system()) -> str:
 
 
 def libre_convert(
-    file: File, convert_to: str, outdir: Path, cmd: str, timeout: int = 30,
+    file: File,
+    convert_to: str,
+    outdir: Path,
+    cmd: str,
+    timeout: int = 30,
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
 

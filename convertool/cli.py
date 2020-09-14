@@ -110,6 +110,16 @@ def libre(file_conv: FileConv) -> None:
         raise click.ClickException(str(error))
 
 
+@cli.command()
+@click.pass_obj
+def context(file_conv: FileConv) -> None:
+    """Convert context documentation files from PDF to TIFF."""
+    try:
+        convert_files("context", file_conv)
+    except ConversionError as error:
+        raise click.ClickException(str(error))
+
+
 # @cli.command()
 # @click.pass_obj
 # def symph(ctx: dict) -> None:
