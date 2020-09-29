@@ -3,9 +3,9 @@ import os
 import sys
 from unittest.mock import patch
 
+import pytest
 from click.testing import CliRunner
 
-import pytest
 from convertool.cli import cli
 
 
