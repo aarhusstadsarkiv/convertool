@@ -1,21 +1,24 @@
 """Convertool enables conversion of several file types to pdf.
 
 """
-
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
 import math
 import platform
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
 import click
 from click.core import Context as ClickContext
 
 from convertool.convert import convert_files
-from convertool.exceptions import ConversionError, WrongOSError
-from convertool.internals import ACCEPTED_OUT, FileConv
-from convertool.utils import check_system, get_files
+from convertool.exceptions import ConversionError
+from convertool.exceptions import WrongOSError
+from convertool.internals import ACCEPTED_OUT
+from convertool.internals import FileConv
+from convertool.utils import check_system
+from convertool.utils import get_files
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -88,16 +91,6 @@ def cli(
             for file_path in file_list
         ]
         ctx.obj = FileConv(files=files_, convert_to=to_, out_dir=outdir)
-        # print(file_conv)
-        # # Create object with state to pass around.
-        # ctx.obj = {
-        #     "file_list": file_list,
-        #     "outdir": outdir,
-        #     "convert_to": to_,
-        #     "parents": parents,
-        #     "encoding": enc,
-        #     "max_errs": max_errs,
-        # }
 
 
 @cli.command()
@@ -118,72 +111,3 @@ def context(file_conv: FileConv) -> None:
         convert_files("context", file_conv)
     except ConversionError as error:
         raise click.ClickException(str(error))
-
-
-# @cli.command()
-# @click.pass_obj
-# def symph(ctx: dict) -> None:
-#     """Convert files using IBM Symphony"""
-#     if not SYMPHONY_IMPORTED:
-#         raise click.ClickException(SYMPHONY_ERROR)
-#     click.confirm(
-#         f"{click.style('WARNING!', fg='red', bold=True)} Conversion using "
-#         "Symphony can take a while and your computer CANNOT be used while "
-#         "this process is running.\n"
-#         "Do you wish to continue?",
-#         abort=True,
-#     )
-#     try:
-#         convert_files(
-#             "symph",
-#             ctx["file_list"],
-#             ctx["outdir"],
-#             ctx["convert_to"],
-#             ctx["encoding"],
-#             ctx["parents"],
-#             ctx["max_errs"],
-#         )
-#     except ConversionError as error:
-#         raise click.ClickException(str(error))
-
-
-# @cli.command()
-# @click.pass_obj
-# def img(ctx: dict) -> None:
-#     """Convert image files."""
-#     try:
-#         convert_files(
-#             "img",
-#             ctx["file_list"],
-#             ctx["outdir"],
-#             ctx["convert_to"],
-#             ctx["encoding"],
-#             ctx["parents"],
-#             ctx["max_errs"],
-#         )
-#     except ConversionError as error:
-#         raise click.ClickException(str(error))
-
-
-# @cli.command()
-# @click.pass_obj
-# def copy(ctx: dict) -> None:
-#     """Convert image files."""
-#     try:
-#         convert_files(
-#             "copy",
-#             ctx["file_list"],
-#             ctx["outdir"],
-#             ctx["convert_to"],
-#             ctx["encoding"],
-#             ctx["parents"],
-#             ctx["max_errs"],
-#         )
-#     except ConversionError as error:
-#         raise click.ClickException(str(error))
-
-
-# @cli.command()
-# @click.pass_obj
-# def ods(ctx: dict) -> None:
-#     read_ods(input=None)

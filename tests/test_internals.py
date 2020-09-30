@@ -1,65 +1,62 @@
-# import math
-# from pathlib import Path
-# from pydantic import ValidationError
-# import pytest
-# from convertool.internals import File, FileConv, FileInfo, size_fmt
-# class TestFileInfo:
-#     def test_init(self, file_handler):
-#         _, file_path = file_handler
-#         file_info = FileInfo(path=file_path)
-#         file_path = Path(file_path)
-#         assert file_info.path == file_path
-#         assert file_info.name == file_path.name
-#         assert file_info.ext == file_path.suffix.lower()
-#         assert file_info.size == size_fmt(file_path.stat().st_size)
-#     def test_validators(self, file_handler, capsys):
-#         with pytest.raises(ValidationError, match="File does not exist"):
-#             FileInfo(path="test", name="test", ext="test", size="test")
-#         captured = capsys.readouterr()
-#         assert "Warning! name=test will be overwritten" in captured.out
-#         assert "Warning! ext=test will be overwritten" in captured.out
-#         assert "Warning! size=test will be overwritten" in captured.out
-# class TestFile:
-#     def test_init(self, file_handler):
-#         _, file_path = file_handler
-#         # Required only
-#         file_0 = File(path=file_path)
-#         assert file_0.path == Path(file_path)
-#         assert file_0.encoding is None
-#         assert file_0.parent_dirs == 0
-#         # With optional
-#         file_1 = File(path=file_path, encoding=2, parent_dirs=2)
-#         assert file_1.path == Path(file_path)
-#         assert file_1.encoding == 2
-#         assert file_1.parent_dirs == 2
-#     def test_get_file_outdir(self, file_handler):
-#         out_path, file_path = file_handler
-#         file = File(path=file_path, convert_to="odt")
-#         file_out = file.get_file_outdir(Path(out_path))
-#         assert file_out == Path(out_path)
-#         file = File(path=file_path, convert_to="odt", parent_dirs=2)
-#         file_out = file.get_file_outdir(Path(out_path))
-#         assert (
-#             file_out
-#             == Path(out_path)
-#             / file.path.parent.parts[-2]
-#             / file.path.parent.parts[-1]
-#         )
-#         assert file_out.is_dir()
-# class TestFileConv:
-#     def test_init(self, file_handler):
-#         out_path, file_path = file_handler
-#         # Required only
-#         file_0 = File(path=file_path)
-#         file_conv_0 = FileConv(
-#             files=[file_0], convert_to="odt", out_dir=out_path
-#         )
-#         assert file_conv_0.files == [file_0]
-#         assert file_conv_0.convert_to == "odt"
-#         assert file_conv_0.max_errs == int(math.sqrt(len([file_0])))
-#         # With optional
-#         file_conv_1 = FileConv(
-#             files=[file_0], convert_to="odt", out_dir=out_path, max_errs=2
-#         )
-#         assert file_conv_1.files == [file_0]
-#         assert file_conv_1.max_errs == 2
+# -----------------------------------------------------------------------------
+# Imports
+# -----------------------------------------------------------------------------
+import math
+import sys
+
+import pytest
+
+from convertool.internals import create_outdir
+from convertool.internals import File
+from convertool.internals import FileConv
+
+
+# -----------------------------------------------------------------------------
+# Tests
+# -----------------------------------------------------------------------------
+
+
+class TestFile:
+    def test_init(self, test_pdf):
+        pdf_file = File(path=test_pdf)
+        assert pdf_file.path == test_pdf
+        assert pdf_file.encoding is None
+        assert pdf_file.parent_dirs == 0
+
+    def test_methods(self, test_pdf, temp_dir):
+        pdf_file = File(path=test_pdf, parent_dirs=1)
+        file_outdir = pdf_file.get_file_outdir(temp_dir)
+        assert file_outdir == temp_dir / "files"
+
+
+class TestFileConv:
+    def test_init(self, test_pdf, temp_dir):
+        file_list = [File(path=test_pdf)]
+        file_conv = FileConv(
+            files=file_list, out_dir=temp_dir, convert_to="odt"
+        )
+        assert file_conv.files == file_list
+        assert file_conv.out_dir == temp_dir
+        assert file_conv.convert_to == "odt"
+
+    def test_validators(self, test_pdf, temp_dir):
+        file_list = [File(path=test_pdf)]
+        file_conv = FileConv(
+            files=file_list, out_dir=temp_dir, convert_to="odt"
+        )
+        assert file_conv.max_errs == int(math.sqrt(len(file_list)))
+        file_conv = FileConv(
+            files=file_list, out_dir=temp_dir, convert_to="odt", max_errs=2
+        )
+        assert file_conv.max_errs == 2
+
+
+class TestAuxFunctions:
+    def test_create_outdir(self, test_pdf, temp_dir):
+        outdir = create_outdir(test_pdf, temp_dir, parents=1)
+        assert outdir == temp_dir / "files"
+        with pytest.raises(
+            IndexError,
+            match=f"Parent index {sys.maxsize} out of range for {test_pdf}",
+        ):
+            create_outdir(test_pdf, temp_dir, parents=sys.maxsize)

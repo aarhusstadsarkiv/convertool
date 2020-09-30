@@ -3,71 +3,37 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-# import logging
-# import os
-# import shutil
-# import pytest
-# from convertool.utils import get_files
+from pathlib import Path
+
+import pytest
+
 # -----------------------------------------------------------------------------
-# Function Definitions
+# Fixtures
 # -----------------------------------------------------------------------------
-# @pytest.fixture
-# def file_handler():
-#     script_path = os.path.dirname(os.path.realpath(__file__))
-#     test_path = os.path.join(script_path, "test_data")
-#     valid_path = os.path.join(test_path, "data")
-#     out_path = os.path.join(test_path, "out")
-#     # file = get_files(valid_path)[0]
-#     files = get_files(valid_path)
-#     for file in files:
-#         if ".docx" in file:
-#             in_file = file
-#     yield out_path, in_file
-#     logging.shutdown()
-#     for file in os.listdir(out_path):
-#         try:
-#             os.remove(os.path.join(out_path, file))
-#         except IsADirectoryError:
-#             shutil.rmtree(os.path.join(out_path, file))
-#         except PermissionError:
-#             pass
-# @pytest.fixture
-# def pdf_file_handler():
-#     script_path = os.path.dirname(os.path.realpath(__file__))
-#     test_path = os.path.join(script_path, "test_data")
-#     valid_path = os.path.join(test_path, "data")
-#     out_path = os.path.join(test_path, "out")
-#     # file = get_files(valid_path)[0]
-#     files = get_files(valid_path)
-#     for file in files:
-#         if ".pdf" in file:
-#             in_file = file
-#     yield out_path, in_file
-#     logging.shutdown()
-#     for file in os.listdir(out_path):
-#         try:
-#             os.remove(os.path.join(out_path, file))
-#         except IsADirectoryError:
-#             shutil.rmtree(os.path.join(out_path, file))
-#         except PermissionError:
-#             pass
-# @pytest.fixture
-# def temp_dir(tmpdir_factory):
-#     temp_dir: str = tmpdir_factory.mktemp("temp_dir")
-#     return temp_dir
-# @pytest.fixture
-# def data_dir(temp_dir):
-#     data_dir: str = temp_dir.mkdir("data")
-#     file1: str = os.path.join(data_dir, "file1.txt")
-#     file2: str = os.path.join(data_dir, "file2.txt")
-#     with open(file1, "w") as f1:
-#         f1.write("test1")
-#     with open(file2, "w") as f2:
-#         f2.write("test2")
-#     return data_dir
-# @pytest.fixture
-# def list_file(temp_dir):
-#     list_file: str = os.path.join(temp_dir, "data.txt")
-#     with open(list_file, "w") as file:
-#         file.writelines(["/dir/file1.txt\n", "/dir/file2.txt"])
-#     return list_file
+
+
+@pytest.fixture
+def temp_dir(tmpdir_factory) -> Path:
+    temp_dir: str = tmpdir_factory.mktemp("temp_dir")
+    return Path(temp_dir)
+
+
+@pytest.fixture
+def test_data() -> Path:
+    test_dir = Path(__file__).parent
+    return test_dir / "test_data"
+
+
+@pytest.fixture
+def test_files(test_data: Path) -> Path:
+    return test_data / "files"
+
+
+@pytest.fixture
+def test_out(test_data: Path) -> Path:
+    return test_data / "out"
+
+
+@pytest.fixture
+def test_pdf(test_files: Path) -> Path:
+    return test_files / "test.pdf"

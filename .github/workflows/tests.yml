@@ -19,9 +19,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: .venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-.venv-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-.venv-
       - name: Install dependencies
         run: |
           poetry config virtualenvs.create true
@@ -48,9 +48,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: .venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-.venv-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-.venv-
       - name: Install dependencies
         run: |
           poetry config virtualenvs.create true
