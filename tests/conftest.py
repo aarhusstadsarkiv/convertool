@@ -26,7 +26,7 @@ def test_data() -> Path:
 
 @pytest.fixture
 def test_files(test_data: Path) -> Path:
-    return test_data / "files"
+    return test_data / "AARS.TEST"
 
 
 @pytest.fixture

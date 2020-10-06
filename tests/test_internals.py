@@ -26,7 +26,7 @@ class TestFile:
     def test_methods(self, test_pdf, temp_dir):
         pdf_file = File(path=test_pdf, parent_dirs=1)
         file_outdir = pdf_file.get_file_outdir(temp_dir)
-        assert file_outdir == temp_dir / "files"
+        assert file_outdir == temp_dir / "AARS.TEST"
 
 
 class TestFileConv:
@@ -54,7 +54,7 @@ class TestFileConv:
 class TestAuxFunctions:
     def test_create_outdir(self, test_pdf, temp_dir):
         outdir = create_outdir(test_pdf, temp_dir, parents=1)
-        assert outdir == temp_dir / "files"
+        assert outdir == temp_dir / "AARS.TEST"
         with pytest.raises(
             IndexError,
             match=f"Parent index {sys.maxsize} out of range for {test_pdf}",

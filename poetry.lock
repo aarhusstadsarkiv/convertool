@@ -4,7 +4,7 @@ description = "Datamodels based on pydantic used in Python tools developed at Aa
 name = "acamodels"
 optional = false
 python-versions = ">=3.8,<4.0"
-version = "0.5.2"
+version = "0.5.3"
 
 [package.dependencies]
 pydantic = ">=1.6,<2.0"
@@ -371,14 +371,13 @@ python-versions = "*"
 version = "3.7.4.3"
 
 [metadata]
-content-hash = "257d5df6b81c67acea2998d8c6c1b758dbcc986501b21e060de045492df08be1"
-lock-version = "1.0"
+content-hash = "028b8c43929f0e9656301ba3dacc0d05c7d40564f356270ba752e5b7ee6cd3a4"
 python-versions = "^3.8"
 
 [metadata.files]
 acamodels = [
-    {file = "acamodels-0.5.2-py3-none-any.whl", hash = "sha256:aaaef1c0715885d589f0ba7ad7cb20d252c33c64f234cc7cca5f60a8ccf47f22"},
-    {file = "acamodels-0.5.2.tar.gz", hash = "sha256:c4fa49126551ffe110ef810c473ff3a5b4e6f7b563453ef612d105c25d492ec0"},
+    {file = "acamodels-0.5.3-py3-none-any.whl", hash = "sha256:33dec7884a626938568bbdb9a6f1808a6332abd423400d148b35d4e44d48ee6b"},
+    {file = "acamodels-0.5.3.tar.gz", hash = "sha256:eaeaea1ee4387116db9fea4e7f9dedfad8c832a9a1dbc7b86f0f004bbc917ccd"},
 ]
 appdirs = [
     {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
@@ -397,6 +396,7 @@ attrs = [
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 black = [
+    {file = "black-20.8b1-py3-none-any.whl", hash = "sha256:70b62ef1527c950db59062cda342ea224d772abdf6adc58b86a45421bab20a6b"},
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
 ]
 cached-property = [
