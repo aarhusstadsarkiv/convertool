@@ -18,7 +18,7 @@ acamodels = "^0.5.3"
 [tool.poetry.dev-dependencies]
 pytest = "^6.1"
 pytest-cov = "^2.10.1"
-mypy = "^0.782"
+mypy = "^0.790"
 black = {version = "^20.8b1", allow-prereleases = true}
 flake8 = "^3.8.4"
 reorder_python_imports = "^2.3.5"
