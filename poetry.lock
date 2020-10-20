@@ -122,7 +122,7 @@ pyflakes = ">=2.2.0,<2.3.0"
 
 [[package]]
 name = "humanize"
-version = "3.0.1"
+version = "3.1.0"
 description = "Python humanize utilities"
 category = "main"
 optional = false
@@ -368,7 +368,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "4f5620fd3a4ac238f30ee40886f421db135736925cda9fb2b1ff95b623986b05"
+content-hash = "dd8628c5a61b2f49b3a667f9ab689af0c2cd00e106e391ce62b40fbc39767492"
 
 [metadata.files]
 acamodels = [
@@ -447,8 +447,8 @@ flake8 = [
     {file = "flake8-3.8.4.tar.gz", hash = "sha256:aadae8761ec651813c24be05c6f7b4680857ef6afaae4651a4eccaef97ce6c3b"},
 ]
 humanize = [
-    {file = "humanize-3.0.1-py3-none-any.whl", hash = "sha256:b67f41ad9689bd8539fe02695385989d8c789019a90c450d3d2f8891e9e4bb32"},
-    {file = "humanize-3.0.1.tar.gz", hash = "sha256:8ff8f292c9bf52bbefdc620410e7defd1c95e7eeb1a5cfc2859aaea4b1877ff5"},
+    {file = "humanize-3.1.0-py3-none-any.whl", hash = "sha256:6790d9ba139ce09761ae901be9b22bd32a131fa65ecc82cdfc4d86f377f7395d"},
+    {file = "humanize-3.1.0.tar.gz", hash = "sha256:fd3eb915310335c63a54d4507289ecc7b3a7454cd2c22ac5086d061a3cbfd592"},
 ]
 iniconfig = [
     {file = "iniconfig-1.0.1-py3-none-any.whl", hash = "sha256:80cf40c597eb564e86346103f609d74efce0f6b4d4f30ec8ce9e2c26411ba437"},
