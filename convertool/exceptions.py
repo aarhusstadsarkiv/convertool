@@ -1,7 +1,6 @@
 """Custom exceptions defined for use in convertool modules.
 
 """
-
 # -----------------------------------------------------------------------------
 # Classes
 # -----------------------------------------------------------------------------
@@ -39,3 +38,7 @@ class SymphonyError(ConvertoolError):
 
 class ImageError(ConvertoolError):
     """Implements an error to raise when image conversion fails."""
+
+
+class FileParseError(ConvertoolError):
+    """Implements an error to raise if file parsing fails"""

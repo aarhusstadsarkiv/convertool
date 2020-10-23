@@ -4,24 +4,36 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-import math
-import platform
+import asyncio
+from functools import wraps
+from typing import Any
+from typing import Callable
 from typing import List
 from typing import Optional
 
 import click
+from acamodels import ArchiveFile
 from click.core import Context as ClickContext
 
-from convertool.convert import convert_files
+from convertool import core
+from convertool.database import FileDB
 from convertool.exceptions import ConversionError
-from convertool.exceptions import WrongOSError
-from convertool.internals import ACCEPTED_OUT
-from convertool.internals import FileConv
-from convertool.utils import check_system
-from convertool.utils import get_files
 
 # -----------------------------------------------------------------------------
-# Function Definitions
+# Auxiliary functions
+# -----------------------------------------------------------------------------
+
+
+def coro(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return asyncio.run(func(*args, **kwargs))
+
+    return wrapper
+
+
+# -----------------------------------------------------------------------------
+# CLI
 # -----------------------------------------------------------------------------
 
 
@@ -33,23 +45,11 @@ from convertool.utils import get_files
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
 @click.option(
-    "--parents",
-    default=0,
-    help="Number of parent directories to use for output name. Default: 0",
-)
-@click.option(
     "--to",
     "to_",
-    type=click.Choice(ACCEPTED_OUT, case_sensitive=False),
+    type=click.Choice(core.ACCEPTED_OUT, case_sensitive=False),
     default="pdf",
     help="File format to convert to. Default: PDF.",
-)
-@click.option(
-    "--encoding",
-    "enc",
-    type=int,
-    default=None,
-    help="Index of encoding to use for LibreOffice's infilter. Default: None.",
 )
 @click.option(
     "--threshold",
@@ -61,53 +61,50 @@ from convertool.utils import get_files
     "rounded to the nearest integer.",
 )
 @click.pass_context
-def cli(
+@coro
+async def cli(
     ctx: ClickContext,
     files: str,
     outdir: str,
-    parents: int,
     to_: str,
-    enc: Optional[int],
     max_errs: Optional[int],
 ) -> None:
-    """Convert files from a folder or a list. If FILES is a folder,
-    convertool will convert every file in this folder and subfolders.
-    If FILES is a file, convertool expects a text file with a list of
-    files to convert. OUTDIR specifies the directory in which to output
-    converted files. It must be an existing directory."""
-    try:
-        check_system(platform.system())
-    except WrongOSError as error:
-        raise click.ClickException(str(error))
-    else:
-        file_list: List[str] = get_files(files)
-        if not file_list:
-            raise click.ClickException(f"{files} is empty. Aborting.")
-        if not max_errs:
-            max_errs = int(math.sqrt(len(file_list)))
+    """Convert files from a digiarch generated file database.
+    OUTDIR specifies the directory in which to output converted files.
+    It must be an existing directory."""
 
-        files_ = [
-            {"path": file_path, "encoding": enc, "parent_dirs": parents}
-            for file_path in file_list
-        ]
-        ctx.obj = FileConv(files=files_, convert_to=to_, out_dir=outdir)
+    try:
+        file_db: FileDB = FileDB(f"sqlite:///{files}")
+    except Exception:
+        raise click.ClickException(f"Failed to load {files} as a database.")
+    else:
+        files_: List[ArchiveFile] = await file_db.get_files()
+        if not files_:
+            raise click.ClickException("Database is empty. Aborting.")
+
+    ctx.obj = core.FileConv(
+        files=files_,
+        convert_to=to_,
+        out_dir=outdir,
+        max_errs=max_errs,
+    )
 
 
 @cli.command()
 @click.pass_obj
-def libre(file_conv: FileConv) -> None:
+def libre(file_conv: core.FileConv) -> None:
     """Convert files using LibreOffice."""
     try:
-        convert_files("libre", file_conv)
+        core.convert_files("libre", file_conv)
     except ConversionError as error:
         raise click.ClickException(str(error))
 
 
-@cli.command()
-@click.pass_obj
-def context(file_conv: FileConv) -> None:
-    """Convert context documentation files from PDF to TIFF."""
-    try:
-        convert_files("context", file_conv)
-    except ConversionError as error:
-        raise click.ClickException(str(error))
+# @cli.command()
+# @click.pass_obj
+# def context(file_conv: core.FileConv) -> None:
+#     """Convert context documentation files from PDF to TIFF."""
+#     try:
+#         core.convert_files("context", file_conv)
+#     except ConversionError as error:
+#         raise click.ClickException(str(error))

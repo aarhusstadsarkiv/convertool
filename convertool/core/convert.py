@@ -1,26 +1,27 @@
 """Module level docstring.
 
 """
-
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-
-from tempfile import TemporaryDirectory
 import time
 from logging import Logger
 from pathlib import Path
 
 import tqdm
-from pdf2image import convert_from_path
-from convertool.exceptions import ConversionError, LibreError
 
-# from convertool.image import image_convert
-from convertool.internals import ACCEPTED_OUT, FileConv
-from convertool.libreoffice import find_libre, libre_convert
+from .internals import FileConv
+from .libreoffice import find_libre
+from .libreoffice import libre_convert
+from .utils import log_setup
+from convertool.exceptions import ConversionError
+from convertool.exceptions import LibreError
 
-# from convertool.utils import copy_file, log_setup
-from convertool.utils import log_setup
+
+# -----------------------------------------------------------------------------
+# Globals
+# -----------------------------------------------------------------------------
+ACCEPTED_OUT = ["pdf", "ods", "odt", "odp", "html", "png", "tiff"]
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -178,25 +179,25 @@ def convert_files(tool: str, file_conv: FileConv) -> None:
                 logger.error(error)
                 raise ConversionError(error)
 
-        if tool == "context":
-            try:
-                with TemporaryDirectory() as temp_path:
-                    if file.ext == ".pdf":
-                        logger.info(f"Converting {file.path}")
-                        file_out = file.get_file_outdir(file_conv.out_dir)
-                        images = convert_from_path(
-                            file.path, output_folder=temp_path
-                        )
-                        outfile = str(file_out / f"{file.path.stem}.tiff")
-                        images[0].save(
-                            outfile,
-                            save_all=True,
-                            compression="tiff_lzw",
-                            append_images=images[1:],
-                        )
-            except Exception as error:
-                logger.warning(f"{error}")
-                err_count += 1
+        # if tool == "context":
+        #     try:
+        #         with TemporaryDirectory() as temp_path:
+        #             if file.ext == ".pdf":
+        #                 logger.info(f"Converting {file.path}")
+        #                 file_out = file.get_file_outdir(file_conv.out_dir)
+        #                 images = convert_from_path(
+        #                     file.path, output_folder=temp_path
+        #                 )
+        #                 outfile = str(file_out / f"{file.path.stem}.tiff")
+        #                 images[0].save(
+        #                     outfile,
+        #                     save_all=True,
+        #                     compression="tiff_lzw",
+        #                     append_images=images[1:],
+        #                 )
+        #     except Exception as error:
+        #         logger.warning(f"{error}")
+        #         err_count += 1
 
         # Convert images
         # if tool == "img":

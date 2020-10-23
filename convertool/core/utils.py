@@ -5,52 +5,16 @@
 # Imports
 # -----------------------------------------------------------------------------
 import logging
-import os
-
-# import shutil
 from pathlib import Path
-from subprocess import Popen, TimeoutExpired
-from typing import List
+from subprocess import Popen
+from subprocess import TimeoutExpired
 
-import tqdm
-
-from .exceptions import ProcessError, WrongOSError
+from convertool.exceptions import ProcessError
+from convertool.exceptions import WrongOSError
 
 # -----------------------------------------------------------------------------
 # Function Definitions
 # -----------------------------------------------------------------------------
-
-
-def get_files(input_files: str) -> List[str]:
-    """Finds files and empty directories in the given path,
-    and collects them into a list of FileInfo objects.
-
-    Parameters
-    ----------
-    files : str
-        Directory of files, or text file with list of files to convert.
-
-    Returns
-    -------
-    file_list : List[str]
-        List of files to be converted.
-    """
-    # Type declarations
-    file_list: List[str] = []
-
-    # Traverse given path, collect results.
-    # tqdm is used to show progress of os.walk
-    if os.path.isdir(input_files):
-        for root, _, files in tqdm.tqdm(os.walk(input_files, topdown=True)):
-            for file in files:
-                file_list.append(os.path.join(root, file))
-
-    if os.path.isfile(input_files):
-        with open(input_files, encoding="utf-8") as in_file:
-            for line in in_file.readlines():
-                file_list.append(line.strip())
-
-    return file_list
 
 
 def check_system(system: str) -> None:
@@ -71,41 +35,6 @@ def check_system(system: str) -> None:
         raise WrongOSError(
             f"Expected to run on Windows or Linux, got {system}."
         )
-
-
-def create_outdir(file: Path, outdir: Path, parents: int = 0) -> Path:
-    """Create the output directory for a file, where parents are the number of
-    parents to use when naming the output directory.
-
-    Parameters
-    ----------
-    file : Path
-        The file for which to create an output directory.
-    outdir : Path
-        The current output directory.
-    parents : int
-        The number of parents to use when creating the output directory.
-        Defaults to 0.
-
-    Raises
-    ------
-    IndexError
-        If the number of parents used for naming exceeds the number of actual
-        parents a file has, and index error is thrown.
-    """
-    for i in range(parents, 0, -1):
-        try:
-            subdir = Path(f"{file}").parent.parts[-i]
-        except IndexError:
-            err_msg = f"Parent index {parents} out of range for {file}"
-            raise IndexError(err_msg)
-        else:
-            outdir = outdir.joinpath(subdir)
-
-    # Create the resulting output directory
-    outdir.mkdir(parents=True, exist_ok=True)
-
-    return outdir
 
 
 # def copy_file(file: Path, outdir: Path) -> None:

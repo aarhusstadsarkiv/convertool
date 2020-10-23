@@ -4,18 +4,21 @@ Windows and Linux compatible. Requires a LibreOffice installation via
 chocolatey (Windows) or snap (Linux).
 
 """
-
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
 import platform
 import subprocess
 from pathlib import Path
-from subprocess import CalledProcessError, TimeoutExpired
+from subprocess import CalledProcessError
+from subprocess import TimeoutExpired
 
-from convertool.exceptions import LibreError, ProcessError
-from convertool.internals import File
-from convertool.utils import check_system, run_proc
+from acamodels import ArchiveFile
+
+from .utils import check_system
+from .utils import run_proc
+from convertool.exceptions import LibreError
+from convertool.exceptions import ProcessError
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -99,7 +102,7 @@ def find_libre(system: str = platform.system()) -> str:
 
 
 def libre_convert(
-    file: File,
+    file: ArchiveFile,
     convert_to: str,
     outdir: Path,
     cmd: str,
@@ -135,7 +138,9 @@ def libre_convert(
 
     # Variables
     err_msg: str = ""
-    file_out = file.get_file_outdir(outdir)
+    file_out = outdir / file.aars_path.parent
+    file_out.mkdir(parents=True, exist_ok=True)
+    # create_outdir(file, outdir, parents=parents)
     cmd = f"{cmd} --headless --convert-to {convert_to}"
 
     # LibreOffice doesn't actually care what it gets in the infilter call;
@@ -143,21 +148,18 @@ def libre_convert(
     # As such, the convert command using --infilter will work no matter what
     # value encoding actually has. This doesn't seem particularly safe, so we
     # might want to type check the encoding input.
-    if file.encoding is not None:
-        convert_cmd = (
-            f'{cmd} "{file.path}" '
-            f"--infilter=:{file.encoding} --outdir {file_out}"
-        )
-    else:
-        convert_cmd = f'{cmd} "{file.path}" --outdir {file_out}'
+    # if file.encoding is not None:
+    #     convert_cmd = f'{cmd} "{file.path}" ' f"--outdir {file_out}"
+    # else:
+    convert_cmd = f'{cmd} "{file.path}" --outdir {file_out}'
 
+    proc = subprocess.Popen(
+        convert_cmd,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+    )
     try:
-        proc = subprocess.Popen(
-            convert_cmd,
-            shell=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-        )
         run_proc(proc, timeout=timeout)
     except ProcessError as error:
         proc.kill()
