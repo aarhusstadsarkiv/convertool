@@ -356,7 +356,7 @@ python-versions = "*"
 
 [[package]]
 name = "reorder-python-imports"
-version = "2.3.5"
+version = "2.3.6"
 description = "Tool for reordering python imports"
 category = "dev"
 optional = false
@@ -431,7 +431,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "45406c9c64ea1c775e7eb0063806ff2dc479a97441cdf3bc77efef7fca51bb86"
+content-hash = "0fdc22aaa83b56b675310a34921054696e09e8a73d8da09ca417f8089cbaf720"
 
 [metadata.files]
 acamodels = [
@@ -677,8 +677,8 @@ regex = [
     {file = "regex-2020.10.23.tar.gz", hash = "sha256:2278453c6a76280b38855a263198961938108ea2333ee145c5168c36b8e2b376"},
 ]
 reorder-python-imports = [
-    {file = "reorder_python_imports-2.3.5-py2.py3-none-any.whl", hash = "sha256:6e8d3baba68c409ec87242757cf579a7ad2b133d1efed498be987b97ee385ac3"},
-    {file = "reorder_python_imports-2.3.5.tar.gz", hash = "sha256:7c46593d39899e3fb249248b448bde93ee7417889904f015c0c5a738c23fd0e0"},
+    {file = "reorder_python_imports-2.3.6-py2.py3-none-any.whl", hash = "sha256:1299c31adf341eba2c17543e3cc7fab7389766e726ab54d20440917b5b96b5c5"},
+    {file = "reorder_python_imports-2.3.6.tar.gz", hash = "sha256:2ea16d2253536e7f90427b383cd046e46977ca25aae82464883eee882bc7d21b"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
