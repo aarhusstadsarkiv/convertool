@@ -14,15 +14,6 @@ from convertool.exceptions import FileParseError
 # -----------------------------------------------------------------------------
 pytestmark = pytest.mark.asyncio
 
-
-@pytest.fixture
-async def db_conn(test_data):
-    file_db = FileDB(f"sqlite:///{test_data}/files.db")
-    await file_db.connect()
-    yield file_db
-    await file_db.disconnect()
-
-
 # -----------------------------------------------------------------------------
 # Tests
 # -----------------------------------------------------------------------------

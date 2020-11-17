@@ -10,44 +10,10 @@ from subprocess import Popen
 from subprocess import TimeoutExpired
 
 from convertool.exceptions import ProcessError
-from convertool.exceptions import WrongOSError
 
 # -----------------------------------------------------------------------------
 # Function Definitions
 # -----------------------------------------------------------------------------
-
-
-def check_system(system: str) -> None:
-    """Checks if a given system is supported. Raises WrongOSError if not.
-
-    Parameters
-    ----------
-    system : str
-        The system on which the script is running.
-
-    Raises
-    ------
-    WrongOSError
-        If the system is not Windows or Linux, convertool will not work,
-        and a WrongOSError is raised.
-    """
-    if system not in ["Windows", "Linux"]:
-        raise WrongOSError(
-            f"Expected to run on Windows or Linux, got {system}."
-        )
-
-
-# def copy_file(file: Path, outdir: Path) -> None:
-#     """Copies a file to the given output directory.
-
-#      Parameters
-#     ----------
-#     file : Path
-#         The file to copy.
-#     outdir : Path
-#         The output directory.
-#     """
-#     shutil.copy2(file, outdir)
 
 
 def run_proc(proc: Popen, timeout: int) -> None:

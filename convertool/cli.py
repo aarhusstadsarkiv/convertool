@@ -45,13 +45,6 @@ def coro(func: Callable) -> Callable:
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
 @click.option(
-    "--to",
-    "to_",
-    type=click.Choice(core.ACCEPTED_OUT, case_sensitive=False),
-    default="pdf",
-    help="File format to convert to. Default: PDF.",
-)
-@click.option(
     "--threshold",
     "max_errs",
     type=int,
@@ -66,7 +59,6 @@ async def cli(
     ctx: ClickContext,
     files: str,
     outdir: str,
-    to_: str,
     max_errs: Optional[int],
 ) -> None:
     """Convert files from a digiarch generated file database.
@@ -84,7 +76,6 @@ async def cli(
 
     ctx.obj = core.FileConv(
         files=files_,
-        convert_to=to_,
         out_dir=outdir,
         max_errs=max_errs,
     )
@@ -95,7 +86,7 @@ async def cli(
 def libre(file_conv: core.FileConv) -> None:
     """Convert files using LibreOffice."""
     try:
-        core.convert_files("libre", file_conv)
+        file_conv.convert()
     except ConversionError as error:
         raise click.ClickException(str(error))
 

@@ -3,9 +3,13 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
+import shutil
 from pathlib import Path
+from typing import Generator
 
 import pytest
+
+from convertool.database import FileDB
 
 # -----------------------------------------------------------------------------
 # Fixtures
@@ -30,10 +34,41 @@ def test_files(test_data: Path) -> Path:
 
 
 @pytest.fixture
-def test_out(test_data: Path) -> Path:
-    return test_data / "out"
+def test_out(test_data: Path) -> Generator[Path, None, None]:
+    out_path: Path = test_data / "out"
+    out_path.mkdir(exist_ok=True)
+    yield out_path
+    shutil.rmtree(out_path, ignore_errors=True)
 
 
 @pytest.fixture
 def test_pdf(test_files: Path) -> Path:
     return test_files / "test.pdf"
+
+
+@pytest.fixture
+def test_docx(test_files: Path) -> Path:
+    return test_files / "test.docx"
+
+
+@pytest.fixture
+def test_jpg(test_files: Path) -> Path:
+    return test_files / "test.jpg"
+
+
+@pytest.fixture
+def conv_json() -> Path:
+    return (
+        Path(__file__).parent.parent
+        / "convertool"
+        / "core"
+        / "convert_map.json"
+    )
+
+
+@pytest.fixture
+async def db_conn(test_data):
+    file_db = FileDB(f"sqlite:///{test_data}/files.db")
+    await file_db.connect()
+    yield file_db
+    await file_db.disconnect()

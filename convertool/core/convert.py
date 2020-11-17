@@ -4,24 +4,119 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
+import json
+import math
+import shutil
 import time
 from logging import Logger
 from pathlib import Path
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import tqdm
+from acamodels import ACABase
+from acamodels import ArchiveFile
+from pydantic import Field
+from pydantic import validator
 
-from .internals import FileConv
-from .libreoffice import find_libre
+from .image import img2tif
 from .libreoffice import libre_convert
 from .utils import log_setup
 from convertool.exceptions import ConversionError
+from convertool.exceptions import ImageError
 from convertool.exceptions import LibreError
 
 
 # -----------------------------------------------------------------------------
-# Globals
+# FileConv Model
 # -----------------------------------------------------------------------------
-ACCEPTED_OUT = ["pdf", "ods", "odt", "odp", "html", "png", "tiff"]
+
+
+class FileConv(ACABase):
+    files: List[ArchiveFile]
+    out_dir: Path
+    parent_dirs: int = 2
+    max_errs: int = Field(None)
+
+    # Validators
+    @validator("max_errs", pre=True, always=True)
+    def set_max_errs(
+        cls, max_errs: Optional[int], values: Dict[str, Any]
+    ) -> int:
+        files = values.get("files") or []
+        return max_errs or int(math.sqrt(len(files)))
+
+    @staticmethod
+    def conv_map() -> Dict[str, str]:
+        map_file = Path(__file__).parent / "convert_map.json"
+        with map_file.open(encoding="utf-8") as f:
+            c_map: Dict[str, str] = json.load(f)
+            return c_map
+
+    def convert(self) -> None:
+        # Initialise variables
+        err_count: int = 0
+        warn_count: int = 0
+        convert_to: Optional[str]
+        errors: str
+
+        # Set up logging
+        logger: Logger = log_setup(
+            log_name="Conversion",
+            log_file=Path(self.out_dir) / f"_convertool_{time.time()}.log",
+        )
+
+        # Start conversion.
+        logger.info(f"Started conversion of {len(self.files)} files.")
+        for file in tqdm.tqdm(
+            self.files, desc="Converting files", unit="file"
+        ):
+            # Create output directory
+            file_out: Path = self.out_dir / file.aars_path.parent
+            file_out.mkdir(parents=True, exist_ok=True)
+
+            convert_to = self.conv_map().get(file.puid)
+
+            if convert_to in ["odt", "ods", "odp"]:
+                timeout = calc_timeout(file.path)
+                try:
+                    libre_convert(file, convert_to, file_out, timeout=timeout)
+                except LibreError as error:
+                    logger.warning(f"{error}")
+                    if error.timeout:
+                        warn_count += 1
+                    else:
+                        err_count += 1
+
+            if convert_to == "copy":
+                try:
+                    shutil.copy2(file.path, file_out)
+                except (OSError, shutil.SameFileError) as error:
+                    logger.warning(f"{error}")
+                    err_count += 1
+
+            if convert_to == "tif":
+                try:
+                    img2tif(file.path, file_out)
+                except ImageError as error:
+                    logger.warning(f"{error}")
+                    err_count += 1
+
+            # Check if too many errors have occurred.
+            errors = check_errors(err_count, self.max_errs)
+            if errors:
+                logger.error(errors)
+                raise ConversionError(errors)
+
+        # We are done! Log before we finish.
+        logger.info(
+            f"Finished conversion of {len(self.files)} files "
+            f"with {err_count + warn_count} issues, "
+            f"{err_count} of which were critical."
+        )
+
 
 # -----------------------------------------------------------------------------
 # Function Definitions
@@ -43,11 +138,9 @@ def calc_timeout(file: Path, base_timeout: int = 10) -> int:
     timeout : int
         The timeout calculated as the base timeout plus file size in whole MBs.
         Essentially, a file gets 1 second extra per MB.
-    ------
-    BadException
-        description
-
     """
+
+    fsize: int
     try:
         fsize = file.stat().st_size
     except FileNotFoundError:
@@ -78,147 +171,13 @@ def check_errors(err_count: int, max_errs: int) -> str:
         count has not yet exceeded the maximum allowed amount of errors.
 
     """
+
     exit_msg: str = ""
 
     if err_count > max_errs:
-        exit_msg = f"Error count {err_count} is higher than "
-        exit_msg += f"threshold of {max_errs}"
-
-    return exit_msg
-
-
-def convert_files(tool: str, file_conv: FileConv) -> None:
-    """Convert a list of files and output the result to the specified output
-    directory using a pre-specified tool. Optionally define the number of
-    parent directories that must be used when outputting a resulting file.
-    A maximum number of errors can be passed to this function, indicating
-    how many tool specific errors that are acceptable before throwing a
-    ConversionError.
-
-    Parameters
-    ----------
-    tool : str
-        The tool to use for conversion.
-    files : List[str]
-        A list of files to convert.
-    outdir : str
-        The path to which converted files should be saved.
-    convert_to : str
-        The file format to convert to.
-    parents : int
-        How many immediate parent directories to use for naming converted
-        files. Defaults to 0.
-    max_errs : int
-        How many tool specific errors to accept before a ConversionError is
-        thrown. Defaults to 0.
-
-    Raises
-    ------
-    ConversionError
-        When something goes wrong during conversion, a ConversionError is
-        thrown. This happens if there are no files to convert; if the number
-        of parents to use for naming is higher than the actual number of
-        parents a file has in its path; and if too many tool specific errors
-        occur.
-
-    """
-    # Initialise variables
-    time_now: float = time.time()
-    err_count: int = 0
-    warn_count: int = 0
-    log_msg: str
-
-    # Set up logging
-    logger: Logger = log_setup(
-        log_name="Conversion",
-        log_file=Path(file_conv.out_dir).joinpath(
-            f"_convertool_{time_now}.log"
-        ),
-    )
-
-    # Check if output file format is supported
-    if file_conv.convert_to not in ACCEPTED_OUT:
-        logger.error(f"Output to {file_conv.convert_to} is not supported!")
-        raise ConversionError(
-            f"Output to {file_conv.convert_to} is not supported!"
+        exit_msg = (
+            f"Error count {err_count} is higher than "
+            f"threshold of {max_errs}"
         )
 
-    # Start conversion.
-    logger.info(f"Started conversion of {len(file_conv.files)} files.")
-    for file in tqdm.tqdm(
-        file_conv.files, desc="Converting files", unit="file"
-    ):
-
-        # Create new output path based on parent naming.
-        # try:
-        #     out_path: Path = file.get_file_outdir(file_conv.out_dir)
-        # except IndexError as error:
-        #     logger.error(error)
-        #     raise ConversionError(error)
-
-        # if tool == "copy":
-        #     copy_file(Path(file), out_path)
-
-        # Convert with LibreOffice
-        if tool == "libre":
-            try:
-                libre_convert(
-                    file,
-                    file_conv.convert_to,
-                    file_conv.out_dir,
-                    cmd=find_libre(),
-                    timeout=calc_timeout(file.path),
-                )
-            except LibreError as error:
-                logger.warning(f"{error}")
-                if error.timeout:
-                    warn_count += 1
-                else:
-                    err_count += 1
-            except IndexError as error:
-                logger.error(error)
-                raise ConversionError(error)
-
-        # if tool == "context":
-        #     try:
-        #         with TemporaryDirectory() as temp_path:
-        #             if file.ext == ".pdf":
-        #                 logger.info(f"Converting {file.path}")
-        #                 file_out = file.get_file_outdir(file_conv.out_dir)
-        #                 images = convert_from_path(
-        #                     file.path, output_folder=temp_path
-        #                 )
-        #                 outfile = str(file_out / f"{file.path.stem}.tiff")
-        #                 images[0].save(
-        #                     outfile,
-        #                     save_all=True,
-        #                     compression="tiff_lzw",
-        #                     append_images=images[1:],
-        #                 )
-        #     except Exception as error:
-        #         logger.warning(f"{error}")
-        #         err_count += 1
-
-        # Convert images
-        # if tool == "img":
-        #     if convert_to.lower() not in ["png", "tiff", "pdf"]:
-        #         err_msg = f"Cannot convert images to {convert_to}."
-        #         logger.error(err_msg)
-        #         raise ConversionError(err_msg)
-        #     try:
-        #         image_convert(Path(file), out_path, convert_to)
-        #     except ImageError as error:
-        #         logger.warning(error)
-        #         err_count += 1
-
-        # Check if too many errors have occurred.
-        errors: str = check_errors(err_count, file_conv.max_errs)
-        if errors:
-            logger.error(errors)
-            raise ConversionError(errors)
-
-    # We are done! Log before we finish.
-    log_msg = f"Finished conversion of {len(file_conv.files)} files "
-    log_msg += f"with {err_count + warn_count} issues, "
-    log_msg += f"{err_count} of which were critical."
-    logger.info(log_msg)
+    return exit_msg

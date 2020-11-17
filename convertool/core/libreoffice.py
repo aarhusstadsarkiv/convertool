@@ -8,16 +8,19 @@ chocolatey (Windows) or snap (Linux).
 # Imports
 # -----------------------------------------------------------------------------
 import platform
+import shlex
 import subprocess
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
+from typing import List
+from typing import Union
 
 from acamodels import ArchiveFile
 
-from .utils import check_system
 from .utils import run_proc
 from convertool.exceptions import LibreError
+from convertool.exceptions import LibreNotFoundError
 from convertool.exceptions import ProcessError
 
 # -----------------------------------------------------------------------------
@@ -25,16 +28,8 @@ from convertool.exceptions import ProcessError
 # -----------------------------------------------------------------------------
 
 
-def find_libre(system: str = platform.system()) -> str:
-    """Find the LibreOffice installation. This function is OS dependent, and
-    will find either `libreoffice` on Linux, or `soffice.exe` on Windows, if
-    these exist. If they do not, an exception is raised and the CLI will exit
-    with an error code.
-
-    Parameters
-    ----------
-    system : str
-        The current system from which the script is called.
+def find_libre() -> str:
+    """Find the LibreOffice installation.
 
     Returns
     -------
@@ -44,68 +39,42 @@ def find_libre(system: str = platform.system()) -> str:
 
     Raises
     ------
-    WrongOSError
-        If there is an attempt to find LibreOffice on a system that is not
-        either Windows or Linux, a WrongOSError is raised from
-        :func:`~convertool.utils.check_system()`.
     LibreError
         If the command to find LibreOffice on the current system fails,
         a LibreError is raised.
 
     """
 
-    libre_path: str = ""
-    find_libre_cmd: str = ""
-
-    check_system(system)
+    libre_path: str
+    libre_cmd: List[str]
+    system: str = platform.system()
 
     if system == "Windows":
-        find_libre_cmd = r"where.exe *soffice.exe"
-    elif system == "Linux":
-        find_libre_cmd = r"which libreoffice"
+        libre_cmd = shlex.split(r"where.exe *soffice.exe")
+    elif system in ["Linux", "Darwin"]:
+        libre_cmd = shlex.split(r"which libreoffice")
+    else:
+        raise LibreNotFoundError(f"OS {system} not supported")
 
     try:
-        # Invoke the OS specific command to find libreoffice.
-        cmd = subprocess.run(
-            f"{find_libre_cmd}", shell=True, check=True, capture_output=True
-        )
+        cmd = subprocess.run(libre_cmd, check=True, capture_output=True)
     except CalledProcessError as error:
-        # Didn't find executable or shell command.
-        # Return code != 0
-        error_msg = error.stderr.strip().decode()
-        exit_msg = f"Could not find LibreOffice with error: {error_msg}"
-        raise LibreError(exit_msg)
+        raise LibreNotFoundError(
+            "Could not find LibreOffice with error: "
+            f"{error.stderr.strip().decode()}"
+        )
     else:
         # Remove trailing newline and decode stdout from byte string.
         # Windows needs the quotes.
-        libre_path = f'"{cmd.stdout.strip().decode()}"'
-        # libre_path = f"{cmd.stdout.strip().decode()}"
+        libre_path = cmd.stdout.strip().decode()
 
     return libre_path
-
-
-# def kill_libre(proc: subprocess.Popen) -> None:
-#     # system: str = platform.system()
-
-#     # Clean up proc
-#     proc.kill()
-#     _, _ = proc.communicate()
-#     # Make sure all LibreOffice related functionality is killed
-#     # pylint: disable=subprocess-run-check
-#     # if system == "Windows":
-#     #     subprocess.run(
-#     #         "taskkill /f /im soffice*", shell=True, capture_output=True
-#     #     )
-#     # if system == "Linux":
-#     #     subprocess.run("pkill soffice", shell=True, capture_output=True)
-#     # pylint: enable=subprocess-run-check
 
 
 def libre_convert(
     file: ArchiveFile,
     convert_to: str,
     outdir: Path,
-    cmd: str,
     timeout: int = 30,
 ) -> None:
     """Converts files in a file list to PDF using LibreOffice in headless mode.
@@ -118,13 +87,6 @@ def libre_convert(
         Directory where conversion results should be written to.
     convert_to : str
         The file type to convert to.
-    encoding : Optional[int]
-        Index for encoding to be used by LibreOffice. Only works for
-        spreadsheet like files. Defaults to None.
-    cmd : str
-        Optional argument defining the path to the LibreOffice shell command or
-        exe file. Defaults to
-        :func:`~convertool.libreoffice.find_libre(platform.system())`
     timeout : int
         Optional argument defining the amount of seconds to wait for the
         LibreOffice command to finish. Defaults to 30.
@@ -137,25 +99,20 @@ def libre_convert(
     """
 
     # Variables
-    err_msg: str = ""
-    file_out = outdir / file.aars_path.parent
-    file_out.mkdir(parents=True, exist_ok=True)
-    # create_outdir(file, outdir, parents=parents)
-    cmd = f"{cmd} --headless --convert-to {convert_to}"
-
-    # LibreOffice doesn't actually care what it gets in the infilter call;
-    # if it doesn't find the filter you specify, it just uses the default.
-    # As such, the convert command using --infilter will work no matter what
-    # value encoding actually has. This doesn't seem particularly safe, so we
-    # might want to type check the encoding input.
-    # if file.encoding is not None:
-    #     convert_cmd = f'{cmd} "{file.path}" ' f"--outdir {file_out}"
-    # else:
-    convert_cmd = f'{cmd} "{file.path}" --outdir {file_out}'
+    err_msg: str
+    libre_path: str = find_libre()
+    cmd: List[Union[str, Path]] = [
+        libre_path,
+        "--headless",
+        "--convert-to",
+        convert_to,
+        file.path,
+        "--outdir",
+        outdir,
+    ]
 
     proc = subprocess.Popen(
-        convert_cmd,
-        shell=True,
+        cmd,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
     )
@@ -163,13 +120,14 @@ def libre_convert(
         run_proc(proc, timeout=timeout)
     except ProcessError as error:
         proc.kill()
-        err_msg = f"LibreConvert of {file.path} failed with error: {error}"
-        raise LibreError(err_msg)
+        raise LibreError(
+            f"Conversion of {file.path} failed with error: {error}"
+        )
     except TimeoutExpired as error:
         proc.kill()
         _, _ = proc.communicate()
         err_msg = (
-            f"LibreConvert of {file.path} "
+            f"Conversion of {file.path} "
             f"timed out after {error.timeout} seconds."
         )
         raise LibreError(err_msg, timeout=True)

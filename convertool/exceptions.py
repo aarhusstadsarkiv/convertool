@@ -31,6 +31,11 @@ class LibreError(ConvertoolError):
         self.timeout = timeout
 
 
+class LibreNotFoundError(ConvertoolError):
+    """Implements an error to raise when LibreOffice
+    is not found on the system."""
+
+
 class SymphonyError(ConvertoolError):
     """Implements an error to raise when Symphony or related
     functionality fails."""

@@ -90,7 +90,7 @@ class TestCli:
         monkeypatch.undo()
 
         # Conversion error
-        monkeypatch.setattr(core, "convert_files", convert_error)
+        monkeypatch.setattr(core.FileConv, "convert", convert_error)
         result = cli_run.invoke(cli, args)
         assert result.output.strip() == "Error: Conversion error."
         assert result.exit_code == 1
