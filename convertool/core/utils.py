@@ -4,7 +4,8 @@
 # -----------------------------------------------------------------------------
 # Imports
 # -----------------------------------------------------------------------------
-import logging
+import logging as log
+from logging import Logger
 from pathlib import Path
 from subprocess import Popen
 from subprocess import TimeoutExpired
@@ -60,16 +61,37 @@ def run_proc(proc: Popen, timeout: int) -> None:
             raise ProcessError(err_msg)
 
 
-def log_setup(
-    log_name: str, log_file: Path, mode: str = "w"
-) -> logging.Logger:
-    logger = logging.getLogger(log_name)
-    file_handler = logging.FileHandler(log_file, mode)
-    file_handler.setFormatter(
-        logging.Formatter(
-            fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%H:%M:%S"
-        )
+def log_setup(log_name: str, log_file: Path, mode: str = "w") -> Logger:
+    """Creates a log with the name specified and outputs it to the
+    specified path using write mode as default.
+
+    Parameters
+    ----------
+    log_name : str
+        The name of the log to be created
+    log_file : pathlib.Path
+        The file to log to
+    mode : str
+        How to write to the log file. Defaults to w, meaning a new log
+        file is created at each run.
+
+    Returns
+    -------
+    logger : logging.Logger
+        The resulting log handler
+    """
+    # Init & log to file
+    logger: Logger = log.getLogger(log_name)
+    file_handler = log.FileHandler(log_file, mode, encoding="utf-8")
+
+    # Format
+    log_fmt = log.Formatter(
+        fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%H:%M:%S"
     )
+    file_handler.setFormatter(log_fmt)
+
+    # Handler & level
     logger.addHandler(file_handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(log.INFO)
+
     return logger
