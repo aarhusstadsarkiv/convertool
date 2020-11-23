@@ -24,6 +24,7 @@ from pydantic import validator
 from .image import img2tif
 from .libreoffice import libre_convert
 from .utils import log_setup
+from convertool.database import FileDB
 from convertool.exceptions import ConversionError
 from convertool.exceptions import ImageError
 from convertool.exceptions import LibreError
@@ -36,9 +37,13 @@ from convertool.exceptions import LibreError
 
 class FileConv(ACABase):
     files: List[ArchiveFile]
+    db: FileDB
     out_dir: Path
     parent_dirs: int = 2
     max_errs: int = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
 
     # Validators
     @validator("max_errs", pre=True, always=True)
@@ -55,12 +60,12 @@ class FileConv(ACABase):
             c_map: Dict[str, str] = json.load(f)
             return c_map
 
-    def convert(self) -> None:
+    async def convert(self) -> None:
         # Initialise variables
         err_count: int = 0
         warn_count: int = 0
         convert_to: Optional[str]
-        errors: str
+        errors: Optional[str] = None
 
         # Set up logging
         logger: Logger = log_setup(
@@ -89,6 +94,8 @@ class FileConv(ACABase):
                         warn_count += 1
                     else:
                         err_count += 1
+                else:
+                    await self.db.update_status(file.uuid)
 
             if convert_to == "copy":
                 try:
@@ -96,6 +103,8 @@ class FileConv(ACABase):
                 except (OSError, shutil.SameFileError) as error:
                     logger.warning(f"{error}")
                     err_count += 1
+                else:
+                    await self.db.update_status(file.uuid)
 
             if convert_to == "tif":
                 try:
@@ -103,6 +112,8 @@ class FileConv(ACABase):
                 except ImageError as error:
                     logger.warning(f"{error}")
                     err_count += 1
+                else:
+                    await self.db.update_status(file.uuid)
 
             # Check if too many errors have occurred.
             errors = check_errors(err_count, self.max_errs)
@@ -152,7 +163,7 @@ def calc_timeout(file: Path, base_timeout: int = 10) -> int:
     return timeout
 
 
-def check_errors(err_count: int, max_errs: int) -> str:
+def check_errors(err_count: int, max_errs: int) -> Optional[str]:
     """Checks if more errors than the defined threshold has occurred, and
     returns a message describing the error if so.
 
@@ -180,4 +191,4 @@ def check_errors(err_count: int, max_errs: int) -> str:
             f"threshold of {max_errs}"
         )
 
-    return exit_msg
+    return exit_msg or None

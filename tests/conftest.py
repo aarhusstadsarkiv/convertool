@@ -71,4 +71,5 @@ async def db_conn(test_data):
     file_db = FileDB(f"sqlite:///{test_data}/files.db")
     await file_db.connect()
     yield file_db
+    file_db.converted_files.drop(file_db.engine, checkfirst=True)
     await file_db.disconnect()

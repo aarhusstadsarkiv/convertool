@@ -76,6 +76,7 @@ async def cli(
 
     ctx.obj = core.FileConv(
         files=files_,
+        db=file_db,
         out_dir=outdir,
         max_errs=max_errs,
     )
@@ -83,10 +84,11 @@ async def cli(
 
 @cli.command()
 @click.pass_obj
-def libre(file_conv: core.FileConv) -> None:
+@coro
+async def libre(file_conv: core.FileConv) -> None:
     """Convert files using LibreOffice."""
     try:
-        file_conv.convert()
+        await file_conv.convert()
     except ConversionError as error:
         raise click.ClickException(str(error))
 
