@@ -15,6 +15,7 @@ import click
 from acamodels import ArchiveFile
 from click.core import Context as ClickContext
 
+from convertool import __version__
 from convertool import core
 from convertool.database import FileDB
 from convertool.exceptions import ConversionError
@@ -44,6 +45,7 @@ def coro(func: Callable) -> Callable:
 @click.argument(
     "outdir", type=click.Path(exists=True, file_okay=False, resolve_path=True)
 )
+@click.version_option(version=__version__)
 @click.option(
     "--threshold",
     "max_errs",
