@@ -57,7 +57,7 @@ def convert_pdf(file: ArchiveFile, outdir: Path) -> None:
         file.path,
     ]
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, capture_output=True)
     except CalledProcessError as error:
         raise GSError(
             f"Conversion of {file.path} failed "
