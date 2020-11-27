@@ -36,8 +36,13 @@ class LibreNotFoundError(ConvertoolError):
     is not found on the system."""
 
 
-class SymphonyError(ConvertoolError):
-    """Implements an error to raise when Symphony or related
+class GSNotFoundError(ConvertoolError):
+    """Implements an error to raise when Ghostscript
+    is not found on the system."""
+
+
+class GSError(ConvertoolError):
+    """Implements an error to raise when Ghostscript
     functionality fails."""
 
 

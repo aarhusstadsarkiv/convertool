@@ -3,7 +3,6 @@
 # -----------------------------------------------------------------------------
 import json
 import math
-import shutil
 from pathlib import Path
 
 import pytest
@@ -13,8 +12,11 @@ import convertool.core.convert as c_convert
 from convertool.core.convert import FileConv
 from convertool.database import FileDB
 from convertool.exceptions import ConversionError
+from convertool.exceptions import GSError
 from convertool.exceptions import ImageError
 from convertool.exceptions import LibreError
+
+# import shutil
 
 # -----------------------------------------------------------------------------
 # Fixtures
@@ -104,18 +106,18 @@ class TestConvert:
         assert libre_file_uuid not in converted_files.values()
         assert "Libre timeout" in caplog.text
 
-    async def test_copy_fail(self, file_conv, monkeypatch, caplog, conv_files):
-        copy_file_uuid = "93ba3862-a425-42bb-87ac-5c7912aa1a28"
+    async def test_pdf_fail(self, file_conv, monkeypatch, caplog, conv_files):
+        pdf_file_uuid = "93ba3862-a425-42bb-87ac-5c7912aa1a28"
 
-        # shutil.copy2 fails
-        def shutil_fail(*args, **kwargs):
-            raise OSError("shutil fail")
+        # Ghostscript fails
+        def gs_fail(*args, **kwargs):
+            raise GSError("gs fail")
 
-        monkeypatch.setattr(shutil, "copy2", shutil_fail)
+        monkeypatch.setattr(c_convert, "convert_pdf", gs_fail)
         await file_conv.convert()
         converted_files = dict(await conv_files)
-        assert copy_file_uuid not in converted_files.values()
-        assert "shutil fail" in caplog.text
+        assert pdf_file_uuid not in converted_files.values()
+        assert "gs fail" in caplog.text
 
     async def test_image_fail(
         self, file_conv, monkeypatch, caplog, conv_files

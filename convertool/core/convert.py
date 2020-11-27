@@ -6,7 +6,6 @@
 # -----------------------------------------------------------------------------
 import json
 import math
-import shutil
 import time
 from logging import Logger
 from pathlib import Path
@@ -23,11 +22,15 @@ from pydantic import validator
 
 from .image import img2tif
 from .libreoffice import libre_convert
+from .pdf import convert_pdf
 from .utils import log_setup
 from convertool.database import FileDB
 from convertool.exceptions import ConversionError
+from convertool.exceptions import GSError
 from convertool.exceptions import ImageError
 from convertool.exceptions import LibreError
+
+# import shutil
 
 
 # -----------------------------------------------------------------------------
@@ -72,11 +75,13 @@ class FileConv(ACABase):
             log_name="Conversion",
             log_file=Path(self.out_dir) / f"_convertool_{time.time()}.log",
         )
-
+        to_convert: List[ArchiveFile] = [
+            f for f in self.files if f.puid in self.conv_map()
+        ]
         # Start conversion.
         logger.info(f"Started conversion of {len(self.files)} files.")
         for file in tqdm.tqdm(
-            self.files, desc="Converting files", unit="file"
+            to_convert, desc="Converting files", unit="file"
         ):
             # Create output directory
             file_out: Path = self.out_dir / file.aars_path.parent
@@ -97,10 +102,19 @@ class FileConv(ACABase):
                 else:
                     await self.db.update_status(file.uuid)
 
-            if convert_to == "copy":
+            # if convert_to == "copy":
+            #     try:
+            #         shutil.copy2(file.path, file_out)
+            #     except (OSError, shutil.SameFileError) as error:
+            #         logger.warning(f"{error}")
+            #         err_count += 1
+            #     else:
+            #         await self.db.update_status(file.uuid)
+
+            if convert_to == "pdf":
                 try:
-                    shutil.copy2(file.path, file_out)
-                except (OSError, shutil.SameFileError) as error:
+                    convert_pdf(file, file_out)
+                except GSError as error:
                     logger.warning(f"{error}")
                     err_count += 1
                 else:

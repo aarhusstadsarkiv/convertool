@@ -8,7 +8,6 @@ chocolatey (Windows) or snap (Linux).
 # Imports
 # -----------------------------------------------------------------------------
 import platform
-import shlex
 import subprocess
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -50,9 +49,9 @@ def find_libre() -> str:
     system: str = platform.system()
 
     if system == "Windows":
-        libre_cmd = shlex.split(r"where.exe *soffice.exe")
+        libre_cmd = ["where.exe", "*soffice.exe"]
     elif system in ["Linux", "Darwin"]:
-        libre_cmd = shlex.split(r"which libreoffice")
+        libre_cmd = ["which", "libreoffice"]
     else:
         raise LibreNotFoundError(f"OS {system} not supported")
 
