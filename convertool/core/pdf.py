@@ -24,7 +24,7 @@ def find_gs() -> str:
     system: str = platform.system()
 
     if system == "Windows":
-        gs_cmd = ["where.exe", "gswin4c.exe"]
+        gs_cmd = ["where.exe", "gswin64c.exe"]
     elif system in ["Linux", "Darwin"]:
         gs_cmd = ["which", "gs"]
     else:
