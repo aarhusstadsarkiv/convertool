@@ -70,6 +70,8 @@ class TestConvert:
     async def test_success_files(self, file_conv, caplog):
         await file_conv.convert()
         assert "Started conversion of 3 files" in caplog.text
+        for file in file_conv.files:
+            assert f"Converted {file.path} successfully." in caplog.text
         assert (
             "Finished conversion of 3 files with 0 issues, "
             "0 of which were critical."
@@ -135,12 +137,19 @@ class TestConvert:
         assert "img2tif fail" in caplog.text
 
     async def test_too_many_errs(self, file_conv, monkeypatch, caplog):
-        # Too many errors
-        def bad_errors(*args, **kwargs):
-            return "Many errors! Handle it!"
+        # No errors allowed
+        file_conv.max_errs = 0
 
-        monkeypatch.setattr(c_convert, "check_errors", bad_errors)
-        err_match = "Many errors! Handle it!"
+        # image conversion fails
+        def img_fail(*args, **kwargs):
+            raise ImageError("img2tif fail")
+
+        monkeypatch.setattr(c_convert, "img2tif", img_fail)
+
+        err_match = (
+            "Error count 1 is higher than "
+            f"threshold of {file_conv.max_errs}"
+        )
         with pytest.raises(ConversionError, match=err_match):
             await file_conv.convert()
             assert err_match in caplog.text
@@ -158,10 +167,3 @@ class TestAuxFunctions:
         not_found = Path("not_a_file")
         timeout = c_convert.calc_timeout(not_found)
         assert timeout == 10
-
-    def test_check_errors(self):
-        assert c_convert.check_errors(1, 100) is None
-        assert (
-            c_convert.check_errors(100, 1) == "Error count 100 is higher than "
-            "threshold of 1"
-        )

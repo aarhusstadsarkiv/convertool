@@ -68,7 +68,6 @@ class FileConv(ACABase):
         err_count: int = 0
         warn_count: int = 0
         convert_to: Optional[str]
-        errors: Optional[str] = None
 
         # Set up logging
         logger: Logger = log_setup(
@@ -79,7 +78,7 @@ class FileConv(ACABase):
             f for f in self.files if f.puid in self.conv_map()
         ]
         # Start conversion.
-        logger.info(f"Started conversion of {len(self.files)} files.")
+        logger.info(f"Started conversion of {len(to_convert)} files.")
         for file in tqdm.tqdm(
             to_convert, desc="Converting files", unit="file"
         ):
@@ -87,57 +86,58 @@ class FileConv(ACABase):
             file_out: Path = self.out_dir / file.aars_path.parent
             file_out.mkdir(parents=True, exist_ok=True)
 
+            # Convert info
             convert_to = self.conv_map().get(file.puid)
 
             if convert_to in ["odt", "ods", "odp"]:
                 timeout = calc_timeout(file.path)
+                logger.info(f"Starting conversion of {file.path}")
                 try:
                     libre_convert(file, convert_to, file_out, timeout=timeout)
                 except LibreError as error:
-                    logger.warning(f"{error}")
+                    logger.warning(f"Failed to convert {file.path}: {error}")
                     if error.timeout:
                         warn_count += 1
                     else:
                         err_count += 1
                 else:
                     await self.db.update_status(file.uuid)
-
-            # if convert_to == "copy":
-            #     try:
-            #         shutil.copy2(file.path, file_out)
-            #     except (OSError, shutil.SameFileError) as error:
-            #         logger.warning(f"{error}")
-            #         err_count += 1
-            #     else:
-            #         await self.db.update_status(file.uuid)
+                    logger.info(f"Converted {file.path} successfully.")
 
             if convert_to == "pdf":
+                logger.info(f"Starting conversion of {file.path}")
                 try:
                     convert_pdf(file, file_out)
                 except GSError as error:
-                    logger.warning(f"{error}")
+                    logger.warning(f"Failed to convert {file.path}: {error}")
                     err_count += 1
                 else:
                     await self.db.update_status(file.uuid)
+                    logger.info(f"Converted {file.path} successfully.")
 
             if convert_to == "tif":
+                logger.info(f"Starting conversion of {file.path}")
                 try:
                     img2tif(file.path, file_out)
                 except ImageError as error:
-                    logger.warning(f"{error}")
+                    logger.warning(f"Failed to convert {file.path}: {error}")
                     err_count += 1
                 else:
                     await self.db.update_status(file.uuid)
+                    logger.info(f"Converted {file.path} successfully.")
 
             # Check if too many errors have occurred.
-            errors = check_errors(err_count, self.max_errs)
-            if errors:
-                logger.error(errors)
-                raise ConversionError(errors)
+            if err_count > self.max_errs:
+                msg = (
+                    f"Error count {err_count} is higher than "
+                    f"threshold of {self.max_errs}"
+                )
+                logger.error(msg)
+                raise ConversionError(msg)
 
         # We are done! Log before we finish.
         logger.info(
-            f"Finished conversion of {len(self.files)} files "
+            f"Finished conversion of {len(to_convert)} files "
             f"with {err_count + warn_count} issues, "
             f"{err_count} of which were critical."
         )
@@ -175,34 +175,3 @@ def calc_timeout(file: Path, base_timeout: int = 10) -> int:
     # We get the file size in whole MB by bit shifting by 20.
     timeout: int = base_timeout + (fsize >> 20)
     return timeout
-
-
-def check_errors(err_count: int, max_errs: int) -> Optional[str]:
-    """Checks if more errors than the defined threshold has occurred, and
-    returns a message describing the error if so.
-
-    Parameters
-    ----------
-    err_count : int
-        The current error count.
-    max_errs : int
-        The maximum amount of errors that are allowed to occur.
-
-    Returns
-    -------
-    exit_msg : str
-        A message describing the error, including information about the current
-        number of errors and the maximum allowed amount. Empty if the error
-        count has not yet exceeded the maximum allowed amount of errors.
-
-    """
-
-    exit_msg: str = ""
-
-    if err_count > max_errs:
-        exit_msg = (
-            f"Error count {err_count} is higher than "
-            f"threshold of {max_errs}"
-        )
-
-    return exit_msg or None
