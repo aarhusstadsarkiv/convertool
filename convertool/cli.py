@@ -87,8 +87,8 @@ async def cli(
 @cli.command()
 @click.pass_obj
 @coro
-async def libre(file_conv: core.FileConv) -> None:
-    """Convert files using LibreOffice."""
+async def main(file_conv: core.FileConv) -> None:
+    """Convert files to their Main Archival version."""
     try:
         await file_conv.convert()
     except ConversionError as error:

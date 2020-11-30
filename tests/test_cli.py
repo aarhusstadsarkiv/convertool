@@ -38,13 +38,13 @@ def clean_up_files(test_out):
 class TestCli:
     def test_with_valid_input(self, cli_run, test_data, test_out):
         test_db = test_data / "files.db"
-        args = [str(test_db), str(test_out), "libre"]
+        args = [str(test_db), str(test_out), "main"]
         result = cli_run.invoke(cli, args)
         assert result.exit_code == 0
 
     def test_with_invalid_files(self, cli_run, test_out):
         with cli_run.isolated_filesystem():
-            args = ["bogus", str(test_out), "libre"]
+            args = ["bogus", str(test_out), "main"]
             result = cli_run.invoke(cli, args)
             assert result.exit_code != 0
             assert "Error: Invalid value for 'FILES'" in result.output
@@ -52,7 +52,7 @@ class TestCli:
 
     def test_with_invalid_outdir(self, cli_run, test_files):
         with cli_run.isolated_filesystem():
-            args = [str(test_files), "bogus", "libre"]
+            args = [str(test_files), "bogus", "main"]
             result = cli_run.invoke(cli, args)
             assert result.exit_code != 0
             assert "Error: Invalid value for 'OUTDIR'" in result.output
@@ -60,7 +60,7 @@ class TestCli:
 
     def test_exceptions(self, cli_run, test_data, test_out, monkeypatch):
         test_db = test_data / "files.db"
-        args = [str(test_db), str(test_out), "libre"]
+        args = [str(test_db), str(test_out), "main"]
 
         # Monkeypatch defs
         def init_except(*args):

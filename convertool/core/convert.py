@@ -42,7 +42,6 @@ class FileConv(ACABase):
     files: List[ArchiveFile]
     db: FileDB
     out_dir: Path
-    parent_dirs: int = 2
     max_errs: int = Field(None)
 
     class Config:
