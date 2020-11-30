@@ -75,7 +75,10 @@ class FileConv(ACABase):
             log_file=Path(self.out_dir) / f"_convertool_{time.time()}.log",
         )
         to_convert: List[ArchiveFile] = [
-            f for f in self.files if f.puid in self.conv_map()
+            f
+            for f in self.files
+            if f.puid in self.conv_map()
+            and await self.db.check_status(f.uuid) is False
         ]
         # Start conversion.
         logger.info(f"Started conversion of {len(to_convert)} files.")

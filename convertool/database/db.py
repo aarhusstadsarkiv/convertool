@@ -63,14 +63,16 @@ class FileDB(Database):
                 self.files.c.uuid == str(uuid)
             )
             file_id = await self.fetch_val(get_file_id, column="id")
-            check = await self.fetch_one(
-                self.converted_files.select().where(
-                    self.converted_files.c.uuid == str(uuid)
-                )
-            )
-            if check is None:
+            exists = await self.check_status(uuid)
+            if not exists:
                 insert_file = self.converted_files.insert()
                 insert_values = {"file_id": file_id, "uuid": str(uuid)}
                 await self.execute(insert_file, insert_values)
             else:
                 return
+
+    async def check_status(self, uuid: UUID) -> bool:
+        conv_files = self.converted_files
+        select_uuid = conv_files.select().where(conv_files.c.uuid == str(uuid))
+        check = await self.fetch_one(select_uuid)
+        return bool(check)

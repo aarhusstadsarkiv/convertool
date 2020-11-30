@@ -61,3 +61,11 @@ class TestFileDB:
             file_db.converted_files.select()
         )
         assert len(converted_files) == 1
+
+    async def test_check_status(self, db_conn):
+        file_db: FileDB = db_conn
+        files = await file_db.get_files()
+        for file in files:
+            assert await file_db.check_status(file.uuid) is False
+        await file_db.update_status(files[0].uuid)
+        assert await file_db.check_status(files[0].uuid) is True
