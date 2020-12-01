@@ -72,6 +72,7 @@ async def cli(
     except Exception:
         raise click.ClickException(f"Failed to load {files} as a database.")
     else:
+        click.secho("Collecting files...", bold=True)
         files_: List[ArchiveFile] = await file_db.get_files()
         if not files_:
             raise click.ClickException("Database is empty. Aborting.")

@@ -69,3 +69,11 @@ class TestFileDB:
             assert await file_db.check_status(file.uuid) is False
         await file_db.update_status(files[0].uuid)
         assert await file_db.check_status(files[0].uuid) is True
+
+    async def test_converted_uuids(self, db_conn):
+        file_db: FileDB = db_conn
+        files = await file_db.get_files()
+        await file_db.update_status(files[0].uuid)
+        uuids = await file_db.converted_uuids()
+        assert files[0].uuid in uuids
+        assert files[1].uuid not in uuids

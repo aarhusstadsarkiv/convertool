@@ -85,13 +85,13 @@ class TestCli:
         # No files
         monkeypatch.setattr(c_db.FileDB, "get_files", empty_files)
         result = cli_run.invoke(cli, args)
-        assert result.output.strip() == "Error: Database is empty. Aborting."
+        assert "Error: Database is empty. Aborting." in result.output.strip()
         assert result.exit_code == 1
         monkeypatch.undo()
 
         # Conversion error
         monkeypatch.setattr(core.FileConv, "convert", convert_error)
         result = cli_run.invoke(cli, args)
-        assert result.output.strip() == "Error: Conversion error."
+        assert "Error: Conversion error." in result.output.strip()
         assert result.exit_code == 1
         monkeypatch.undo()

@@ -4,6 +4,7 @@
 # from typing import Any
 # from typing import Dict
 from typing import List
+from typing import Set
 from uuid import UUID
 
 import sqlalchemy as sql
@@ -76,3 +77,9 @@ class FileDB(Database):
         select_uuid = conv_files.select().where(conv_files.c.uuid == str(uuid))
         check = await self.fetch_one(select_uuid)
         return bool(check)
+
+    async def converted_uuids(self) -> Set[UUID]:
+        conv_files = self.converted_files
+        query = conv_files.select()
+        rows = await self.fetch_all(query)
+        return {UUID(row["uuid"]) for row in rows}
