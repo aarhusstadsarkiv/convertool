@@ -6,7 +6,6 @@
 # -----------------------------------------------------------------------------
 import json
 import math
-import time
 from logging import Logger
 from pathlib import Path
 from typing import Any
@@ -71,7 +70,7 @@ class FileConv(ACABase):
         # Set up logging
         logger: Logger = log_setup(
             log_name="Conversion",
-            log_file=Path(self.out_dir) / f"_convertool_{time.time()}.log",
+            log_file=Path(self.out_dir) / "_convertool.log",
         )
         converted_uuids = await self.db.converted_uuids()
         to_convert: List[ArchiveFile] = [
@@ -80,7 +79,10 @@ class FileConv(ACABase):
             if f.puid in self.conv_map() and f.uuid not in converted_uuids
         ]
         # Start conversion.
-        logger.info(f"Started conversion of {len(to_convert)} files.")
+        logger.info(
+            f"Started conversion of {len(to_convert)} files "
+            f"from {self.db.url} to {self.out_dir}"
+        )
         for file in tqdm.tqdm(
             to_convert, desc="Converting files", unit="file"
         ):

@@ -61,7 +61,7 @@ def run_proc(proc: Popen, timeout: int) -> None:
             raise ProcessError(err_msg)
 
 
-def log_setup(log_name: str, log_file: Path, mode: str = "w") -> Logger:
+def log_setup(log_name: str, log_file: Path, mode: str = "a") -> Logger:
     """Creates a log with the name specified and outputs it to the
     specified path using write mode as default.
 
@@ -72,8 +72,7 @@ def log_setup(log_name: str, log_file: Path, mode: str = "w") -> Logger:
     log_file : pathlib.Path
         The file to log to
     mode : str
-        How to write to the log file. Defaults to w, meaning a new log
-        file is created at each run.
+        How to write to the log file. Defaults to a.
 
     Returns
     -------
@@ -86,7 +85,8 @@ def log_setup(log_name: str, log_file: Path, mode: str = "w") -> Logger:
 
     # Format
     log_fmt = log.Formatter(
-        fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%H:%M:%S"
+        fmt="%(asctime)s %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     file_handler.setFormatter(log_fmt)
 
