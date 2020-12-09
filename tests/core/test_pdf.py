@@ -74,7 +74,7 @@ class TestFindGS:
 class TestConvertGS:
     def test_valid_input(self, test_file, test_out):
         convert_pdf(test_file, test_out)
-        assert 62000 > (test_out / "test.pdf").stat().st_size > 61000
+        assert 67000 > (test_out / "test.pdf").stat().st_size > 64000
 
     def test_process_error(self, test_file, test_out, monkeypatch):
         # CalledProcessError

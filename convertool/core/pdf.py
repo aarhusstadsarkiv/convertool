@@ -52,7 +52,7 @@ def convert_pdf(file: ArchiveFile, outdir: Path) -> None:
         "-dPDFA=3",
         "-dPDFACompatibilityPolicy=1",
         "-sDEVICE=pdfwrite",
-        "-sColorConversoinStrategy=UseDeviceIndependentColor",
+        "-sColorConversionStrategy=UseDeviceIndependentColor",
         f"-sOutputFile={out_file}",
         file.path,
     ]
