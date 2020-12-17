@@ -6,6 +6,7 @@
 # -----------------------------------------------------------------------------
 import json
 import math
+import shutil
 from logging import Logger
 from pathlib import Path
 from typing import Any
@@ -29,7 +30,7 @@ from convertool.exceptions import GSError
 from convertool.exceptions import ImageError
 from convertool.exceptions import LibreError
 
-# import shutil
+PARENT_DIR: Path = Path(__file__).parent
 
 
 # -----------------------------------------------------------------------------
@@ -56,10 +57,22 @@ class FileConv(ACABase):
 
     @staticmethod
     def conv_map() -> Dict[str, str]:
-        map_file = Path(__file__).parent / "convert_map.json"
+        map_file = PARENT_DIR / "convert_map.json"
         with map_file.open(encoding="utf-8") as f:
             c_map: Dict[str, str] = json.load(f)
             return c_map
+
+    @staticmethod
+    def replace_map() -> Dict[str, Path]:
+        replace_dir = PARENT_DIR / "replacements"
+        r_map = {
+            "corrupt": replace_dir / "1.tif",
+            "password": replace_dir / "2.tif",
+            "no_software": replace_dir / "3.tif",
+            "ignore": replace_dir / "4.tif",
+            "empty": replace_dir / "5.tif",
+        }
+        return r_map
 
     async def convert(self) -> None:
         # Initialise variables
@@ -74,9 +87,7 @@ class FileConv(ACABase):
         )
         converted_uuids = await self.db.converted_uuids()
         to_convert: List[ArchiveFile] = [
-            f
-            for f in self.files
-            if f.puid in self.conv_map() and f.uuid not in converted_uuids
+            f for f in self.files if f.uuid not in converted_uuids
         ]
         # Start conversion.
         logger.info(
@@ -92,6 +103,22 @@ class FileConv(ACABase):
 
             # Convert info
             convert_to = self.conv_map().get(file.puid)
+
+            # File is empty
+            if "File is empty" in (file.warning or ""):
+                logger.info(f"Starting conversion of {file.path}")
+                try:
+                    replace_file: Path = Path(
+                        shutil.copy2(self.replace_map()["empty"], file_out)
+                    )
+                    new_name = f"{file.name()}.tif"
+                    replace_file.rename(replace_file.with_name(new_name))
+                except Exception as error:
+                    logger.warning(f"Failed to convert {file.path}: {error}")
+                    err_count += 1
+                else:
+                    await self.db.update_status(file.uuid)
+                    logger.info(f"Converted {file.path} successfully.")
 
             if convert_to in ["odt", "ods", "odp"]:
                 timeout = calc_timeout(file.path)

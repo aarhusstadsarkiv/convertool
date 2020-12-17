@@ -31,12 +31,12 @@ class TestFileDB:
         # Normal operation
         files = await file_db.get_files()
         for archive_file in files:
-            print(archive_file)
             assert archive_file.path.is_file()
             assert archive_file.uuid is not None
             assert archive_file.checksum is not None
-            assert archive_file.puid is not None
-            assert archive_file.signature is not None
+            if archive_file.aars_path.name != "test.empty":
+                assert archive_file.puid is not None
+                assert archive_file.signature is not None
 
         # Validation error
         def raise_val_error(*args, **kwargs):

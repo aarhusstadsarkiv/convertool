@@ -3,6 +3,7 @@
 # -----------------------------------------------------------------------------
 import json
 import math
+import shutil
 from pathlib import Path
 
 import pytest
@@ -69,11 +70,11 @@ class TestConvert:
 
     async def test_success_files(self, file_conv, caplog):
         await file_conv.convert()
-        assert "Started conversion of 3 files" in caplog.text
+        assert "Started conversion of 4 files" in caplog.text
         for file in file_conv.files:
             assert f"Converted {file.path} successfully." in caplog.text
         assert (
-            "Finished conversion of 3 files with 0 issues, "
+            "Finished conversion of 4 files with 0 issues, "
             "0 of which were critical."
         ) in caplog.text
 
@@ -96,7 +97,7 @@ class TestConvert:
     async def test_libre_warn(
         self, file_conv, monkeypatch, caplog, conv_files
     ):
-        libre_file_uuid = "e93d2c29-b143-4c29-a135-f4a0feefee14"
+        libre_file_uuid = "5361016e-ce42-4cab-8158-04ed8b4bc67c"
 
         # Libre warning
         def libre_warn(*args, **kwargs):
@@ -109,7 +110,7 @@ class TestConvert:
         assert "Libre timeout" in caplog.text
 
     async def test_pdf_fail(self, file_conv, monkeypatch, caplog, conv_files):
-        pdf_file_uuid = "93ba3862-a425-42bb-87ac-5c7912aa1a28"
+        pdf_file_uuid = "f1bd4ee3-0410-4d29-8d38-09ebccc6b198"
 
         # Ghostscript fails
         def gs_fail(*args, **kwargs):
@@ -124,7 +125,7 @@ class TestConvert:
     async def test_image_fail(
         self, file_conv, monkeypatch, caplog, conv_files
     ):
-        image_file_uuid = "a23d1ae1-42ec-4e5c-aa28-68b84b950cec"
+        image_file_uuid = "9a7867e4-513c-43a5-adf9-d86c4bdbb287"
 
         # image conversion fails
         def img_fail(*args, **kwargs):
@@ -135,6 +136,21 @@ class TestConvert:
         converted_files = dict(await conv_files)
         assert image_file_uuid not in converted_files.values()
         assert "img2tif fail" in caplog.text
+
+    async def test_empty_fail(
+        self, file_conv, monkeypatch, caplog, conv_files
+    ):
+        empty_file_uuid = "eb6ab410-cc98-4050-8724-e60894d4ae71"
+
+        # shutil copy fails
+        def shutil_fail(*args, **kwargs):
+            raise Exception("shutil fail")
+
+        monkeypatch.setattr(shutil, "copy2", shutil_fail)
+        await file_conv.convert()
+        converted_files = dict(await conv_files)
+        assert empty_file_uuid not in converted_files.values()
+        assert "shutil fail" in caplog.text
 
     async def test_too_many_errs(self, file_conv, monkeypatch, caplog):
         # No errors allowed
