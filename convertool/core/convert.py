@@ -62,18 +62,6 @@ class FileConv(ACABase):
             c_map: Dict[str, str] = json.load(f)
             return c_map
 
-    @staticmethod
-    def replace_map() -> Dict[str, Path]:
-        replace_dir = PARENT_DIR / "replacements"
-        r_map = {
-            "corrupt": replace_dir / "1.tif",
-            "password": replace_dir / "2.tif",
-            "no_software": replace_dir / "3.tif",
-            "ignore": replace_dir / "4.tif",
-            "empty": replace_dir / "5.tif",
-        }
-        return r_map
-
     async def convert(self) -> None:
         # Initialise variables
         err_count: int = 0
@@ -86,9 +74,15 @@ class FileConv(ACABase):
             log_file=Path(self.out_dir) / "_convertool.log",
         )
         converted_uuids = await self.db.converted_uuids()
-        to_convert: List[ArchiveFile] = [
-            f for f in self.files if f.uuid not in converted_uuids
-        ]
+        to_convert: List[ArchiveFile] = []
+
+        for f in self.files:
+            # Create all output directories
+            (self.out_dir / f.aars_path.parent).mkdir(
+                parents=True, exist_ok=True
+            )
+            if f.puid in self.conv_map() and f.uuid not in converted_uuids:
+                to_convert.append(f)
         # Start conversion.
         logger.info(
             f"Started conversion of {len(to_convert)} files "
@@ -97,20 +91,19 @@ class FileConv(ACABase):
         for file in tqdm.tqdm(
             to_convert, desc="Converting files", unit="file"
         ):
-            # Create output directory
+            # Define output directory
             file_out: Path = self.out_dir / file.aars_path.parent
-            file_out.mkdir(parents=True, exist_ok=True)
 
             # Convert info
             convert_to = self.conv_map().get(file.puid)
 
             # File is empty
-            if "File is empty" in (file.warning or ""):
-                logger.info(f"Starting conversion of {file.path}")
+            if convert_to == "error":
+                error_dir = PARENT_DIR / "replacements" / "errors"
+                logger.info(f"Replacing {file.path} with TIFF file")
+                new_file = error_dir / f"{file.puid.split('/')[-1]}.tif"
                 try:
-                    replace_file: Path = Path(
-                        shutil.copy2(self.replace_map()["empty"], file_out)
-                    )
+                    replace_file: Path = Path(shutil.copy2(new_file, file_out))
                     new_name = f"{file.name()}.tif"
                     replace_file.rename(replace_file.with_name(new_name))
                 except Exception as error:

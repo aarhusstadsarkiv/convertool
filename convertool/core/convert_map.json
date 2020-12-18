@@ -2,6 +2,8 @@
     "aca-fmt/1": "symphony",
     "aca-fmt/2": "odt",
     "aca-fmt/3": "ods",
+    "aca-error/1": "error",
+    "aca-error/2": "error",
     "fmt/3": "tif",
     "fmt/4": "tif",
     "fmt/11": "tif",
