@@ -1,5 +1,4 @@
 {
-    "aca-fmt/1": "symphony",
     "aca-fmt/2": "odt",
     "aca-fmt/3": "ods",
     "aca-error/1": "error",
@@ -42,7 +41,6 @@
     "fmt/290": "odt",
     "fmt/291": "odt",
     "fmt/295": "pdf",
-    "fmt/340": "symphony",
     "fmt/353": "tif",
     "fmt/354": "pdf",
     "fmt/355": "odt",
@@ -61,8 +59,6 @@
     "fmt/881": "tif",
     "x-fmt/17": "ods",
     "x-fmt/45": "odt",
-    "x-fmt/116": "symphony",
-    "x-fmt/340": "symphony",
     "x-fmt/390": "tif",
     "x-fmt/391": "tif"
 }
