@@ -44,7 +44,9 @@ def find_gs() -> str:
 
 def convert_pdf(file: ArchiveFile, outdir: Path) -> None:
     gs: str = find_gs()
-    out_file = outdir / file.path.name
+    # GS uses % in sOutputFile for printer information
+    # and will crash if % is present in the file name
+    out_file = outdir / file.path.name.replace("%", "")
     cmd: List[Union[str, Path]] = [
         gs,
         "-dBATCH",
