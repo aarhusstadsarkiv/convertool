@@ -74,7 +74,6 @@ class FileConv(ACABase):
             log_file=Path(self.out_dir) / "_convertool.log",
         )
         converted_uuids = await self.db.converted_uuids()
-        to_convert_keys = self.conv_map().keys() - "symphony"
         to_convert: List[ArchiveFile] = []
 
         for f in self.files:
@@ -82,7 +81,7 @@ class FileConv(ACABase):
             (self.out_dir / f.aars_path.parent).mkdir(
                 parents=True, exist_ok=True
             )
-            if f.puid in to_convert_keys and f.uuid not in converted_uuids:
+            if f.puid in self.conv_map() and f.uuid not in converted_uuids:
                 to_convert.append(f)
         # Start conversion.
         logger.info(
