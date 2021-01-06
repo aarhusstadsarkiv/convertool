@@ -46,7 +46,7 @@ def convert_pdf(file: ArchiveFile, outdir: Path) -> None:
     gs: str = find_gs()
     # GS uses % in sOutputFile for printer information
     # and will crash if % is present in the file name
-    out_file = outdir / file.path.name.replace("%", "")
+    out_file = outdir / "out.pdf"
     cmd: List[Union[str, Path]] = [
         gs,
         "-dBATCH",
@@ -65,3 +65,6 @@ def convert_pdf(file: ArchiveFile, outdir: Path) -> None:
             f"Conversion of {file.path} failed "
             f"with error: {error.stderr.strip().decode()}"
         )
+    else:
+        new_name = out_file.with_name(file.path.name).with_suffix(".pdf")
+        out_file.rename(new_name)
