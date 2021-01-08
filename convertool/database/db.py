@@ -12,6 +12,10 @@ from acamodels import ArchiveFile
 from databases import Database
 from pydantic import parse_obj_as
 from pydantic import ValidationError
+from sqlalchemy.engine import Engine
+from sqlalchemy.sql.expression import TextClause
+from sqlalchemy_views import CreateView
+from sqlalchemy_views import DropView
 
 from convertool.exceptions import FileParseError
 
@@ -36,6 +40,7 @@ class FileDB(Database):
         sql.Column("uuid", sql.Unicode, nullable=False),
         extend_existing=True,
     )
+    not_converted = sql.Table("_NotConverted", sql_meta)
 
     def __init__(self, url: str) -> None:
         super().__init__(url)
@@ -47,6 +52,15 @@ class FileDB(Database):
         self.sql_meta.reflect(bind=self.engine)
         self.files = self.sql_meta.tables["Files"]
         self.converted_files.create(self.engine, checkfirst=True)
+
+        # Create _NotConverted view
+        view_def = sql.text(
+            "SELECT f.id, f.uuid, path, aars_path, puid, signature, warning "
+            "FROM Files AS f "
+            "LEFT JOIN _ConvertedFiles AS c "
+            "ON f.uuid = c.uuid WHERE c.uuid IS NULL"
+        )
+        create_view(self.not_converted, view_def, self.engine)
 
     async def get_files(self) -> List[ArchiveFile]:
         query = self.files.select()
@@ -83,3 +97,17 @@ class FileDB(Database):
         query = conv_files.select()
         rows = await self.fetch_all(query)
         return {UUID(row["uuid"]) for row in rows}
+
+
+# -----------------------------------------------------------------------------
+# View Creation Utility
+# -----------------------------------------------------------------------------
+
+
+def create_view(
+    table: sql.Table, definition: TextClause, engine: Engine
+) -> None:
+    view_drop = DropView(table, if_exists=True)
+    view_create = CreateView(table, definition)
+    engine.execute(view_drop)
+    engine.execute(view_create)
