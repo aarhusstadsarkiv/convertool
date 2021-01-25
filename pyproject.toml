@@ -20,7 +20,7 @@ sqlalchemy-views = "^0.2.4"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
 pytest-cov = "^2.11.1"
-mypy = "^0.790"
+mypy = "^0.800"
 black = {version = "^20.8b1", allow-prereleases = true}
 flake8 = "^3.8.4"
 reorder_python_imports = "^2.3.6"
