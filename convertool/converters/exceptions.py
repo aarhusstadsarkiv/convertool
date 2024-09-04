@@ -1,0 +1,13 @@
+from click import File
+
+
+class ConvertError(Exception):
+    def __init__(self, file: File, msg: str | BaseException | None = None):
+        self.file: File = file
+        self.msg: str | BaseException | None = msg
+
+
+class OutputDirError(ConvertError): ...
+
+
+class OutputExtensionError(ConvertError): ...
