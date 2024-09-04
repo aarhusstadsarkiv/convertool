@@ -36,3 +36,4 @@ jobs:
           file: Dockerfile-base
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          github-token: ${{ secrets.REGISTRY_TOKEN }}
