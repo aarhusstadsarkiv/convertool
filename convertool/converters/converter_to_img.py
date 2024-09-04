@@ -21,7 +21,7 @@ class ConverterToImg(Converter):
         dest_file: Path = self.output_file(dest_dir, output)
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        self.run_process("magick", self.file.get_absolute_path(), dest_file.name, cwd=dest_dir)
+        self.run_process("convert", self.file.get_absolute_path(), dest_file.name, cwd=dest_dir)
 
         return [dest_file]
 
@@ -35,7 +35,7 @@ class ConverterPDFToImg(ConverterToImg):
         dest_file: Path = self.output_file(dest_dir, output)
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        density_stdout, _ = self.run_process("magick", "identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
+        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
         density: int = 0
 
         for density_line in density_stdout.strip().splitlines():
@@ -46,7 +46,7 @@ class ConverterPDFToImg(ConverterToImg):
 
         density = density or 150
 
-        self.run_process("magick", "-density", density, self.file.get_absolute_path(), dest_file.name, cwd=dest_dir)
+        self.run_process("convert", "-density", density, self.file.get_absolute_path(), dest_file.name, cwd=dest_dir)
 
         if output == "tiff":
             return [dest_file]
@@ -73,7 +73,7 @@ class ConverterTextToImg(ConverterToImg):
         dest_dir.mkdir(parents=True, exist_ok=True)
 
         self.run_process(
-            "magick",
+            "convert",
             "-size",
             f"{width}x{height}",
             "xc:white",
