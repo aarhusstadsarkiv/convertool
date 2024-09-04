@@ -7,7 +7,7 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN pip3 install pipx
 
 # Install GDAL
-RUN apt-get update && apt-get install -y libproj-dev  # gdal
+RUN apt-get update && apt-get install -y libproj-dev gdal-bin
 
 # Install GhostScript, Libreoffice, and imagemagick
 RUN apt-get update && apt-get install -y ghostscript libreoffice ffmpeg imagemagick libc6-i386 libc6-x32 libxtst6
