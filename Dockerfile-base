@@ -7,19 +7,10 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN pip3 install pipx
 
 # Install GDAL
-RUN apt-get update && apt-get install -y libproj-dev
-RUN wget https://github.com/OSGeo/gdal/releases/download/v3.5.2/gdal-3.5.2.tar.gz && tar -xzf gdal-3.5.2.tar.gz
-WORKDIR "/gdal-3.5.2/build"
-RUN cmake .. && cmake --build . && cmake --build . --target install
-WORKDIR "/"
+RUN apt-get update && apt-get install -y libproj-dev gdal
 
-# Install GhostScript
-# We must update apt-get again for else GhostScript won't install
+# Install GhostScript, Libreoffice, and imagemagick
 RUN apt-get update && apt-get install -y ghostscript libreoffice ffmpeg imagemagick libc6-i386 libc6-x32 libxtst6
-
-## Install JDK
-RUN wget https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.deb && dpkg -i jdk-17_linux-x64_bin.deb
-ENV PATH "${PATH}:/usr/lib/jvm/jdk-17/bin"
 
 # Install chrome
 RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
