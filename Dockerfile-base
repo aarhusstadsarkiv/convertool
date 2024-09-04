@@ -21,6 +21,6 @@ RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
 # Install QCAD
 WORKDIR /root
 RUN mkdir -p /root/qcad
-RUN curl https://qcad.org/archives/qcad/qcadcam-3.28.1-trial-linux-x86_64.run -o /root/qcad/qcadcam-3.28.1-trial-linux-x86_64.run
-RUN chmod a+x /root/qcad/qcadcam-3.28.1-trial-linux-x86_64.run
+RUN curl https://qcad.org/archives/qcad/qcadcam-3.28.2-trial-linux-x86_64.run -o /root/qcad/qcadcam-3.28.2-trial-linux-x86_64.run
+RUN chmod a+x /root/qcad/qcadcam-3.28.2-trial-linux-x86_64.run
 RUN /root/qcad/qcadcam-3.28.1-trial-linux-x86_64.run
