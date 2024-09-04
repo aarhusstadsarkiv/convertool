@@ -7,12 +7,7 @@ on:
 
 jobs:
   test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: .github/workflows/test.yml
+    uses: aarhusstadsarkiv/convertool-new/.github/workflows/test.yml@main
 
   build:
     name: Build & Push
