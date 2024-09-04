@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Type
 
+from acacore.__version__ import __version__ as __acacore_version__
 from acacore.models.file import File
 from click import argument
 from click import BadParameter
@@ -8,8 +9,10 @@ from click import Context
 from click import group
 from click import pass_context
 from click import Path as ClickPath
+from click import version_option
 from click.exceptions import Exit
 
+from .__version__ import __version__
 from .converters.base import Converter
 from .converters.converter_to_img import ConverterPDFToImg
 from .converters.converter_to_img import ConverterTextToImg
@@ -33,6 +36,7 @@ def find_converter(tool: str, output: str) -> Type[Converter] | None:
 
 
 @group("convertool", no_args_is_help=True)
+@version_option(__version__, message=f"%(prog)s, version %(version)s\nacacore, version {__acacore_version__}")
 def app(): ...
 
 
