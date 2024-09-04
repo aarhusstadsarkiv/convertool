@@ -31,10 +31,11 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v6
         with:
-          push: true
+          file: Dockerfile-base
+          context: .
           tags: |
             git.openaws.dk/aarhusstadsarkiv/convertool-base:latest
             git.openaws.dk/aarhusstadsarkiv/convertool-base:${{ steps.date.outputs.date }}
-          file: Dockerfile-base
+          push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max

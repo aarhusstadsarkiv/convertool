@@ -80,6 +80,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: Dockerfile
+          context: .
           target: test
           tags: convertool:latest
           push: false
