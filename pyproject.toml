@@ -11,11 +11,11 @@ convertool = "convertool.cli:app"
 [tool.poetry.dependencies]
 python = "^3.11"
 acacore = {git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v3.0.8"}
-types-click = "^7.1.8"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.2"
 pytest = "^8.3.2"
+types-click = "^7.1.8"
 
 [tool.ruff]
 line-length = 120
