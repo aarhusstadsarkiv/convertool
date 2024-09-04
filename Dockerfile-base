@@ -1,6 +1,6 @@
 FROM python:3.11.9-bullseye AS base
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y curl wget git cmake
+RUN apt-get update && apt-get install -y curl wget git cmake apt-transport-https
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install pipx
