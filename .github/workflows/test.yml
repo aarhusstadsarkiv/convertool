@@ -5,6 +5,8 @@ on:
     paths:
       - convertool/**
       - config/**
+      - pyproject.toml
+      - poetry.lock
   workflow_dispatch:
 
 env:
