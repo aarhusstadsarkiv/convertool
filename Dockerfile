@@ -1,7 +1,7 @@
 FROM git.openaws.dk/aarhusstadsarkiv/convertool-base:latest AS base
 WORKDIR /root/convertool
 COPY . .
-RUN sudo cp config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
+RUN cp config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 
 FROM base AS test
 RUN pip3 install poetry
