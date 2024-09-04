@@ -32,7 +32,6 @@ def run_process(*args: str | int | PathLike, cwd: Path | None = None, env: bool 
     """
     try:
         env_args = [ENV] if env and ENV else []
-        print([*env_args, *map(str, args)])
         process: CompletedProcess[str] = run(
             [*env_args, *map(str, args)],
             cwd=cwd,
