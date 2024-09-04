@@ -1,12 +1,13 @@
 from pathlib import Path
 from re import match
+from typing import ClassVar
 
 from .base import Converter
 
 
 class ConverterToImg(Converter):
-    tool_names = ["img"]
-    outputs = ["jpg", "png", "tiff"]
+    tool_names: ClassVar[list[str]] = ["img"]
+    outputs: ClassVar[list[str]] = ["jpg", "png", "tiff"]
 
     def convert(
         self,
@@ -26,7 +27,7 @@ class ConverterToImg(Converter):
 
 
 class ConverterPDFToImg(ConverterToImg):
-    tool_names = ["pdf-to-img"]
+    tool_names: ClassVar[list[str]] = ["pdf-to-img"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -60,14 +61,14 @@ class ConverterPDFToImg(ConverterToImg):
 
 
 class ConverterTextToImg(ConverterToImg):
-    tool_names = ["text-to-img"]
+    tool_names: ClassVar[list[str]] = ["text-to-img"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
         text: str = self.file.get_absolute_path().read_text().strip()
-        width: int = max(800, max(len(l) * 10 for l in text.splitlines()))
+        width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
         height: int = max(600, (text.count("\n") + 1) * 25)
         dest_dir.mkdir(parents=True, exist_ok=True)
 

@@ -14,6 +14,10 @@ def ctx_params(ctx: Context) -> dict[str, Parameter]:
 
 def run_process(*args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
     """
+    Run process and capture output.
+
+    If the command is not found, a ``CalledProcessError`` exception is raised instead of ``FileNotFoundError``.
+
     :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
     :param cwd: Optionally, the working directory to use.
     :raise CalledProcessError: If the process exists with a non-zero code.

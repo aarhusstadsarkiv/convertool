@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
@@ -6,8 +7,8 @@ from .base import Converter
 
 
 class ConverterToVideo(Converter):
-    tool_names = ["video"]
-    outputs = [
+    tool_names: ClassVar[list[str]] = ["video"]
+    outputs: ClassVar[list[str]] = [
         "mpeg2",
         "h264",
         "h265",

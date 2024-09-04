@@ -1,11 +1,12 @@
 from pathlib import Path
+from typing import ClassVar
 
 from .base import Converter
 
 
 class ConverterToPdf(Converter):
-    tool_names = ["pdf"]
-    outputs = [
+    tool_names: ClassVar[list[str]] = ["pdf"]
+    outputs: ClassVar[list[str]] = [
         "pdf-a1",
         "pdf-a2",
         "pdf-a3",

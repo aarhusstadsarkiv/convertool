@@ -19,18 +19,16 @@ class Converter(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
 
-    def __init__(
-        self,
-        file: File,
-        database: FileDB | None = None,
-        root: Path | None = None,
-    ):
+    def __init__(self, file: File, database: FileDB | None = None, root: Path | None = None) -> None:
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
+        Run process and capture output.
+
+        If a ``CalledProcessError`` is raised, it is converted to ``ConvertError``.
 
         :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
         :param cwd: Optionally, the working directory to use.
@@ -74,6 +72,8 @@ class Converter(ABC):
 
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
         """
+        Get the path to the output file.
+
         :param output_dir: The path to the output directory.
         :param output: The desired output extension.
         :param append: ``True`` if the extension should be appended to the file name instead of replacing the existing

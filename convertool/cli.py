@@ -34,6 +34,8 @@ def find_converter(tool: str, output: str) -> Type[Converter] | None:
         if tool in converter.tool_names and output in converter.outputs:
             return converter
 
+    return None
+
 
 @group("convertool", no_args_is_help=True)
 @version_option(__version__, message=f"%(prog)s, version %(version)s\nacacore, version {__acacore_version__}")
