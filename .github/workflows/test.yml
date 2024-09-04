@@ -5,6 +5,8 @@ on:
     paths:
       - convertool/**
       - config/**
+      - Dockerfile
+      - Dockerfile-base
       - pyproject.toml
       - poetry.lock
   workflow_dispatch:
