@@ -115,3 +115,5 @@ process.yml
 
 # VS Code
 .vscode/
+
+tests/output
