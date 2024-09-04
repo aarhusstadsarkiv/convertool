@@ -90,5 +90,6 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Run tests and report coverage
         run: |
-          docker run -v $(pwd):/root/convertool convertool:latest poetry run pytest --cov-report=term:skip-covered --cov-fail-under=80 --cov=convertool tests/
+          docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
+          docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
       
