@@ -5,6 +5,7 @@ on:
     paths:
       - convertool/**
       - config/**
+      - tests/**
       - Dockerfile
       - Dockerfile-base
       - pyproject.toml
