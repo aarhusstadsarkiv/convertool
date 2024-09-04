@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and push Docker image to azure on merge
+    name: Build & Push
     runs-on: ubuntu-latest
     outputs:
       date: ${{ steps.date.outputs.date }}
