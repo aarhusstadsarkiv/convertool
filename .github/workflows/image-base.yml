@@ -32,7 +32,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: aarhusstadsarkiv/convertool-base:latest,aarhusstadsarkiv/convertool-base:${{ steps.date.outputs.date }}
+          tags: |
+            git.openaws.dk/aarhusstadsarkiv/convertool-base:latest
+            git.openaws.dk/aarhusstadsarkiv/convertool-base:${{ steps.date.outputs.date }}
           file: Dockerfile-base
           cache-from: type=gha
           cache-to: type=gha,mode=max
