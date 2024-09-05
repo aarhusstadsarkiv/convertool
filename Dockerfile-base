@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y libproj-dev gdal-bin
 RUN apt-get update && apt-get install -y ghostscript libreoffice ffmpeg imagemagick libc6-i386 libc6-x32 libxtst6
 
 # Install chrome
-RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-RUN apt update -y && apt install -y google-chrome-stable
+WORKDIR /root
+RUN curl -L https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /root/google-chrome-stable_current_amd64.deb
+RUN apt update && apt install -y /root/google-chrome-stable_current_amd64.deb
 RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
 
 # Install QCAD
