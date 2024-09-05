@@ -103,4 +103,3 @@ jobs:
         run: |
           docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
           docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
-      
