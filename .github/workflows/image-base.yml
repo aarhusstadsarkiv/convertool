@@ -34,8 +34,8 @@ jobs:
           file: Dockerfile-base
           context: .
           tags: |
-            git.openaws.dk/aarhusstadsarkiv/convertool-base:latest
             git.openaws.dk/aarhusstadsarkiv/convertool-base:${{ steps.date.outputs.date }}
+            git.openaws.dk/aarhusstadsarkiv/convertool-base:latest
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
