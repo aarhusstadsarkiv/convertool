@@ -53,9 +53,10 @@ class ConverterPDFToImg(ConverterToImg):
 
         return sorted(
             [
-                i.relative_to(dest_dir)
+                i
                 for i in dest_dir.iterdir()
-                if i.is_file() and match(rf"^{dest_file.name.split('.')[0]}-\d+.{i.name.split('.', 1)[1]}$", i.name)
+                if i.is_file()
+                and match(rf"^{dest_file.name.split('.')[0]}-\d+.{dest_file.name.split('.', 1)[1]}$", i.name)
             ]
         )
 
