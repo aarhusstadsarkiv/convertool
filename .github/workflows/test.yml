@@ -30,6 +30,7 @@ jobs:
           file: Dockerfile-base
           context: .
           target: base
+          platforms: linux/amd64
           tags: convertool-base:latest
           push: false
           load: true
@@ -41,6 +42,7 @@ jobs:
           file: Dockerfile
           context: .
           target: test
+          platforms: linux/amd64
           tags: convertool:latest
           push: false
           load: true
