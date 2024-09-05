@@ -77,8 +77,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Base Image
         run: docker build . -t convertool-base:latest -f Dockerfile-base
-      - name: Build Test Target
-        run: docker build . -t convertool:latest -f Dockerfile-base
+      - name: Build Test Image
+        run: docker build . -t convertool:latest -f Dockerfile
       - name: Run tests and report coverage
         run: |
           docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
