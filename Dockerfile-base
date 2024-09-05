@@ -5,6 +5,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # Install pipx
 RUN pip3 install pipx
+ENV PATH="/root/.local/bin:$PATH"
 
 # Install GDAL
 RUN apt update && apt install -y libproj-dev gdal-bin
