@@ -6,7 +6,11 @@ on:
       - 'v*.*.*'
 
 jobs:
+  linting:
+    uses: aarhusstadsarkiv/convertool-new/.github/workflows/linting.yml@main
+
   test:
+    needs: linting
     uses: aarhusstadsarkiv/convertool-new/.github/workflows/test.yml@main
 
   build:
