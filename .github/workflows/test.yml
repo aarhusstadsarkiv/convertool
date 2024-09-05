@@ -78,7 +78,7 @@ jobs:
       - name: Build Base Image
         run: docker build . -t git.openaws.dk/aarhusstadsarkiv/convertool-base:latest -f Dockerfile-base
       - name: Build Test Image
-        run: docker build . -t convertool:latest -f Dockerfile
+        run: docker build . -t convertool:latest -f Dockerfile --target test
       - name: Run tests and report coverage
         run: |
           docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
