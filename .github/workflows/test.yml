@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Base Image
-        run: docker build . -t convertool-base:latest -f Dockerfile-base
+        run: docker build . -t git.openaws.dk/aarhusstadsarkiv/convertool-base:latest -f Dockerfile-base
       - name: Build Test Image
         run: docker build . -t convertool:latest -f Dockerfile
       - name: Run tests and report coverage
