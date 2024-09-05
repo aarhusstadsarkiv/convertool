@@ -1,4 +1,4 @@
-FROM convertool-base:latest AS test
+FROM --platform=linux/amd64 convertool-base:latest AS test
 WORKDIR /root/convertool
 COPY . .
 RUN cp config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
