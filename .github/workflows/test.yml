@@ -34,8 +34,6 @@ jobs:
           tags: convertool-base:latest
           push: false
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
       - name: Build Test Target
         uses: docker/build-push-action@v6
         with:
@@ -47,8 +45,6 @@ jobs:
           push: false
           pull: false
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
       - name: Run tests and report coverage
         run: |
           docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
