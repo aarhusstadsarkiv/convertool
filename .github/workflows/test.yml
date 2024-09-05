@@ -22,29 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set Up Docker Buildx
-        uses: docker/setup-buildx-action@v3
       - name: Build Base Image
-        uses: docker/build-push-action@v6
-        with:
-          file: Dockerfile-base
-          context: .
-          target: base
-          platforms: linux/amd64
-          tags: convertool-base:latest
-          push: false
-          load: true
+        run: docker build . -t convertool-base:latest -f Dockerfile-base
       - name: Build Test Target
-        uses: docker/build-push-action@v6
-        with:
-          file: Dockerfile
-          context: .
-          target: test
-          platforms: linux/amd64
-          tags: convertool:latest
-          push: false
-          pull: false
-          load: true
+        run: docker build . -t convertool:latest -f Dockerfile-base
       - name: Run tests and report coverage
         run: |
           docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
