@@ -17,6 +17,9 @@ RUN /root/verapdf-*/verapdf-install /root/verapdf-autoinstall.xml
 ENV PATH="/root/.local/verapdf:$PATH"
 RUN rm -rf /root/verapdf-*
 
+# Install vim
+RUN apt-get update && apt-get install -y vim
+
 # Install poetry
 WORKDIR /root/convertool
 RUN pip3 install poetry
