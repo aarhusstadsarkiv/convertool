@@ -18,6 +18,7 @@ WORKDIR /root
 RUN curl -L https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /root/google-chrome-stable_current_amd64.deb
 RUN apt-get update && apt-get install -y /root/google-chrome-stable_current_amd64.deb
 RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
+RUN rm google-chrome-stable_current_amd64.deb
 
 # Install QCAD
 WORKDIR /root
@@ -25,5 +26,6 @@ RUN mkdir -p /root/qcad
 RUN curl https://qcad.org/archives/qcad/qcadcam-3.28.2-trial-linux-x86_64.run -o /root/qcad/qcadcam-3.28.2-trial-linux-x86_64.run
 RUN chmod a+x /root/qcad/qcadcam-3.28.2-trial-linux-x86_64.run
 RUN /root/qcad/qcadcam-3.28.2-trial-linux-x86_64.run
+RUN rm -rf /root/qcad
 
 CMD ["bash"]
