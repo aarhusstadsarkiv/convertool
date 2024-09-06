@@ -19,7 +19,6 @@ class ConverterToImg(Converter):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
-        dest_dir.mkdir(parents=True, exist_ok=True)
 
         self.run_process("convert", self.file.get_absolute_path(), dest_file.name, cwd=dest_dir)
 
@@ -33,7 +32,6 @@ class ConverterPDFToImg(ConverterToImg):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
-        dest_dir.mkdir(parents=True, exist_ok=True)
 
         density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
         density: int = 0
@@ -71,7 +69,6 @@ class ConverterTextToImg(ConverterToImg):
         text: str = self.file.get_absolute_path().read_text().strip()
         width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
         height: int = max(600, (text.count("\n") + 1) * 25)
-        dest_dir.mkdir(parents=True, exist_ok=True)
 
         self.run_process(
             "convert",

@@ -43,19 +43,22 @@ class Converter(ABC):
                 err.stderr or err.stdout or f"An unknown error occurred. Return code {err.returncode}",
             )
 
-    def output_dir(self, output_dir: Path, keep_relative_path: bool = True) -> Path:
+    def output_dir(self, output_dir: Path, keep_relative_path: bool = True, mkdir: bool = True) -> Path:
         """
         Compute the output directory and check if it is a valid directory path.
 
         :param output_dir: The base output path.
         :param keep_relative_path: ``True`` if the output path should include the file's parent directories relative to
             its root.
+        :param mkdir: ``True`` if the output directory should be created.
         :raise OutputDirError: If the path already exists and is not a directory.
         :return: The path to the output directory.
         """
         dest_dir: Path = output_dir.joinpath(self.file.relative_path.parent) if keep_relative_path else output_dir
         if dest_dir.exists() and not dest_dir.is_dir():
             raise OutputDirError(self.file, FileExistsError(dest_dir))
+        if mkdir:
+            dest_dir.mkdir(parents=True, exist_ok=True)
         return dest_dir
 
     def output(self, output: str) -> str:

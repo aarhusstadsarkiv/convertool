@@ -24,7 +24,6 @@ class ConverterToVideo(Converter):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         arguments: list[str] = []
-        dest_dir.mkdir(parents=True, exist_ok=True)
 
         if output == "mpeg2":
             output = "mpg"
