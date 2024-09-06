@@ -2,6 +2,9 @@ FROM git.openaws.dk/aarhusstadsarkiv/convertool-base:latest AS base
 WORKDIR /root/convertool
 COPY . .
 
+FROM base AS prod
+RUN pipx install .
+
 FROM base AS test
 # Install veraPDF
 WORKDIR /root
@@ -18,6 +21,3 @@ RUN rm -rf /root/verapdf-*
 WORKDIR /root/convertool
 RUN pip3 install poetry
 RUN poetry install
-
-FROM base AS prod
-RUN pipx install .
