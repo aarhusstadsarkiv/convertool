@@ -1,6 +1,6 @@
 FROM python:3.11.9-bullseye AS base
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt update && apt install -y curl wget git cmake apt-transport-https software-properties-common ca-certificates
+RUN apt-get update && apt-get install -y curl wget git cmake apt-transport-https software-properties-common ca-certificates
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install pipx
@@ -8,15 +8,15 @@ RUN pip3 install pipx
 ENV PATH="/root/.local/bin:$PATH"
 
 # Install GDAL
-RUN apt update && apt install -y libproj-dev gdal-bin
+RUN apt-get update && apt-get install -y libproj-dev gdal-bin
 
 # Install GhostScript, Libreoffice, and imagemagick
-RUN apt update && apt install -y ghostscript libreoffice ffmpeg imagemagick libc6-i386 libc6-x32 libxtst6
+RUN apt-get update && apt-get install -y ghostscript libreoffice ffmpeg imagemagick libc6-i386 libc6-x32 libxtst6
 
 # Install chrome
 WORKDIR /root
 RUN curl -L https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /root/google-chrome-stable_current_amd64.deb
-RUN apt update && apt install -y /root/google-chrome-stable_current_amd64.deb
+RUN apt-get update && apt-get install -y /root/google-chrome-stable_current_amd64.deb
 RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
 
 # Install QCAD
