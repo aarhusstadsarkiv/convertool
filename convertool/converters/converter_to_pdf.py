@@ -4,12 +4,12 @@ from typing import ClassVar
 from .base import Converter
 
 
-class ConverterToPdf(Converter):
+class ConverterToPDF(Converter):
     tool_names: ClassVar[list[str]] = ["pdf"]
     outputs: ClassVar[list[str]] = [
-        "pdf-a1",
-        "pdf-a2",
-        "pdf-a3",
+        "pdfa-1",
+        "pdfa-2",
+        "pdfa-3",
     ]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

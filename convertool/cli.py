@@ -17,7 +17,7 @@ from .converters.base import Converter
 from .converters.converter_to_img import ConverterPDFToImg
 from .converters.converter_to_img import ConverterTextToImg
 from .converters.converter_to_img import ConverterToImg
-from .converters.converter_to_pdf import ConverterToPdf
+from .converters.converter_to_pdf import ConverterToPDF
 from .converters.converter_to_video import ConverterToVideo
 from .converters.exceptions import ConvertError
 from .util import ctx_params
@@ -29,7 +29,7 @@ def find_converter(tool: str, output: str) -> Type[Converter] | None:
         ConverterTextToImg,
         ConverterToImg,
         ConverterToVideo,
-        ConverterToPdf,
+        ConverterToPDF,
     ):
         if tool in converter.tool_names and output in converter.outputs:
             return converter
