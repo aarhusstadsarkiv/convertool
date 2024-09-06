@@ -1,7 +1,6 @@
 FROM git.openaws.dk/aarhusstadsarkiv/convertool-base:latest AS base
 WORKDIR /root/convertool
 COPY . .
-RUN cp config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 
 FROM base AS test
 # Install veraPDF

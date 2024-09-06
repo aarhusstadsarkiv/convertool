@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y libproj-dev gdal-bin
 
 # Install Imagemagick
 RUN apt-get update && apt-get install -y imagemagick
+COPY config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 
 # Install LibreOffice
 RUN apt-get update && apt-get install -y libreoffice
