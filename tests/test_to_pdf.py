@@ -24,4 +24,6 @@ def test_pdf_to_pdfa(test_files: dict[str, Path], reference_files: dict[str, Pat
             encoding="utf-8",
         )
         validation = loads(validation_process.stdout)
-        assert validation["report"]["batchSummary"]["validationSummary"]["compliantPdfaCount"] == 1
+        assert (
+            validation["report"]["batchSummary"]["validationSummary"]["compliantPdfaCount"] == 1
+        ), validation_process.stdout
