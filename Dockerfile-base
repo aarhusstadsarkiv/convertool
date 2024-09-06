@@ -1,6 +1,18 @@
 FROM python:3.11.9-bullseye AS base
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y curl wget git cmake apt-transport-https software-properties-common ca-certificates
+
+# Install base dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    cmake \
+    apt-transport-https \
+    software-properties-common \
+    ca-certificates \
+    libc6-i386 \
+    libc6-x32 \
+    libxtst6
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install pipx
@@ -10,8 +22,17 @@ ENV PATH="/root/.local/bin:$PATH"
 # Install GDAL
 RUN apt-get update && apt-get install -y libproj-dev gdal-bin
 
-# Install GhostScript, Libreoffice, and imagemagick
-RUN apt-get update && apt-get install -y ghostscript libreoffice ffmpeg imagemagick libc6-i386 libc6-x32 libxtst6
+# Install Imagemagick
+RUN apt-get update && apt-get install -y imagemagick
+
+# Install LibreOffice
+RUN apt-get update && apt-get install -y libreoffice
+
+# Install GhostScript
+RUN apt-get update && apt-get install -y ghostscript
+
+# Install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
 
 # Install chrome
 WORKDIR /root
