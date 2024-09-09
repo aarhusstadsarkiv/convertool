@@ -10,7 +10,7 @@ FROM base AS test
 WORKDIR /root
 RUN curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
 RUN tar -C /usr/local -xzf go.tar.gz
-ENV GOPATH="/root/.go"
+ENV GOPATH="/usr/local/go"
 RUN go install github.com/richardlehane/siegfried/cmd/sf@latest
 ENV PATH="$GOPATH/bin:$PATH"
 ENV SIEGFRIED_PATH="$GOPATH/bin/sf"
