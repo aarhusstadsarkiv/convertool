@@ -7,8 +7,10 @@ RUN pipx install .
 
 FROM base AS test
 # Install go and Siegfried
+WORKDIR /root
+RUN curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
+RUN tar -C /usr/local -xzf go.tar.gz
 ENV GOPATH="/root/.go"
-RUN apt-get update && apt-get install -y go
 RUN go install github.com/richardlehane/siegfried/cmd/sf@latest
 ENV PATH="$GOPATH/bin:$PATH"
 ENV SIEGFRIED_PATH="$GOPATH/bin/sf"
