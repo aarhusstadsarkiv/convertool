@@ -11,8 +11,8 @@ WORKDIR /root
 RUN curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
 RUN tar -C /usr/local -xzf go.tar.gz
 ENV GOPATH="/usr/local/go"
-RUN go install github.com/richardlehane/siegfried/cmd/sf@latest
 ENV PATH="$GOPATH/bin:$PATH"
+RUN go install github.com/richardlehane/siegfried/cmd/sf@latest
 ENV SIEGFRIED_PATH="$GOPATH/bin/sf"
 ENV SIEGFRIED_HOME="/root/.sf"
 RUN sf -home "$SIEGFRIED_HOME" -update
