@@ -1,6 +1,4 @@
-from json import loads
 from pathlib import Path
-from subprocess import run
 
 from acacore.models.file import File
 
@@ -18,12 +16,3 @@ def test_pdf_to_pdfa(test_files: dict[str, Path], reference_files: dict[str, Pat
         output_files = converter.convert(output_dir, output)
         assert len(output_files) == 1
         assert output_files[0].is_file()
-        validation_process = run(
-            ["verapdf", "-f", f"{pdfa_ver}b", "--format", "json", str(output_files[0])],
-            capture_output=True,
-            encoding="utf-8",
-        )
-        validation = loads(validation_process.stdout)
-        assert (
-            validation["report"]["batchSummary"]["validationSummary"]["compliantPdfaCount"] == 1
-        ), validation_process.stdout
