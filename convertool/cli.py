@@ -73,7 +73,9 @@ def convert_file(
 ) -> tuple[list[Path], list[HistoryEntry]]:
     if not file.action_data.convert:
         return [], [HistoryEntry.command_history(ctx, "error", file.uuid, None, "Missing convert action data")]
+
     tool, outputs = file.action_data.convert.tool, file.action_data.convert.outputs
+    dests: list[Path] = []
 
     if tool == "copy":
         dst = output_dir.joinpath(file.relative_path)
@@ -93,8 +95,9 @@ def convert_file(
                 )
             ]
         converter: Converter = converter_cls(file, database, root)
-        dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
-        return dests, [HistoryEntry.command_history(ctx, "convert", file.uuid, dst) for dst in dests]
+        dests.extend(converter.convert(output_dir, output, keep_relative_path=True))
+
+    return dests, [HistoryEntry.command_history(ctx, "convert", file.uuid, dst) for dst in dests]
 
 
 @group("convertool", no_args_is_help=True)
