@@ -144,7 +144,7 @@ def digiarch(
             for file in database.files.select(where="action = 'convert'"):
                 if tool_include and file.action_data.convert.tool not in tool_include:
                     continue
-                elif file.action_data.convert.tool in tool_ignore:
+                if file.action_data.convert.tool in tool_ignore:
                     continue
                 dests, history = convert_file(ctx, root, database, file, output_dir)
                 for event in history:
