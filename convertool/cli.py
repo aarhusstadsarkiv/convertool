@@ -147,7 +147,7 @@ def digiarch(
                     continue
                 dests, history = convert_file(ctx, root, database, file, output_dir)
                 for event in history:
-                    event.log(INFO)
+                    event.log(INFO, log_stdout)
                     database.history.insert(event)
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
