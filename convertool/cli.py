@@ -141,16 +141,15 @@ def digiarch(
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
 
         with ExceptionManager(BaseException) as exception:
-            if templates:
-                for file in database.files.select(where="action = 'convert'"):
-                    if tool_include and file.action_data.convert.tool not in tool_include:
-                        continue
-                    elif file.action_data.convert.tool in tool_ignore:
-                        continue
-                    dests, history = convert_file(ctx, root, database, file, output_dir)
-                    for event in history:
-                        event.log(INFO)
-                        database.history.insert(event)
+            for file in database.files.select(where="action = 'convert'"):
+                if tool_include and file.action_data.convert.tool not in tool_include:
+                    continue
+                elif file.action_data.convert.tool in tool_ignore:
+                    continue
+                dests, history = convert_file(ctx, root, database, file, output_dir)
+                for event in history:
+                    event.log(INFO)
+                    database.history.insert(event)
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
