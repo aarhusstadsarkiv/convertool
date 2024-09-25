@@ -10,7 +10,7 @@ convertool = "convertool.cli:app"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-acacore = {git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v3.0.8"}
+acacore = {git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v3.0.11"}
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.2"
