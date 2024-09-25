@@ -26,7 +26,7 @@ jobs:
           tag="$(git tag -l --sort=-version:refname | head -1)"
           minor="${tag%.*}"
           major="${minor%.*}"
-          echo "patch=$patch" >> "$GITHUB_OUTPUT"
+          echo "patch=$tag" >> "$GITHUB_OUTPUT"
           echo "minor=$minor" >> "$GITHUB_OUTPUT"
           echo "major=$major" >> "$GITHUB_OUTPUT"
       - name: Set Up Docker Buildx
