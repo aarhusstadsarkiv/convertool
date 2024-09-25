@@ -126,7 +126,6 @@ def digiarch(
     ctx: Context,
     root: Path,
     output_dir: Path,
-    templates: bool,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     dry_run: bool,
