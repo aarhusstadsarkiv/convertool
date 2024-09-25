@@ -75,8 +75,6 @@ jobs:
       - version-acacore
     steps:
       - uses: actions/checkout@v4
-      - name: Build Base Image
-        run: docker build . -t git.openaws.dk/aarhusstadsarkiv/convertool-base:latest -f Dockerfile-base
       - name: Build Test Image
         run: docker build . -t convertool:latest -f Dockerfile --target test
       - name: Run tests and report coverage
