@@ -7,7 +7,6 @@ on:
       - config/**
       - tests/**
       - Dockerfile
-      - Dockerfile-base
       - pyproject.toml
       - poetry.lock
   workflow_dispatch:
