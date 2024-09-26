@@ -6,7 +6,7 @@ from .base import Converter
 
 
 class ConverterToImg(Converter):
-    tool_names: ClassVar[list[str]] = ["img"]
+    tool_names: ClassVar[list[str]] = ["image"]
     outputs: ClassVar[list[str]] = ["jpg", "png", "tiff"]
 
     def convert(
@@ -26,7 +26,7 @@ class ConverterToImg(Converter):
 
 
 class ConverterPDFToImg(ConverterToImg):
-    tool_names: ClassVar[list[str]] = ["pdf-to-img"]
+    tool_names: ClassVar[list[str]] = ["pdf-to-image"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -60,7 +60,7 @@ class ConverterPDFToImg(ConverterToImg):
 
 
 class ConverterTextToImg(ConverterToImg):
-    tool_names: ClassVar[list[str]] = ["text-to-img"]
+    tool_names: ClassVar[list[str]] = ["text-to-image"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
