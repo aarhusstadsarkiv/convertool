@@ -25,6 +25,7 @@ from click.exceptions import Exit
 
 from .__version__ import __version__
 from .converters.base import Converter
+from .converters.converter_templates import ConverterTemplate
 from .converters.converter_to_img import ConverterPDFToImg
 from .converters.converter_to_img import ConverterTextToImg
 from .converters.converter_to_img import ConverterToImg
@@ -150,6 +151,17 @@ def digiarch(
                     file.processed = True
                     database.files.update(file)
                     for dst, event in zip(dests, history):
+                        event.log(INFO, log_stdout)
+                        database.history.insert(event)
+
+            while files := list(database.files.select(where="action = 'ignore' and not processed", limit=100)):
+                for file in files:
+                    converter = ConverterTemplate(file, database, root)
+                    dests = converter.convert(output_dir, file.action_data.ignore.template)
+                    file.processed = True
+                    database.files.update(file)
+                    for dst in dests:
+                        event = HistoryEntry.command_history(ctx, "template", file.uuid, dst.relative_to(output_dir))
                         event.log(INFO, log_stdout)
                         database.history.insert(event)
 
