@@ -82,7 +82,7 @@ def convert_file(
         dst = output_dir.joinpath(file.relative_path)
         dst.parent.mkdir(parents=True, exist_ok=True)
         copy2(file.get_absolute_path(root), dst)
-        return [dst], [HistoryEntry.command_history(ctx, "copy", file.uuid, dst)]
+        return [dst], [HistoryEntry.command_history(ctx, "copy", file.uuid, dst.relative_to(output_dir))]
 
     for output in outputs:
         if not (converter_cls := find_converter(tool, output)):
