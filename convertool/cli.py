@@ -65,6 +65,19 @@ def check_database_version(ctx: Context, param: Parameter, path: Path):
             raise BadParameter(err.args[0], ctx, param)
 
 
+def file_tool_outputs(file: File) -> tuple[str, list[str]]:
+    if file.action == "convert" and not file.action_data.convert:
+        raise ValueError("Missing convert action data", file)
+    elif file.action == "convert":
+        return file.action_data.convert.tool, file.action_data.convert.outputs
+    elif file.action == "ignore" and not file.action_data.ignore:
+        raise ValueError("Missing ignore action data", file)
+    elif file.action == "ignore":
+        return "template", [file.action_data.ignore.template]
+    else:
+        raise ValueError(f"Unsupported action {file.action!r}", file)
+
+
 def convert_file(
     ctx: Context,
     root: Path,
