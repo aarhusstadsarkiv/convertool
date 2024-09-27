@@ -119,6 +119,7 @@ def app(): ...
     type=ClickPath(file_okay=False, writable=True, resolve_path=True),
     callback=lambda _c, _p, v: Path(v),
 )
+@argument("--templates/--no-templates", is_flag=True, default=True, show_default=True, help="")
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
@@ -127,6 +128,7 @@ def digiarch(
     ctx: Context,
     root: Path,
     output_dir: Path,
+    templates: bool,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     dry_run: bool,
@@ -154,16 +156,19 @@ def digiarch(
                         event.log(INFO, log_stdout)
                         database.history.insert(event)
 
-            while files := list(database.files.select(where="action = 'ignore' and not processed", limit=100)):
-                for file in files:
-                    converter = ConverterTemplate(file, database, root)
-                    dests = converter.convert(output_dir, file.action_data.ignore.template)
-                    file.processed = True
-                    database.files.update(file)
-                    for dst in dests:
-                        event = HistoryEntry.command_history(ctx, "template", file.uuid, dst.relative_to(output_dir))
-                        event.log(INFO, log_stdout)
-                        database.history.insert(event)
+            if templates:
+                while files := list(database.files.select(where="action = 'ignore' and not processed", limit=100)):
+                    for file in files:
+                        converter = ConverterTemplate(file, database, root)
+                        dests = converter.convert(output_dir, file.action_data.ignore.template)
+                        file.processed = True
+                        database.files.update(file)
+                        for dst in dests:
+                            event = HistoryEntry.command_history(
+                                ctx, "template", file.uuid, dst.relative_to(output_dir)
+                            )
+                            event.log(INFO, log_stdout)
+                            database.history.insert(event)
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
