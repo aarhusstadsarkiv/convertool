@@ -172,7 +172,7 @@ def digiarch(
                     try:
                         dests, history = convert_file(ctx, root, database, file, output_dir, tool, outputs)
                     except ConvertError as err:
-                        HistoryEntry.command_history(ctx, f"error", file.uuid, [tool, outputs], err.msg).log(
+                        HistoryEntry.command_history(ctx, "error", file.uuid, [tool, outputs], err.msg).log(
                             ERROR, log_stdout
                         )
                         continue
