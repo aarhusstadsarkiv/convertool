@@ -26,12 +26,12 @@ from click.exceptions import Exit
 from .__version__ import __version__
 from .converters.base import Converter
 from .converters.converter_copy import ConverterCopy
+from .converters.converter_img import ConverterPDFToImg
+from .converters.converter_img import ConverterTextToImg
+from .converters.converter_img import ConverterToImg
+from .converters.converter_pdf import ConverterToPDF
 from .converters.converter_templates import ConverterTemplate
-from .converters.converter_to_img import ConverterPDFToImg
-from .converters.converter_to_img import ConverterTextToImg
-from .converters.converter_to_img import ConverterToImg
-from .converters.converter_to_pdf import ConverterToPDF
-from .converters.converter_to_video import ConverterToVideo
+from .converters.converter_video import ConverterToVideo
 from .converters.exceptions import ConvertError
 from .util import ctx_params
 

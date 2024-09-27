@@ -4,7 +4,7 @@ from pathlib import Path
 from acacore.models.file import File
 from acacore.siegfried import Siegfried
 
-from convertool.converters.converter_to_pdf import ConverterToPDF
+from convertool.converters.converter_pdf import ConverterToPDF
 
 
 # noinspection DuplicatedCode

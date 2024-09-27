@@ -2,9 +2,9 @@ from pathlib import Path
 
 from acacore.models.file import File
 
-from convertool.converters.converter_to_img import ConverterPDFToImg
-from convertool.converters.converter_to_img import ConverterTextToImg
-from convertool.converters.converter_to_img import ConverterToImg
+from convertool.converters.converter_img import ConverterPDFToImg
+from convertool.converters.converter_img import ConverterTextToImg
+from convertool.converters.converter_img import ConverterToImg
 
 
 # noinspection DuplicatedCode
