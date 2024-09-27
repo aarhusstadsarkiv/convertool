@@ -95,6 +95,7 @@ ignore = [
     "PLR2004", # magic value used in comparison
     "PT012",   # ptest.raises should contain a simple statement
     "RET505",  # unnecessary {branch} after return statement
+    "RET506",  # unnecessary `elif` after `raise` statement
     "S101",    # use of assert,
     "TRY003",  # avoid using long messages outside exception class
     "UP007",   # not using | in type anotations
