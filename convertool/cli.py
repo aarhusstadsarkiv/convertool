@@ -1,6 +1,6 @@
+from logging import ERROR
 from logging import INFO
 from pathlib import Path
-from shutil import copy2
 from sqlite3 import DatabaseError
 from typing import Type
 
@@ -25,6 +25,7 @@ from click.exceptions import Exit
 
 from .__version__ import __version__
 from .converters.base import Converter
+from .converters.converter_copy import ConverterCopy
 from .converters.converter_templates import ConverterTemplate
 from .converters.converter_to_img import ConverterPDFToImg
 from .converters.converter_to_img import ConverterTextToImg
@@ -37,6 +38,8 @@ from .util import ctx_params
 
 def find_converter(tool: str, output: str) -> Type[Converter] | None:
     for converter in (
+        ConverterCopy,
+        ConverterTemplate,
         ConverterPDFToImg,
         ConverterTextToImg,
         ConverterToImg,
@@ -84,34 +87,35 @@ def convert_file(
     database: FileDB,
     file: File,
     output_dir: Path,
+    tool: str,
+    outputs: list[str],
 ) -> tuple[list[Path], list[HistoryEntry]]:
-    if not file.action_data.convert:
-        return [], [HistoryEntry.command_history(ctx, "error", file.uuid, None, "Missing convert action data")]
+    if tool in ConverterCopy.tool_names:
+        outputs = ConverterCopy.outputs[0]
 
-    tool, outputs = file.action_data.convert.tool, file.action_data.convert.outputs
+    converters: list[tuple[str, Type[Converter]]] = [(o, find_converter(tool, o)) for o in outputs]
+
+    if not (missing_converters := [o for o, c in converters if not c]):
+        raise ConvertError(
+            file,
+            f"No converter found for tool {tool!r}"
+            f" and output{'s' if len(missing_converters) > 1 else ''} {','.join(map(repr, missing_converters))}",
+        )
+
     dests: list[Path] = []
+    history: list[HistoryEntry] = []
 
-    if tool == "copy":
-        dst = output_dir.joinpath(file.relative_path)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        copy2(file.get_absolute_path(root), dst)
-        return [dst], [HistoryEntry.command_history(ctx, "copy", file.uuid, dst.relative_to(output_dir))]
-
-    for output in outputs:
-        if not (converter_cls := find_converter(tool, output)):
-            return [], [
-                HistoryEntry.command_history(
-                    ctx,
-                    "error",
-                    file.uuid,
-                    None,
-                    f"Converter not found for tool {tool} output {output}",
-                )
-            ]
+    for output, converter_cls in converters:
         converter: Converter = converter_cls(file, database, root)
-        dests.extend(converter.convert(output_dir, output, keep_relative_path=True))
+        dests.extend(dsts := converter.convert(output_dir, output, keep_relative_path=True))
+        history.extend(
+            [
+                HistoryEntry.command_history(ctx, f"{tool}.{output}", file.uuid, dst.relative_to(output_dir))
+                for dst in dsts
+            ]
+        )
 
-    return dests, [HistoryEntry.command_history(ctx, "convert", file.uuid, dst) for dst in dests]
+    return dests, history
 
 
 @group("convertool", no_args_is_help=True)
@@ -132,7 +136,6 @@ def app(): ...
     type=ClickPath(file_okay=False, writable=True, resolve_path=True),
     callback=lambda _c, _p, v: Path(v),
 )
-@argument("--templates/--no-templates", is_flag=True, default=True, show_default=True, help="")
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
@@ -141,7 +144,6 @@ def digiarch(
     ctx: Context,
     root: Path,
     output_dir: Path,
-    templates: bool,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     dry_run: bool,
@@ -156,32 +158,30 @@ def digiarch(
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
 
         with ExceptionManager(BaseException) as exception:
-            while files := list(database.files.select(where="action = 'convert' and not processed", limit=100)):
+            while files := list(
+                database.files.select(where="action in ('convert', 'ignore') and not processed", limit=100)
+            ):
                 for file in files:
-                    if tool_include and file.action_data.convert.tool not in tool_include:
+                    tool, outputs = file_tool_outputs(file)
+
+                    if tool_include and tool not in tool_include:
                         continue
-                    if file.action_data.convert.tool in tool_ignore:
+                    if tool in tool_ignore:
                         continue
-                    dests, history = convert_file(ctx, root, database, file, output_dir)
+
+                    try:
+                        dests, history = convert_file(ctx, root, database, file, output_dir, tool, outputs)
+                    except ConvertError as err:
+                        HistoryEntry.command_history(ctx, f"error", file.uuid, [tool, outputs], err.msg).log(
+                            ERROR, log_stdout
+                        )
+                        continue
+
                     file.processed = True
                     database.files.update(file)
-                    for dst, event in zip(dests, history):
+                    database.history.insert(HistoryEntry.command_history(ctx, tool, file.uuid, outputs))
+                    for event in history:
                         event.log(INFO, log_stdout)
-                        database.history.insert(event)
-
-            if templates:
-                while files := list(database.files.select(where="action = 'ignore' and not processed", limit=100)):
-                    for file in files:
-                        converter = ConverterTemplate(file, database, root)
-                        dests = converter.convert(output_dir, file.action_data.ignore.template)
-                        file.processed = True
-                        database.files.update(file)
-                        for dst in dests:
-                            event = HistoryEntry.command_history(
-                                ctx, "template", file.uuid, dst.relative_to(output_dir)
-                            )
-                            event.log(INFO, log_stdout)
-                            database.history.insert(event)
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
