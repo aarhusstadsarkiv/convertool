@@ -9,7 +9,7 @@ class ConverterCopy(Converter):
     tool_names: ClassVar[list[str]] = ["copy"]
     outputs: ClassVar[list[str]] = ["copy"]
 
-    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
+    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
         return output_dir / self.file.name
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
