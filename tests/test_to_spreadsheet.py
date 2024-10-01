@@ -8,8 +8,8 @@ from convertool.converters.converter_spreadsheet import ConverterSpreadsheet
 
 
 # noinspection DuplicatedCode
-def test_spreadsheet_to_ods(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    for path in [f for n, f in reference_files.items() if n.startswith("spreadsheet.")]:
+def test_spreadsheet_to_ods(test_files: dict[str, Path], output_dir: Path):
+    for path in [f for n, f in test_files.items() if n.startswith("spreadsheet.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
@@ -25,8 +25,8 @@ def test_spreadsheet_to_ods(test_files: dict[str, Path], reference_files: dict[s
 
 
 # noinspection DuplicatedCode
-def test_spreadsheet_to_pdf(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    for path in [f for n, f in reference_files.items() if n.startswith("spreadsheet.")]:
+def test_spreadsheet_to_pdf(test_files: dict[str, Path], output_dir: Path):
+    for path in [f for n, f in test_files.items() if n.startswith("spreadsheet.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
@@ -42,8 +42,8 @@ def test_spreadsheet_to_pdf(test_files: dict[str, Path], reference_files: dict[s
 
 
 # noinspection DuplicatedCode
-def test_spreadsheet_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    for path in [f for n, f in reference_files.items() if n.startswith("spreadsheet.")]:
+def test_spreadsheet_to_html(test_files: dict[str, Path], output_dir: Path):
+    for path in [f for n, f in test_files.items() if n.startswith("spreadsheet.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)

@@ -8,8 +8,8 @@ from convertool.converters.converter_document import ConverterDocument
 
 
 # noinspection DuplicatedCode
-def test_document_to_odt(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    for path in [f for n, f in reference_files.items() if n.startswith("document.")]:
+def test_document_to_odt(test_files: dict[str, Path], output_dir: Path):
+    for path in [f for n, f in test_files.items() if n.startswith("document.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
@@ -25,8 +25,8 @@ def test_document_to_odt(test_files: dict[str, Path], reference_files: dict[str,
 
 
 # noinspection DuplicatedCode
-def test_document_to_pdf(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    for path in [f for n, f in reference_files.items() if n.startswith("document.")]:
+def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path):
+    for path in [f for n, f in test_files.items() if n.startswith("document.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
@@ -42,8 +42,8 @@ def test_document_to_pdf(test_files: dict[str, Path], reference_files: dict[str,
 
 
 # noinspection DuplicatedCode
-def test_document_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    for path in [f for n, f in reference_files.items() if n.startswith("document.")]:
+def test_document_to_html(test_files: dict[str, Path], output_dir: Path):
+    for path in [f for n, f in test_files.items() if n.startswith("document.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
