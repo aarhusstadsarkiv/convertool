@@ -11,7 +11,7 @@ class ConverterDocument(Converter):
     outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
 
     # noinspection PyMethodMayBeStatic
-    def output_filter(self, output: str) -> str:
+    def output_filter(self, output: str) -> str:  # noqa: ARG002
         return ""
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
