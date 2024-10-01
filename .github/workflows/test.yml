@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Test Image
         run: docker build . -t convertool:latest -f Dockerfile --target test
-      - name: Run tests and report coverage
-        run: |
-          docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
-          docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
+      - name: pytest
+        run: docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
+      - name: converage
+        run: docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
