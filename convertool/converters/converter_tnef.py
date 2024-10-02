@@ -61,6 +61,8 @@ def tnef_body_text(tnef: TNEF) -> str | None:
         if not detect_encoding(tnef.rtfbody.encode(tnef.codepage))["encoding"]:
             return None
         return rtf_to_text(tnef.rtfbody, tnef.codepage, "replace").strip()
+    else:
+        return None
 
 
 def tnef_body_html(tnef: TNEF) -> str | None:
@@ -101,18 +103,8 @@ def tnef_front_matter(tnef: TNEF, headers: TNEFHeaders) -> str:
 
 
 def tnef_to_txt(tnef: TNEF, headers: TNEFHeaders) -> str:
-    front_matter_items: dict[str, str | list[str]] = {
-        "From": f"{headers.from_name or ''} {f'<{headers.from_email}>' if headers.from_email else ''}".strip(),
-        "To": f"{headers.to_name or ''} {f'<{headers.to_email}>' if headers.to_email else ''}".strip(),
-        "Date": headers.date_sent.isoformat() if headers.date_sent else "",
-        "Subject": headers.subject or "",
-        "Attachments": [a.long_filename() for a in tnef.attachments],
-    }
-
     text: str = tnef_front_matter(tnef, headers) + "\n\n"
-
     text += tnef_body_text(tnef) or "No readable content available."
-
     return text
 
 
