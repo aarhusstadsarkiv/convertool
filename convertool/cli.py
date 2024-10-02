@@ -31,6 +31,7 @@ from .converters.converter_img import ConverterTextToImg
 from .converters.converter_img import ConverterToImg
 from .converters.converter_pdf import ConverterToPDF
 from .converters.converter_templates import ConverterTemplate
+from .converters.converter_tnef import ConverterTnef
 from .converters.converter_video import ConverterToVideo
 from .converters.exceptions import ConvertError
 from .util import ctx_params
@@ -40,6 +41,7 @@ def find_converter(tool: str, output: str) -> Type[Converter] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
+        ConverterTnef,
         ConverterPDFToImg,
         ConverterTextToImg,
         ConverterToImg,
