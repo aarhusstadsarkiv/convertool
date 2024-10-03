@@ -99,7 +99,7 @@ def convert_file(
 
     converters: list[tuple[str, Type[Converter]]] = [(o, find_converter(tool, o)) for o in outputs]
 
-    if not (missing_converters := [o for o, c in converters if not c]):
+    if missing_converters := [o for o, c in converters if not c]:
         raise ConvertError(
             file,
             f"No converter found for tool {tool!r}"
