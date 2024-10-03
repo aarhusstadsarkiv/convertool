@@ -26,6 +26,7 @@ from click.exceptions import Exit
 from .__version__ import __version__
 from .converters.base import Converter
 from .converters.converter_copy import ConverterCopy
+from .converters.converter_document import ConverterDocument
 from .converters.converter_img import ConverterPDFToImg
 from .converters.converter_img import ConverterTextToImg
 from .converters.converter_img import ConverterToImg
@@ -42,6 +43,7 @@ def find_converter(tool: str, output: str) -> Type[Converter] | None:
         ConverterCopy,
         ConverterTemplate,
         ConverterTnef,
+        ConverterDocument,
         ConverterPDFToImg,
         ConverterTextToImg,
         ConverterToImg,
