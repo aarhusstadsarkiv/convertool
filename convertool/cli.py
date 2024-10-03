@@ -163,9 +163,16 @@ def digiarch(
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
 
         with ExceptionManager(BaseException) as exception:
+            offset: int = 0
             while files := list(
-                database.files.select(where="action in ('convert', 'ignore') and not processed", limit=100)
+                database.files.select(
+                    where="action in ('convert', 'ignore') and not processed",
+                    limit=100,
+                    offset=offset,
+                )
             ):
+                offset += len(files)
+
                 for file in files:
                     tool, outputs = file_tool_outputs(file)
 
