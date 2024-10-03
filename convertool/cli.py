@@ -104,6 +104,7 @@ def convert_file(
             f" and output{'s' if len(missing_converters) > 1 else ''} {','.join(map(repr, missing_converters))}",
         )
 
+    converters = [(o, c) for o, c in converters if c]
     dests: list[Path] = []
     history: list[HistoryEntry] = []
 
