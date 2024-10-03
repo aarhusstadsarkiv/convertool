@@ -25,3 +25,5 @@
 | spreadsheet | ods    | Convert a spreadsheet file (Excel, LibreOffice, etc.) to ODS  | .ods      |
 | spreadsheet | pdf    | Convert a spreadsheet file (Excel, LibreOffice, etc.) to PDF  | .pdf      |
 | spreadsheet | html   | Convert a spreadsheet file (Excel, LibreOffice, etc.) to HTML | .html     |
+| tnef        | html   | Convert a TNEF file to HTML                                   | .html     |
+| tnef        | txt    | Convert a TNEF file to TXT                                    | .txt      |
