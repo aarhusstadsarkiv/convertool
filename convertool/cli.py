@@ -27,6 +27,7 @@ from click.exceptions import Exit
 
 from .__version__ import __version__
 from .converters import ConverterABC
+from .converters import ConverterAudio
 from .converters import ConverterCopy
 from .converters import ConverterDocument
 from .converters import ConverterImage
@@ -53,6 +54,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterPDFToImage,
         ConverterTextToImage,
         ConverterImage,
+        ConverterAudio,
         ConverterVideo,
         ConverterPDF,
     ):
