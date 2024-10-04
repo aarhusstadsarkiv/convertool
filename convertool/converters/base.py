@@ -20,6 +20,7 @@ from .exceptions import OutputExtensionError
 class ConverterABC(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
+    process_timeout: ClassVar[float | None] = None
 
     def __init__(
         self,
@@ -47,7 +48,7 @@ class ConverterABC(ABC):
         :return: A tuple with the captured stdout and stderr outputs in string format.
         """
         try:
-            return run_process(*args, cwd=cwd, capture_output=self.capture_output)
+            return run_process(*args, cwd=cwd, capture_output=self.capture_output, timeout=self.process_timeout)
         except TimeoutExpired as err:
             raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s")
         except CalledProcessError as err:
