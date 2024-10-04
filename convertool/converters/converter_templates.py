@@ -26,11 +26,11 @@ class ConverterTemplate(ConverterABC):
         elif output == "text":
             dest_file.write_text(self.file.action_data.ignore.reason)
         elif output == "empty":
-            dest_file.write_text("Den originale fil var tom")
+            dest_file.write_text("Den originale fil var tom.")
         elif output == "password-protected":
-            dest_file.write_text("Den originale fil var kodeordsbeskyttet")
+            dest_file.write_text("Den originale fil var kodeordsbeskyttet.")
         elif output == "corrupted":
-            dest_file.write_text("Den originale fil var korrumperet og kunne ikke åbnes")
+            dest_file.write_text("Den originale fil var korrumperet og kunne ikke åbnes.")
         elif output == "duplicate" and not self.database:
             raise ConvertError(self.file, f"{output!r} template requires a database")
         elif output == "duplicate":
@@ -39,11 +39,11 @@ class ConverterTemplate(ConverterABC):
                 parameters=[self.file.checksum],
                 limit=1,
             ).fetchone()
-            dest_file.write_text(f"Den originale fil var en kopi af {original.relative_path}")
+            dest_file.write_text(f"Den originale fil var en kopi af {original.relative_path}.")
         elif output == "not-preservable":
-            dest_file.write_text("Den originale fil var ikke bevaringsværdig")
+            dest_file.write_text("Den originale fil var ikke bevaringsværdig.")
         elif output == "not-convertable":
-            dest_file.write_text("Den originale fil kunne ikke konverteres til et gyldigt arkivformat")
+            dest_file.write_text("Den originale fil kunne ikke konverteres til et gyldigt arkivformat.")
         elif output == "extracted-archive" and not self.database:
             raise ConvertError(self.file, f"{output!r} template requires a database")
         elif output == "extracted-archive":
