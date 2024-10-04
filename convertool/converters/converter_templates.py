@@ -4,11 +4,11 @@ from typing import ClassVar
 from acacore.models.file import File
 from acacore.models.reference_files import TemplateTypeEnum
 
-from .base import Converter
+from .base import ConverterABC
 from .exceptions import ConvertError
 
 
-class ConverterTemplate(Converter):
+class ConverterTemplate(ConverterABC):
     tool_names: ClassVar[list[str]] = ["template"]
     outputs: ClassVar[list[str]] = TemplateTypeEnum
 

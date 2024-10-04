@@ -24,7 +24,7 @@ from click import version_option
 from click.exceptions import Exit
 
 from .__version__ import __version__
-from .converters.base import Converter
+from .converters.base import ConverterABC
 from .converters.converter_copy import ConverterCopy
 from .converters.converter_document import ConverterDocument
 from .converters.converter_img import ConverterPDFToImg
@@ -38,7 +38,7 @@ from .converters.exceptions import ConvertError
 from .util import ctx_params
 
 
-def find_converter(tool: str, output: str) -> Type[Converter] | None:
+def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
@@ -99,7 +99,7 @@ def convert_file(
     if tool in ConverterCopy.tool_names:
         outputs = ConverterCopy.outputs[0]
 
-    converters: list[tuple[str, Type[Converter]]] = [(o, find_converter(tool, o)) for o in outputs]
+    converters: list[tuple[str, Type[ConverterABC]]] = [(o, find_converter(tool, o)) for o in outputs]
 
     if missing_converters := [o for o, c in converters if not c]:
         raise ConvertError(
@@ -113,7 +113,7 @@ def convert_file(
     history: list[HistoryEntry] = []
 
     for output, converter_cls in converters:
-        converter: Converter = converter_cls(file, database, root, capture_output=not verbose)
+        converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
         dests.extend(dsts := converter.convert(output_dir, output, keep_relative_path=True))
         history.extend(
             [

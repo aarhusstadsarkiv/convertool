@@ -15,7 +15,7 @@ from .exceptions import OutputDirError
 from .exceptions import OutputExtensionError
 
 
-class Converter(ABC):
+class ConverterABC(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
 

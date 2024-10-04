@@ -3,10 +3,10 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterToVideo(Converter):
+class ConverterToVideo(ConverterABC):
     tool_names: ClassVar[list[str]] = ["video"]
     outputs: ClassVar[list[str]] = [
         "mpeg2",

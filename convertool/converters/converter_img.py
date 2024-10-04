@@ -2,10 +2,10 @@ from pathlib import Path
 from re import match
 from typing import ClassVar
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterToImg(Converter):
+class ConverterToImg(ConverterABC):
     tool_names: ClassVar[list[str]] = ["image"]
     outputs: ClassVar[list[str]] = ["jpg", "png", "tiff"]
 

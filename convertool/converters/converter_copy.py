@@ -2,10 +2,10 @@ from pathlib import Path
 from shutil import copy2
 from typing import ClassVar
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterCopy(Converter):
+class ConverterCopy(ConverterABC):
     tool_names: ClassVar[list[str]] = ["copy"]
     outputs: ClassVar[list[str]] = ["copy"]
 

@@ -3,10 +3,10 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterDocument(Converter):
+class ConverterDocument(ConverterABC):
     tool_names: ClassVar[list[str]] = ["document"]
     outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
 

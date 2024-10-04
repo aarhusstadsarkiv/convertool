@@ -3,10 +3,10 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterSpreadsheet(Converter):
+class ConverterSpreadsheet(ConverterABC):
     tool_names: ClassVar[list[str]] = ["spreadsheet"]
     outputs: ClassVar[list[str]] = ["ods", "pdf", "html"]
 

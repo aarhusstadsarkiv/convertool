@@ -12,7 +12,7 @@ from tnefparse import TNEF
 from tnefparse import TNEFObject
 from tnefparse.mapi import TNEFMAPI_Attribute
 
-from .base import Converter
+from .base import ConverterABC
 from .exceptions import ConvertError
 
 
@@ -141,7 +141,7 @@ def tnef_to_html(tnef: TNEF, headers: TNEFHeaders):
         return html.decode_contents()
 
 
-class ConverterTnef(Converter):
+class ConverterTnef(ConverterABC):
     tool_names: ClassVar[list[str]] = ["tnef"]
     outputs: ClassVar[list[[str]]] = ["html", "txt"]
 
