@@ -213,7 +213,7 @@ def digiarch(
 
                     file.processed = True
                     database.files.update(file)
-                    database.history.insert(HistoryEntry.command_history(ctx, tool, file.uuid, outputs))
+                    database.history.insert(HistoryEntry.command_history(ctx, "converted", file.uuid, [tool, outputs]))
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
