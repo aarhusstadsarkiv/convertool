@@ -141,7 +141,7 @@ def tnef_to_html(tnef: TNEF, headers: TNEFHeaders):
         return html.decode_contents()
 
 
-class ConverterTnef(ConverterABC):
+class ConverterTNEF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["tnef"]
     outputs: ClassVar[list[[str]]] = ["html", "txt"]
 

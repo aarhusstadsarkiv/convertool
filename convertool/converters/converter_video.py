@@ -6,7 +6,7 @@ from acacore.utils.functions import rm_tree
 from .base import ConverterABC
 
 
-class ConverterToVideo(ConverterABC):
+class ConverterVideo(ConverterABC):
     tool_names: ClassVar[list[str]] = ["video"]
     outputs: ClassVar[list[str]] = [
         "mpeg2",

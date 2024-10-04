@@ -2,15 +2,15 @@ from pathlib import Path
 
 from acacore.models.file import File
 
-from convertool.converters.converter_img import ConverterPDFToImg
-from convertool.converters.converter_img import ConverterTextToImg
-from convertool.converters.converter_img import ConverterToImg
+from convertool.converters.converter_image import ConverterImage
+from convertool.converters.converter_image import ConverterPDFToImage
+from convertool.converters.converter_image import ConverterTextToImage
 
 
 # noinspection DuplicatedCode
 def test_img_to_img(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = File.from_file(test_files["img-to-img.webp"], root=test_files["img-to-img.webp"].parent)
-    converter = ConverterToImg(file)
+    converter = ConverterImage(file)
 
     for output in converter.outputs:
         print(output)
@@ -23,7 +23,7 @@ def test_img_to_img(test_files: dict[str, Path], reference_files: dict[str, Path
 # noinspection DuplicatedCode
 def test_pdf_to_img(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = File.from_file(test_files["pdf-to-img.pdf"], root=test_files["pdf-to-img.pdf"].parent)
-    converter = ConverterPDFToImg(file)
+    converter = ConverterPDFToImage(file)
 
     for output in converter.outputs:
         print(output)
@@ -35,7 +35,7 @@ def test_pdf_to_img(test_files: dict[str, Path], reference_files: dict[str, Path
 # noinspection DuplicatedCode
 def test_text_to_img(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = File.from_file(test_files["text_to_img.txt"], root=test_files["text_to_img.txt"].parent)
-    converter = ConverterTextToImg(file)
+    converter = ConverterTextToImage(file)
 
     for output in converter.outputs:
         print(output)

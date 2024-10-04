@@ -27,13 +27,13 @@ from .__version__ import __version__
 from .converters import ConverterABC
 from .converters import ConverterCopy
 from .converters import ConverterDocument
-from .converters import ConverterPDFToImg
+from .converters import ConverterImage
+from .converters import ConverterPDF
+from .converters import ConverterPDFToImage
 from .converters import ConverterTemplate
-from .converters import ConverterTextToImg
-from .converters import ConverterTnef
-from .converters import ConverterToImg
-from .converters import ConverterToPDF
-from .converters import ConverterToVideo
+from .converters import ConverterTextToImage
+from .converters import ConverterTNEF
+from .converters import ConverterVideo
 from .converters.exceptions import ConvertError
 from .util import ctx_params
 
@@ -42,13 +42,13 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
-        ConverterTnef,
+        ConverterTNEF,
         ConverterDocument,
-        ConverterPDFToImg,
-        ConverterTextToImg,
-        ConverterToImg,
-        ConverterToVideo,
-        ConverterToPDF,
+        ConverterPDFToImage,
+        ConverterTextToImage,
+        ConverterImage,
+        ConverterVideo,
+        ConverterPDF,
     ):
         if tool in converter.tool_names and output in converter.outputs:
             return converter

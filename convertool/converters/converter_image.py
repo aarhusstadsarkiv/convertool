@@ -5,7 +5,7 @@ from typing import ClassVar
 from .base import ConverterABC
 
 
-class ConverterToImg(ConverterABC):
+class ConverterImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["image"]
     outputs: ClassVar[list[str]] = ["jpg", "png", "tiff"]
 
@@ -25,7 +25,7 @@ class ConverterToImg(ConverterABC):
         return [dest_file]
 
 
-class ConverterPDFToImg(ConverterToImg):
+class ConverterPDFToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["pdf-to-image"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
@@ -59,7 +59,7 @@ class ConverterPDFToImg(ConverterToImg):
         )
 
 
-class ConverterTextToImg(ConverterToImg):
+class ConverterTextToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["text-to-image"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

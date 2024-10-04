@@ -4,7 +4,7 @@ from typing import ClassVar
 from .base import ConverterABC
 
 
-class ConverterToPDF(ConverterABC):
+class ConverterPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["pdf"]
     outputs: ClassVar[list[str]] = [
         "pdfa-1",
