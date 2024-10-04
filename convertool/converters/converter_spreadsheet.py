@@ -14,6 +14,7 @@ class ConverterSpreadsheet(ConverterABC):
     def output_filter(self, output: str) -> str:  # noqa: ARG002
         return ""
 
+    # noinspection DuplicatedCode
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         output_filter: str = self.output_filter(output)
