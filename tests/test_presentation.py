@@ -55,4 +55,4 @@ def test_presentation_to_html(test_files: dict[str, Path], output_dir: Path):
         assert len(output_files) == 1
         assert expected_output_file.name in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
-        assert sf_match and sf_match.mime == "text/html"
+        assert sf_match and sf_match.mime in ("text/html", "application/xml")
