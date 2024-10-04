@@ -24,16 +24,16 @@ from click import version_option
 from click.exceptions import Exit
 
 from .__version__ import __version__
-from .converters.base import ConverterABC
-from .converters.converter_copy import ConverterCopy
-from .converters.converter_document import ConverterDocument
-from .converters.converter_img import ConverterPDFToImg
-from .converters.converter_img import ConverterTextToImg
-from .converters.converter_img import ConverterToImg
-from .converters.converter_pdf import ConverterToPDF
-from .converters.converter_templates import ConverterTemplate
-from .converters.converter_tnef import ConverterTnef
-from .converters.converter_video import ConverterToVideo
+from .converters import ConverterABC
+from .converters import ConverterCopy
+from .converters import ConverterDocument
+from .converters import ConverterPDFToImg
+from .converters import ConverterTemplate
+from .converters import ConverterTextToImg
+from .converters import ConverterTnef
+from .converters import ConverterToImg
+from .converters import ConverterToPDF
+from .converters import ConverterToVideo
 from .converters.exceptions import ConvertError
 from .util import ctx_params
 
