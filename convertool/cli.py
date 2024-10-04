@@ -33,11 +33,11 @@ from .converters import ConverterImage
 from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
+from .converters import ConverterSpreadsheet
 from .converters import ConverterTemplate
 from .converters import ConverterTextToImage
 from .converters import ConverterTNEF
 from .converters import ConverterVideo
-from .converters.converter_spreadsheet import ConverterSpreadsheet
 from .converters.exceptions import ConvertError
 from .util import ctx_params
 
