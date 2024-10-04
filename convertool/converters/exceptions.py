@@ -8,6 +8,9 @@ class ConvertError(Exception):
         super().__init__(msg)
 
 
+class ConvertTimeoutError(ConvertError): ...
+
+
 class OutputDirError(ConvertError): ...
 
 
