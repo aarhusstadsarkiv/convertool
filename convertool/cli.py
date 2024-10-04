@@ -93,6 +93,8 @@ def convert_file(
     output_dir: Path,
     tool: str,
     outputs: list[str],
+    *,
+    verbose: bool = False,
 ) -> tuple[list[Path], list[HistoryEntry]]:
     if tool in ConverterCopy.tool_names:
         outputs = ConverterCopy.outputs[0]
@@ -111,7 +113,7 @@ def convert_file(
     history: list[HistoryEntry] = []
 
     for output, converter_cls in converters:
-        converter: Converter = converter_cls(file, database, root)
+        converter: Converter = converter_cls(file, database, root, capture_output=not verbose)
         dests.extend(dsts := converter.convert(output_dir, output, keep_relative_path=True))
         history.extend(
             [
@@ -144,6 +146,7 @@ def app(): ...
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
+@option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
 def digiarch(
     ctx: Context,
@@ -152,6 +155,7 @@ def digiarch(
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     dry_run: bool,
+    verbose: bool,
 ):
     check_database_version(
         ctx,
@@ -182,7 +186,16 @@ def digiarch(
                         continue
 
                     try:
-                        dests, history = convert_file(ctx, root, database, file, output_dir, tool, outputs)
+                        dests, history = convert_file(
+                            ctx,
+                            root,
+                            database,
+                            file,
+                            output_dir,
+                            tool,
+                            outputs,
+                            verbose=verbose,
+                        )
                     except ConvertError as err:
                         HistoryEntry.command_history(ctx, "error", file.uuid, [tool, outputs], err.msg).log(
                             ERROR, log_stdout
