@@ -15,6 +15,7 @@ class ConverterImage(ConverterABC):
         "tiff",
         "jp2",
     ]
+    process_timeout: ClassVar[float] = 180.0
 
     def output(self, output: str) -> str:
         if output == "jpeg":

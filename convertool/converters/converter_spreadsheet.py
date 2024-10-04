@@ -9,6 +9,7 @@ from .base import ConverterABC
 class ConverterSpreadsheet(ConverterABC):
     tool_names: ClassVar[list[str]] = ["spreadsheet"]
     outputs: ClassVar[list[str]] = ["ods", "pdf", "html"]
+    process_timeout: ClassVar[float] = 60.0
 
     # noinspection PyMethodMayBeStatic
     def output_filter(self, output: str) -> str:  # noqa: ARG002

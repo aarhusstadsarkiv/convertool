@@ -13,6 +13,7 @@ class ConverterVideo(ConverterABC):
         "h264",
         "h265",
     ]
+    process_timeout: ClassVar[float] = 7200
 
     def convert(
         self,
