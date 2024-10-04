@@ -1,7 +1,9 @@
 from logging import ERROR
 from logging import INFO
+from logging import Logger
 from pathlib import Path
 from sqlite3 import DatabaseError
+from typing import Generator
 from typing import Type
 
 from acacore.__version__ import __version__ as __acacore_version__
@@ -95,7 +97,10 @@ def convert_file(
     outputs: list[str],
     *,
     verbose: bool = False,
-) -> tuple[list[Path], list[HistoryEntry]]:
+    loggers: list[Logger] | None = None,
+) -> Generator[Path, None, None]:
+    loggers = loggers or []
+
     if tool in ConverterCopy.tool_names:
         outputs = ConverterCopy.outputs[0]
 
@@ -109,20 +114,16 @@ def convert_file(
         )
 
     converters = [(o, c) for o, c in converters if c]
-    dests: list[Path] = []
-    history: list[HistoryEntry] = []
 
     for output, converter_cls in converters:
+        HistoryEntry.command_history(ctx, f"{tool}.{output}:start", file.uuid).log(INFO, *loggers)
         converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
-        dests.extend(dsts := converter.convert(output_dir, output, keep_relative_path=True))
-        history.extend(
-            [
-                HistoryEntry.command_history(ctx, f"{tool}.{output}", file.uuid, dst.relative_to(output_dir))
-                for dst in dsts
-            ]
-        )
+        dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
+        for dst in dests:
+            HistoryEntry.command_history(ctx, f"{tool}.{output}:end", file.uuid).log(INFO, *loggers, output=dst.name)
+        yield from dests
 
-    return dests, history
+    yield from ()
 
 
 @group("convertool", no_args_is_help=True)
@@ -185,8 +186,10 @@ def digiarch(
                     if tool in tool_ignore:
                         continue
 
+                    dests: list[Path] = []
+
                     try:
-                        dests, history = convert_file(
+                        for dst in convert_file(
                             ctx,
                             root,
                             database,
@@ -194,19 +197,23 @@ def digiarch(
                             output_dir,
                             tool,
                             outputs,
+                            loggers=[log_stdout],
                             verbose=verbose,
-                        )
+                        ):
+                            dests.append(dst)
                     except ConvertError as err:
                         HistoryEntry.command_history(ctx, "error", file.uuid, [tool, outputs], err.msg).log(
                             ERROR, log_stdout
                         )
                         continue
+                    except BaseException:
+                        for dst in dests:
+                            dst.unlink(missing_ok=True)
+                        raise
 
                     file.processed = True
                     database.files.update(file)
                     database.history.insert(HistoryEntry.command_history(ctx, tool, file.uuid, outputs))
-                    for event in history:
-                        event.log(INFO, log_stdout)
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
