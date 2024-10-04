@@ -7,7 +7,14 @@ from .base import ConverterABC
 
 class ConverterImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["image"]
-    outputs: ClassVar[list[str]] = ["jpg", "jpeg", "png", "tif", "tiff"]
+    outputs: ClassVar[list[str]] = [
+        "jpg",
+        "jpeg",
+        "png",
+        "tif",
+        "tiff",
+        "jp2",
+    ]
 
     def output(self, output: str) -> str:
         if output == "jpeg":
