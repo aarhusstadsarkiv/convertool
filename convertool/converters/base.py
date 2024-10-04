@@ -3,6 +3,7 @@ from abc import abstractmethod
 from os import PathLike
 from pathlib import Path
 from subprocess import CalledProcessError
+from subprocess import TimeoutExpired
 from typing import ClassVar
 
 from acacore.database import FileDB
@@ -11,6 +12,7 @@ from acacore.models.file import File
 from convertool.util import run_process
 
 from .exceptions import ConvertError
+from .exceptions import ConvertTimeoutError
 from .exceptions import OutputDirError
 from .exceptions import OutputExtensionError
 
@@ -41,10 +43,13 @@ class ConverterABC(ABC):
         :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
         :param cwd: Optionally, the working directory to use.
         :raise ConvertError: If the process exists with a non-zero code.
+        :raise ConvertTimeoutError: If the process times out.
         :return: A tuple with the captured stdout and stderr outputs in string format.
         """
         try:
             return run_process(*args, cwd=cwd, capture_output=self.capture_output)
+        except TimeoutExpired as err:
+            raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s")
         except CalledProcessError as err:
             raise ConvertError(
                 self.file,
