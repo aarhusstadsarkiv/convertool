@@ -18,7 +18,12 @@ def ctx_params(ctx: Context) -> dict[str, Parameter]:
     return {p.name: p for p in ctx.command.params}
 
 
-def run_process(*args: str | int | PathLike, cwd: Path | None = None, env: bool = True) -> tuple[str, str]:
+def run_process(
+    *args: str | int | PathLike,
+    cwd: Path | None = None,
+    env: bool = True,
+    capture_output: bool = True,
+) -> tuple[str, str]:
     """
     Run process and capture output.
 
@@ -26,7 +31,8 @@ def run_process(*args: str | int | PathLike, cwd: Path | None = None, env: bool 
 
     :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
     :param cwd: Optionally, the working directory to use.
-    :param env: If ``True`` to use the system's env command (if available)
+    :param env: If ``True`` to use the system's env command (if available).
+    :param capture_output: Whether to capture the output of ``subprocess.run``. Default: ``True``.
     :raise CalledProcessError: If the process exists with a non-zero code.
     :return: A tuple with the captured stdout and stderr outputs in string format.
     """
@@ -35,7 +41,7 @@ def run_process(*args: str | int | PathLike, cwd: Path | None = None, env: bool 
         process: CompletedProcess[str] = run(
             [*env_args, *map(str, args)],
             cwd=cwd,
-            capture_output=True,
+            capture_output=capture_output,
             encoding="utf-8",
             check=True,
         )
