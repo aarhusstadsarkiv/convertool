@@ -8,7 +8,7 @@ from convertool.converters.converter_presentation import ConverterPresentation
 
 
 # noinspection DuplicatedCode
-def test_presentation_to_ods(test_files: dict[str, Path], output_dir: Path):
+def test_presentation_to_odp(test_files: dict[str, Path], output_dir: Path):
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
@@ -16,8 +16,8 @@ def test_presentation_to_ods(test_files: dict[str, Path], output_dir: Path):
         converter = ConverterPresentation(file)
         siegfried = Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
 
-        output_files = converter.convert(output_dir, "odt")
-        expected_output_file = file.relative_path.with_suffix(".odt")
+        output_files = converter.convert(output_dir, "odp")
+        expected_output_file = file.relative_path.with_suffix(".odp")
         assert len(output_files) == 1
         assert expected_output_file.name in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
