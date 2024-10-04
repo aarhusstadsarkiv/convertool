@@ -116,11 +116,11 @@ def convert_file(
     converters = [(o, c) for o, c in converters if c]
 
     for output, converter_cls in converters:
-        HistoryEntry.command_history(ctx, f"{tool}.{output}:start", file.uuid).log(INFO, *loggers)
+        HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
         converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
         dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
         for dst in dests:
-            HistoryEntry.command_history(ctx, f"{tool}.{output}:end", file.uuid).log(INFO, *loggers, output=dst.name)
+            HistoryEntry.command_history(ctx, f"output:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
         yield from dests
 
     yield from ()
