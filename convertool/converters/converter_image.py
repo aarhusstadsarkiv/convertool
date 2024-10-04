@@ -9,6 +9,13 @@ class ConverterImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["image"]
     outputs: ClassVar[list[str]] = ["jpg", "jpeg", "png", "tif", "tiff"]
 
+    def output(self, output: str) -> str:
+        if output == "jpeg":
+            output = "jpg"
+        elif output == "tiff":
+            output = "tif"
+        return super().output(output)
+
     def convert(
         self,
         output_dir: Path,
