@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import ClassVar
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterToPDF(Converter):
+class ConverterPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["pdf"]
     outputs: ClassVar[list[str]] = [
         "pdfa-1",

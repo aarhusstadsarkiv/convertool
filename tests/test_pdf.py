@@ -1,17 +1,15 @@
-from os import environ
 from pathlib import Path
 
 from acacore.models.file import File
 from acacore.siegfried import Siegfried
 
-from convertool.converters.converter_pdf import ConverterToPDF
+from convertool.converters.converter_pdf import ConverterPDF
 
 
 # noinspection DuplicatedCode
-def test_pdf_to_pdfa(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
+def test_pdf_to_pdfa(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = File.from_file(test_files["pdf-to-pdfa.pdf"], root=test_files["pdf-to-pdfa.pdf"].parent)
-    converter = ConverterToPDF(file)
-    siegfried = Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
+    converter = ConverterPDF(file)
 
     for pdfa_ver in (1, 2, 3):
         output: str = f"pdfa-{pdfa_ver}"

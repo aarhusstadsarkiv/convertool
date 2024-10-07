@@ -1,5 +1,6 @@
 from logging import ERROR
 from logging import INFO
+from logging import Logger
 from pathlib import Path
 from sqlite3 import DatabaseError
 from typing import Type
@@ -24,29 +25,37 @@ from click import version_option
 from click.exceptions import Exit
 
 from .__version__ import __version__
-from .converters.base import Converter
-from .converters.converter_copy import ConverterCopy
-from .converters.converter_img import ConverterPDFToImg
-from .converters.converter_img import ConverterTextToImg
-from .converters.converter_img import ConverterToImg
-from .converters.converter_pdf import ConverterToPDF
-from .converters.converter_templates import ConverterTemplate
-from .converters.converter_tnef import ConverterTnef
-from .converters.converter_video import ConverterToVideo
+from .converters import ConverterABC
+from .converters import ConverterAudio
+from .converters import ConverterCopy
+from .converters import ConverterDocument
+from .converters import ConverterImage
+from .converters import ConverterPDF
+from .converters import ConverterPDFToImage
+from .converters import ConverterPresentation
+from .converters import ConverterSpreadsheet
+from .converters import ConverterTemplate
+from .converters import ConverterTextToImage
+from .converters import ConverterTNEF
+from .converters import ConverterVideo
 from .converters.exceptions import ConvertError
 from .util import ctx_params
 
 
-def find_converter(tool: str, output: str) -> Type[Converter] | None:
+def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
-        ConverterTnef,
-        ConverterPDFToImg,
-        ConverterTextToImg,
-        ConverterToImg,
-        ConverterToVideo,
-        ConverterToPDF,
+        ConverterTNEF,
+        ConverterDocument,
+        ConverterPresentation,
+        ConverterSpreadsheet,
+        ConverterPDFToImage,
+        ConverterTextToImage,
+        ConverterImage,
+        ConverterAudio,
+        ConverterVideo,
+        ConverterPDF,
     ):
         if tool in converter.tool_names and output in converter.outputs:
             return converter
@@ -70,15 +79,15 @@ def check_database_version(ctx: Context, param: Parameter, path: Path):
             raise BadParameter(err.args[0], ctx, param)
 
 
-def file_tool_outputs(file: File) -> tuple[str, list[str]]:
+def file_tool_output(file: File) -> tuple[str, str]:
     if file.action == "convert" and not file.action_data.convert:
         raise ValueError("Missing convert action data", file)
     elif file.action == "convert":
-        return file.action_data.convert.tool, file.action_data.convert.outputs
+        return file.action_data.convert.tool, file.action_data.convert.output
     elif file.action == "ignore" and not file.action_data.ignore:
         raise ValueError("Missing ignore action data", file)
     elif file.action == "ignore":
-        return "template", [file.action_data.ignore.template]
+        return "template", file.action_data.ignore.template
     else:
         raise ValueError(f"Unsupported action {file.action!r}", file)
 
@@ -90,34 +99,27 @@ def convert_file(
     file: File,
     output_dir: Path,
     tool: str,
-    outputs: list[str],
-) -> tuple[list[Path], list[HistoryEntry]]:
+    output: str,
+    *,
+    verbose: bool = False,
+    loggers: list[Logger] | None = None,
+) -> list[Path]:
+    loggers = loggers or []
+
     if tool in ConverterCopy.tool_names:
-        outputs = ConverterCopy.outputs[0]
+        output = ConverterCopy.outputs[0]
 
-    converters: list[tuple[str, Type[Converter]]] = [(o, find_converter(tool, o)) for o in outputs]
+    converter_cls = find_converter(tool, output)
 
-    if not (missing_converters := [o for o, c in converters if not c]):
-        raise ConvertError(
-            file,
-            f"No converter found for tool {tool!r}"
-            f" and output{'s' if len(missing_converters) > 1 else ''} {','.join(map(repr, missing_converters))}",
-        )
+    if not converter_cls:
+        raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
 
-    dests: list[Path] = []
-    history: list[HistoryEntry] = []
-
-    for output, converter_cls in converters:
-        converter: Converter = converter_cls(file, database, root)
-        dests.extend(dsts := converter.convert(output_dir, output, keep_relative_path=True))
-        history.extend(
-            [
-                HistoryEntry.command_history(ctx, f"{tool}.{output}", file.uuid, dst.relative_to(output_dir))
-                for dst in dsts
-            ]
-        )
-
-    return dests, history
+    HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
+    converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
+    dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
+    for dst in dests:
+        HistoryEntry.command_history(ctx, f"output:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
+    return dests
 
 
 @group("convertool", no_args_is_help=True)
@@ -141,6 +143,7 @@ def app(): ...
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
+@option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
 def digiarch(
     ctx: Context,
@@ -149,6 +152,7 @@ def digiarch(
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     dry_run: bool,
+    verbose: bool,
 ):
     check_database_version(
         ctx,
@@ -160,30 +164,53 @@ def digiarch(
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
 
         with ExceptionManager(BaseException) as exception:
+            offset: int = 0
             while files := list(
-                database.files.select(where="action in ('convert', 'ignore') and not processed", limit=100)
+                database.files.select(
+                    where="action in ('convert', 'ignore') and not processed",
+                    limit=100,
+                    offset=offset,
+                )
             ):
+                offset += len(files)
+
                 for file in files:
-                    tool, outputs = file_tool_outputs(file)
+                    tool, output = file_tool_output(file)
 
                     if tool_include and tool not in tool_include:
                         continue
                     if tool in tool_ignore:
                         continue
 
+                    dests: list[Path] = []
+
                     try:
-                        dests, history = convert_file(ctx, root, database, file, output_dir, tool, outputs)
+                        dests = convert_file(
+                            ctx,
+                            root,
+                            database,
+                            file,
+                            output_dir,
+                            tool,
+                            output,
+                            loggers=[log_stdout],
+                            verbose=verbose,
+                        )
                     except ConvertError as err:
-                        HistoryEntry.command_history(ctx, "error", file.uuid, [tool, outputs], err.msg).log(
+                        HistoryEntry.command_history(ctx, "error", file.uuid, [tool, output], err.msg).log(
                             ERROR, log_stdout
                         )
+                        for dst in dests:
+                            dst.unlink(missing_ok=True)
                         continue
+                    except BaseException:
+                        for dst in dests:
+                            dst.unlink(missing_ok=True)
+                        raise
 
                     file.processed = True
                     database.files.update(file)
-                    database.history.insert(HistoryEntry.command_history(ctx, tool, file.uuid, outputs))
-                    for event in history:
-                        event.log(INFO, log_stdout)
+                    database.history.insert(HistoryEntry.command_history(ctx, "converted", file.uuid, [tool, output]))
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 

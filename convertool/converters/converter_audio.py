@@ -6,14 +6,13 @@ from acacore.utils.functions import rm_tree
 from .base import ConverterABC
 
 
-class ConverterVideo(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["video"]
+class ConverterAudio(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["audio"]
     outputs: ClassVar[list[str]] = [
-        "mpeg2",
-        "h264",
-        "h265",
+        "mp3",
+        "wav",
     ]
-    process_timeout: ClassVar[float] = 7200
+    process_timeout: ClassVar[float] = 1800
 
     def convert(
         self,
@@ -26,15 +25,10 @@ class ConverterVideo(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         arguments: list[str] = []
 
-        if output == "mpeg2":
-            output = "mpg"
-            arguments.extend(["-c:v", "mpeg2video", "-c:a", "mp3"])
-        elif output == "h264":
-            output = "mp4"
-            arguments.extend(["-c:v", "libx264", "-c:a", "aac"])
-        elif output == "h265":
-            output = "mp4"
-            arguments.extend(["-c:v", "libx265", "-c:a", "aac", "-vtag", "hvc1"])
+        if output == "mp3":
+            arguments.extend(["-c:a", "mp3"])
+        elif output == "wav":
+            arguments.extend(["-c:a", "pcm_s16le"])
 
         dest_file: Path = self.output_file(dest_dir, output)
 
@@ -54,6 +48,7 @@ class ConverterVideo(ConverterABC):
                 "-loglevel",
                 "error",
                 "-stats",
+                "-vn",
                 *arguments,
                 dest_file.name,
                 cwd=dest_dir_tmp,

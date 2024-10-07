@@ -6,9 +6,9 @@ from acacore.utils.functions import rm_tree
 from .base import ConverterABC
 
 
-class ConverterDocument(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["document"]
-    outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
+class ConverterPresentation(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["presentation"]
+    outputs: ClassVar[list[str]] = ["odp", "pdf", "html"]
     process_timeout: ClassVar[float] = 60.0
 
     # noinspection PyMethodMayBeStatic

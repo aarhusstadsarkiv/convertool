@@ -2,12 +2,27 @@ from pathlib import Path
 from re import match
 from typing import ClassVar
 
-from .base import Converter
+from .base import ConverterABC
 
 
-class ConverterToImg(Converter):
+class ConverterImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["image"]
-    outputs: ClassVar[list[str]] = ["jpg", "png", "tiff"]
+    outputs: ClassVar[list[str]] = [
+        "jpg",
+        "jpeg",
+        "png",
+        "tif",
+        "tiff",
+        "jp2",
+    ]
+    process_timeout: ClassVar[float] = 180.0
+
+    def output(self, output: str) -> str:
+        if output == "jpeg":
+            output = "jpg"
+        elif output == "tiff":
+            output = "tif"
+        return super().output(output)
 
     def convert(
         self,
@@ -25,7 +40,7 @@ class ConverterToImg(Converter):
         return [dest_file]
 
 
-class ConverterPDFToImg(ConverterToImg):
+class ConverterPDFToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["pdf-to-image"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
@@ -59,7 +74,7 @@ class ConverterPDFToImg(ConverterToImg):
         )
 
 
-class ConverterTextToImg(ConverterToImg):
+class ConverterTextToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["text-to-image"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

@@ -2,12 +2,12 @@ from pathlib import Path
 
 from acacore.models.file import File
 
-from convertool.converters.converter_tnef import ConverterTnef
+from convertool.converters.converter_tnef import ConverterTNEF
 
 
 def test_tnef(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = File.from_file(test_files["winmail.dat"], root=test_files["winmail.dat"].parent)
-    converter = ConverterTnef(file)
+    converter = ConverterTNEF(file)
 
     for output in converter.outputs:
         print(output)

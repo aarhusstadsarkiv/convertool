@@ -3,6 +3,7 @@ from abc import abstractmethod
 from os import PathLike
 from pathlib import Path
 from subprocess import CalledProcessError
+from subprocess import TimeoutExpired
 from typing import ClassVar
 
 from acacore.database import FileDB
@@ -11,18 +12,28 @@ from acacore.models.file import File
 from convertool.util import run_process
 
 from .exceptions import ConvertError
+from .exceptions import ConvertTimeoutError
 from .exceptions import OutputDirError
 from .exceptions import OutputExtensionError
 
 
-class Converter(ABC):
+class ConverterABC(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
+    process_timeout: ClassVar[float | None] = None
 
-    def __init__(self, file: File, database: FileDB | None = None, root: Path | None = None) -> None:
+    def __init__(
+        self,
+        file: File,
+        database: FileDB | None = None,
+        root: Path | None = None,
+        *,
+        capture_output: bool = True,
+    ) -> None:
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
+        self.capture_output: bool = capture_output
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
@@ -33,10 +44,13 @@ class Converter(ABC):
         :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
         :param cwd: Optionally, the working directory to use.
         :raise ConvertError: If the process exists with a non-zero code.
+        :raise ConvertTimeoutError: If the process times out.
         :return: A tuple with the captured stdout and stderr outputs in string format.
         """
         try:
-            return run_process(*args, cwd=cwd)
+            return run_process(*args, cwd=cwd, capture_output=self.capture_output, timeout=self.process_timeout)
+        except TimeoutExpired as err:
+            raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s")
         except CalledProcessError as err:
             raise ConvertError(
                 self.file,

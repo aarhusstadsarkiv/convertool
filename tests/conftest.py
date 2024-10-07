@@ -1,12 +1,24 @@
+from os import environ
 from pathlib import Path
 
 import pytest
+from acacore.siegfried import Siegfried
 from acacore.utils.functions import rm_tree
 
 
 @pytest.fixture(scope="session")
-def test_files() -> dict[str, Path]:
-    return {f.name: f for f in Path(__file__).parent.joinpath("files").iterdir() if f.is_file()}
+def siegfried() -> Siegfried:
+    return Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
+
+
+@pytest.fixture(scope="session")
+def test_files_dir() -> Path:
+    return Path(__file__).parent.joinpath("files")
+
+
+@pytest.fixture(scope="session")
+def test_files(test_files_dir: Path) -> dict[str, Path]:
+    return {f.name: f for f in test_files_dir.iterdir() if f.is_file()}
 
 
 @pytest.fixture(scope="session")
