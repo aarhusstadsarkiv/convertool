@@ -3,7 +3,6 @@ from logging import INFO
 from logging import Logger
 from pathlib import Path
 from sqlite3 import DatabaseError
-from typing import Generator
 from typing import Type
 
 from acacore.__version__ import __version__ as __acacore_version__
@@ -80,15 +79,15 @@ def check_database_version(ctx: Context, param: Parameter, path: Path):
             raise BadParameter(err.args[0], ctx, param)
 
 
-def file_tool_outputs(file: File) -> tuple[str, list[str]]:
+def file_tool_output(file: File) -> tuple[str, str]:
     if file.action == "convert" and not file.action_data.convert:
         raise ValueError("Missing convert action data", file)
     elif file.action == "convert":
-        return file.action_data.convert.tool, file.action_data.convert.outputs
+        return file.action_data.convert.tool, file.action_data.convert.output
     elif file.action == "ignore" and not file.action_data.ignore:
         raise ValueError("Missing ignore action data", file)
     elif file.action == "ignore":
-        return "template", [file.action_data.ignore.template]
+        return "template", file.action_data.ignore.template
     else:
         raise ValueError(f"Unsupported action {file.action!r}", file)
 
@@ -100,36 +99,27 @@ def convert_file(
     file: File,
     output_dir: Path,
     tool: str,
-    outputs: list[str],
+    output: str,
     *,
     verbose: bool = False,
     loggers: list[Logger] | None = None,
-) -> Generator[Path, None, None]:
+) -> list[Path]:
     loggers = loggers or []
 
     if tool in ConverterCopy.tool_names:
-        outputs = ConverterCopy.outputs[0]
+        output = ConverterCopy.outputs[0]
 
-    converters: list[tuple[str, Type[ConverterABC]]] = [(o, find_converter(tool, o)) for o in outputs]
+    converter_cls = find_converter(tool, output)
 
-    if missing_converters := [o for o, c in converters if not c]:
-        raise ConvertError(
-            file,
-            f"No converter found for tool {tool!r}"
-            f" and output{'s' if len(missing_converters) > 1 else ''} {','.join(map(repr, missing_converters))}",
-        )
+    if not converter_cls:
+        raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
 
-    converters = [(o, c) for o, c in converters if c]
-
-    for output, converter_cls in converters:
-        HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
-        converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
-        dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
-        for dst in dests:
-            HistoryEntry.command_history(ctx, f"output:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
-        yield from dests
-
-    yield from ()
+    HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
+    converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
+    dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
+    for dst in dests:
+        HistoryEntry.command_history(ctx, f"output:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
+    return dests
 
 
 @group("convertool", no_args_is_help=True)
@@ -185,7 +175,7 @@ def digiarch(
                 offset += len(files)
 
                 for file in files:
-                    tool, outputs = file_tool_outputs(file)
+                    tool, output = file_tool_output(file)
 
                     if tool_include and tool not in tool_include:
                         continue
@@ -195,22 +185,23 @@ def digiarch(
                     dests: list[Path] = []
 
                     try:
-                        for dst in convert_file(
+                        dests = convert_file(
                             ctx,
                             root,
                             database,
                             file,
                             output_dir,
                             tool,
-                            outputs,
+                            output,
                             loggers=[log_stdout],
                             verbose=verbose,
-                        ):
-                            dests.append(dst)
+                        )
                     except ConvertError as err:
-                        HistoryEntry.command_history(ctx, "error", file.uuid, [tool, outputs], err.msg).log(
+                        HistoryEntry.command_history(ctx, "error", file.uuid, [tool, output], err.msg).log(
                             ERROR, log_stdout
                         )
+                        for dst in dests:
+                            dst.unlink(missing_ok=True)
                         continue
                     except BaseException:
                         for dst in dests:
@@ -219,7 +210,7 @@ def digiarch(
 
                     file.processed = True
                     database.files.update(file)
-                    database.history.insert(HistoryEntry.command_history(ctx, "converted", file.uuid, [tool, outputs]))
+                    database.history.insert(HistoryEntry.command_history(ctx, "converted", file.uuid, [tool, output]))
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
