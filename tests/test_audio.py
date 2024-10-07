@@ -13,7 +13,7 @@ def test_audio_to_mp3(test_files: dict[str, Path], output_dir: Path, siegfried: 
 
         output_files = converter.convert(output_dir, "mp3")
         assert len(output_files) == 1
-        assert siegfried.identify(output_files[0]).files[0].best_match().mime == "audio/mp3"
+        assert siegfried.identify(output_files[0]).files[0].best_match().mime == "audio/mpeg"
 
 
 def test_audio_to_wav(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
