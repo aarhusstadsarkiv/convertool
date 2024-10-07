@@ -1,4 +1,3 @@
-from os import environ
 from pathlib import Path
 
 from acacore.models.file import File
@@ -8,13 +7,12 @@ from convertool.converters.converter_presentation import ConverterPresentation
 
 
 # noinspection DuplicatedCode
-def test_presentation_to_odp(test_files: dict[str, Path], output_dir: Path):
+def test_presentation_to_odp(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
         converter = ConverterPresentation(file)
-        siegfried = Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
 
         output_files = converter.convert(output_dir, "odp")
         expected_output_file = file.relative_path.with_suffix(".odp")
@@ -25,13 +23,12 @@ def test_presentation_to_odp(test_files: dict[str, Path], output_dir: Path):
 
 
 # noinspection DuplicatedCode
-def test_presentation_to_pdf(test_files: dict[str, Path], output_dir: Path):
+def test_presentation_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
         converter = ConverterPresentation(file)
-        siegfried = Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
 
         output_files = converter.convert(output_dir, "pdf")
         expected_output_file = file.relative_path.with_suffix(".pdf")
@@ -42,13 +39,12 @@ def test_presentation_to_pdf(test_files: dict[str, Path], output_dir: Path):
 
 
 # noinspection DuplicatedCode
-def test_presentation_to_html(test_files: dict[str, Path], output_dir: Path):
+def test_presentation_to_html(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
         file = File.from_file(path, root=path.parent)
         converter = ConverterPresentation(file)
-        siegfried = Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
 
         output_files = converter.convert(output_dir, "html")
         expected_output_file = file.relative_path.with_suffix(".html")

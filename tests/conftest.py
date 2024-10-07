@@ -1,7 +1,14 @@
+from os import environ
 from pathlib import Path
 
 import pytest
+from acacore.siegfried import Siegfried
 from acacore.utils.functions import rm_tree
+
+
+@pytest.fixture(scope="session")
+def siegfried() -> Siegfried:
+    return Siegfried(environ["SIEGFRIED_PATH"], "default.sig", environ["SIEGFRIED_HOME"])
 
 
 @pytest.fixture(scope="session")
