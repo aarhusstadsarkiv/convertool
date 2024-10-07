@@ -12,8 +12,13 @@ def siegfried() -> Siegfried:
 
 
 @pytest.fixture(scope="session")
-def test_files() -> dict[str, Path]:
-    return {f.name: f for f in Path(__file__).parent.joinpath("files").iterdir() if f.is_file()}
+def test_files_dir() -> Path:
+    return Path(__file__).parent.joinpath("files")
+
+
+@pytest.fixture(scope="session")
+def test_files(test_files_dir: Path) -> dict[str, Path]:
+    return {f.name: f for f in test_files_dir.iterdir() if f.is_file()}
 
 
 @pytest.fixture(scope="session")
