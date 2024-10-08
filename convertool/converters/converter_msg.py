@@ -2,6 +2,7 @@ from base64 import b64encode
 from contextlib import suppress
 from pathlib import Path
 from typing import ClassVar
+from xml.sax.saxutils import escape
 
 from acacore.models.file import File
 from bs4 import BeautifulSoup
@@ -132,7 +133,7 @@ def msg_html_body(msg: MessageBase) -> str:
         html.select_one("body").append(p)
 
     for attachment in msg.attachments:
-        if not (cid := getattr(attachment, "cid", None)):
+        if not (cid := getattr(attachment, "cid", None)):  # noqa: SIM114
             continue
         elif attachment.data is None or not isinstance(attachment.data, bytes):
             continue
