@@ -49,7 +49,7 @@ def test_pdf_to_img(
         print(output)
         output_files = converter.convert(output_dir, output)
         assert all(o.name in reference_files for o in output_files)
-        assert all(siegfried.identify(of).files[0].best_match().mime == MIMETYPES[output] for of in output_files)
+        assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)
 
 
 # noinspection DuplicatedCode
@@ -67,4 +67,4 @@ def test_text_to_img(
         output_files = converter.convert(output_dir, output)
         assert len(output_files) == 1
         assert output_files[0].name in reference_files
-        assert all(siegfried.identify(of).files[0].best_match().mime == MIMETYPES[output] for of in output_files)
+        assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)
