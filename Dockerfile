@@ -57,6 +57,8 @@ FROM base AS prod
 WORKDIR /root/convertool
 COPY . .
 RUN pipx install .
+WORKDIR /root
+CMD ["bash"]
 
 FROM base AS test
 # Install go and Siegfried
@@ -80,3 +82,4 @@ RUN pip3 install poetry
 WORKDIR /root/convertool
 COPY . .
 RUN poetry install
+CMD ["bash"]
