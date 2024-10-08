@@ -1,4 +1,4 @@
-FROM python:3.11.9-bullseye AS base
+FROM python:3.11.10-bookworm AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
