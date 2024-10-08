@@ -1,4 +1,4 @@
-FROM python:3.11.9-bullseye AS base
+FROM python:3.11.10-bookworm AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
@@ -57,6 +57,8 @@ FROM base AS prod
 WORKDIR /root/convertool
 COPY . .
 RUN pipx install .
+WORKDIR /root
+CMD ["bash"]
 
 FROM base AS test
 # Install go and Siegfried
@@ -80,3 +82,4 @@ RUN pip3 install poetry
 WORKDIR /root/convertool
 COPY . .
 RUN poetry install
+CMD ["bash"]

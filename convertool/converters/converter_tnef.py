@@ -26,6 +26,7 @@ class TNEFHeaders:
     to_email: str | None = None
 
 
+# noinspection DuplicatedCode
 def text_to_html(text: str) -> str:
     paragraphs = [p for p_raw in text.split("\n\n") if (p := p_raw.strip())]
     return "\n".join("<p>{}</p>\n".format(escape(p).replace("\n", "<br/>")) for p in paragraphs)
@@ -75,6 +76,7 @@ def tnef_body_html(tnef: TNEF) -> str | None:
         return html_to_text(tnef_body_text(tnef))
 
 
+# noinspection DuplicatedCode
 def tnef_front_matter(tnef: TNEF, headers: TNEFHeaders) -> str:
     items: dict[str, str | list[str]] = {
         "From": f"{headers.from_name or ''} {f'<{headers.from_email}>' if headers.from_email else ''}".strip(),
@@ -108,37 +110,41 @@ def tnef_to_txt(tnef: TNEF, headers: TNEFHeaders) -> str:
     return text
 
 
+# noinspection DuplicatedCode
 def tnef_to_html(tnef: TNEF, headers: TNEFHeaders):
     if not (html_body := tnef_body_html(tnef) or "").strip():
-        return (
-            f"<html>"
-            f'<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/></head>'
-            f"<body><pre class='____front_matter'>{escape(tnef_front_matter(tnef, headers))}</pre>"
-            f"<p>No readable content available.</p></body>"
-            f"</html>"
-        )
+        html_body = "<html></html>"
+    html = BeautifulSoup(html_body, "lxml")
+    has_body: bool = True
+
+    if not html.select_one("head"):
+        html.append(html.new_tag("head"))
+
+    if charset_tag := html.select_one('head > meta[http-equiv="Content-Type"]'):
+        charset_tag.attrs["content"] = "text/html; charset=utf-8"
     else:
-        html = BeautifulSoup(html_body, "lxml")
-        has_body: bool = True
+        html.select_one("head").append(
+            html.new_tag(
+                "meta",
+                attrs={"http-equiv": "Content-Type", "content": "text/html; charset=utf-8"},
+            )
+        )
 
-        if charset_tag := html.select_one('head > meta[http-equiv="Content-Type"]'):
-            charset_tag.attrs["content"] = "text/html; charset=utf-8"
+    if not html.select_one("body"):
+        html.append(html.new_tag("body"))
+        has_body = False
 
-        if not html.select_one("body"):
-            html.append(html.new_tag("body"))
-            has_body = False
+    front_matter = html.new_tag("pre", attrs={"class": "____front_matter"})
+    front_matter.string = tnef_front_matter(tnef, headers)
 
-        front_matter = html.new_tag("pre", attrs={"class": "____front_matter"})
-        front_matter.string = tnef_front_matter(tnef, headers)
+    html.select_one("body").insert(0, front_matter)
 
-        html.select_one("body").insert(0, front_matter)
+    if not has_body:
+        p = html.new_tag("p")
+        p.string = "No readable content available."
+        html.select_one("body").append(p)
 
-        if not has_body:
-            p = html.new_tag("p")
-            p.string = "No readable content available."
-            html.select_one("body").append(p)
-
-        return html.decode_contents()
+    return html.decode_contents()
 
 
 class ConverterTNEF(ConverterABC):
