@@ -48,6 +48,7 @@ def test_pdf_to_img(
     for output in converter.outputs:
         print(output)
         output_files = converter.convert(output_dir, output)
+        assert len(output_files) >= 1
         assert all(o.name in reference_files for o in output_files)
         assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)
 
