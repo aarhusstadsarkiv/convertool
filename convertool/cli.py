@@ -30,6 +30,7 @@ from .converters import ConverterAudio
 from .converters import ConverterCopy
 from .converters import ConverterDocument
 from .converters import ConverterImage
+from .converters import ConverterMSG
 from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
@@ -47,6 +48,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterCopy,
         ConverterTemplate,
         ConverterTNEF,
+        ConverterMSG,
         ConverterDocument,
         ConverterPresentation,
         ConverterSpreadsheet,

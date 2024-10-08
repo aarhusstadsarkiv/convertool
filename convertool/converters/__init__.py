@@ -6,6 +6,7 @@ from .converter_document import ConverterDocument
 from .converter_image import ConverterImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
+from .converter_msg import ConverterMSG
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_spreadsheet import ConverterSpreadsheet
@@ -27,5 +28,6 @@ __all__ = [
     "ConverterSpreadsheet",
     "ConverterTemplate",
     "ConverterTNEF",
+    "ConverterMSG",
     "ConverterVideo",
 ]
