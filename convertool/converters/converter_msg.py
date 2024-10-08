@@ -14,6 +14,7 @@ from extract_msg.exceptions import ExMsgBaseException
 from extract_msg.msg_classes import MessageBase
 from extract_msg.msg_classes import MessageSigned
 from striprtf.striprtf import rtf_to_text
+from zoneinfo import ZoneInfo
 
 from .base import ConverterABC
 from .exceptions import ConvertError
@@ -68,7 +69,7 @@ def msg_front_matter(msg: MessageBase) -> str:
         "To": msg.to or "",
         "CC": msg.cc or "",
         "BCC": msg.bcc or "",
-        "Date": msg.date.isoformat() if msg.date else "",
+        "Date": msg.date.astimezone(ZoneInfo("UTC")).isoformat() if msg.date else "",
         "Subject": msg.subject or "",
         "Attachments": [a.longFilename for a in msg.attachments if getattr(a, "cid", None) is None],
     }
