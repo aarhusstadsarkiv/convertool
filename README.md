@@ -16,6 +16,8 @@
 | audio        | wav    | Convert audio/video to WAV                                          | .wav      |
 | tnef         | html   | Convert a TNEF file to HTML                                         | .html     |
 | tnef         | txt    | Convert a TNEF file to TXT                                          | .txt      |
+| msg          | html   | Convert an MSG file to HTML                                         | .html     |
+| msg          | txt    | Convert an MSG file to TXT                                          | .txt      |
 | document     | odt    | Convert a document file (Word, LibreOffice, etc.) to ODT            | .odt      |
 | document     | pdf    | Convert a document file (Word, LibreOffice, etc.) to PDF            | .pdf      |
 | document     | html   | Convert a document file (Word, LibreOffice, etc.) to HTML           | .html     |
