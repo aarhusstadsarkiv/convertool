@@ -11,7 +11,6 @@ from tnefparse import properties as tnefprops
 from tnefparse import TNEF
 from tnefparse import TNEFObject
 from tnefparse.mapi import TNEFMAPI_Attribute
-from zoneinfo import ZoneInfo
 
 from .base import ConverterABC
 from .exceptions import ConvertError
@@ -82,7 +81,7 @@ def tnef_front_matter(tnef: TNEF, headers: TNEFHeaders) -> str:
     items: dict[str, str | list[str]] = {
         "From": f"{headers.from_name or ''} {f'<{headers.from_email}>' if headers.from_email else ''}".strip(),
         "To": f"{headers.to_name or ''} {f'<{headers.to_email}>' if headers.to_email else ''}".strip(),
-        "Date": headers.date_sent.astimezone(ZoneInfo("UTC")).isoformat() if headers.date_sent else "",
+        "Date": headers.date_sent.isoformat() if headers.date_sent else "",
         "Subject": headers.subject or "",
         "Attachments": [a.long_filename() for a in tnef.attachments],
     }
