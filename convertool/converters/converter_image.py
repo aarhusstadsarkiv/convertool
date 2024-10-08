@@ -1,6 +1,7 @@
 from pathlib import Path
-from re import match
 from typing import ClassVar
+
+from acacore.utils.functions import rm_tree
 
 from .base import ConverterABC
 
@@ -47,31 +48,35 @@ class ConverterPDFToImage(ConverterImage):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
+        dest_dir_tmp: Path = dest_dir / f"_{dest_file.name}.imagemagick"
+        rm_tree(dest_dir_tmp)
 
-        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
-        density: int = 0
+        try:
+            dest_dir_tmp.mkdir(parents=True, exist_ok=True)
 
-        for density_line in density_stdout.strip().splitlines():
-            density_x, _, density_y = density_line.strip().partition(",")
-            density_page: int = max(int(density_x), int(density_y), 0) * 2
-            if density_page > density:
-                density = density_page
+            density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
+            density: int = 0
 
-        density = density or 150
+            for density_line in density_stdout.strip().splitlines():
+                density_x, _, density_y = density_line.strip().partition(",")
+                density_page: int = max(int(density_x), int(density_y), 0) * 2
+                if density_page > density:
+                    density = density_page
 
-        self.run_process("convert", "-density", density, self.file.get_absolute_path(), dest_file.name, cwd=dest_dir)
+            density = density or 150
 
-        if output == "tiff":
-            return [dest_file]
+            self.run_process(
+                "convert",
+                "-density",
+                density,
+                self.file.get_absolute_path(),
+                dest_file.name,
+                cwd=dest_dir_tmp,
+            )
 
-        return sorted(
-            [
-                i
-                for i in dest_dir.iterdir()
-                if i.is_file()
-                and match(rf"^{dest_file.name.split('.')[0]}-\d+.{dest_file.name.split('.', 1)[1]}$", i.name)
-            ]
-        )
+            return [f.replace(dest_dir / f.name) for f in sorted(dest_dir_tmp.iterdir()) if f.is_file()]
+        finally:
+            rm_tree(dest_dir_tmp)
 
 
 class ConverterTextToImage(ConverterImage):
