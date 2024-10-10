@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ogr:FeatureCollection
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://ogr.maptools.org/ 080115 Ny by efter høring.xsd"
+     xsi:schemaLocation="http://ogr.maptools.org/ gis.xsd"
      xmlns:ogr="http://ogr.maptools.org/"
      xmlns:gml="http://www.opengis.net/gml">
   <gml:boundedBy><gml:Envelope><gml:lowerCorner>-235003.208 176926.087</gml:lowerCorner><gml:upperCorner>-213028.4 207056.852</gml:upperCorner></gml:Envelope></gml:boundedBy>
