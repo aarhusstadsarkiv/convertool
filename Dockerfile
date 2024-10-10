@@ -49,7 +49,8 @@ RUN curl https://qcad.org/archives/qcad/qcadcam-3.28.2-trial-linux-x86_64.run -o
 RUN chmod a+x /root/qcad/qcad-installer.run
 RUN /root/qcad/qcad-installer.run
 RUN rm -rf /root/qcad
-ENV PATH="/root/opt/qcad*:$PATH"
+RUN mv /root/opt/qcad* /root/opt/qcad
+ENV PATH="/root/opt/qcad:$PATH"
 
 CMD ["bash"]
 
