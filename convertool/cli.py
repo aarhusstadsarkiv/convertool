@@ -29,6 +29,7 @@ from .converters import ConverterABC
 from .converters import ConverterAudio
 from .converters import ConverterCopy
 from .converters import ConverterDocument
+from .converters import ConverterGIS
 from .converters import ConverterImage
 from .converters import ConverterMSG
 from .converters import ConverterPDF
@@ -47,6 +48,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
+        ConverterGIS,
         ConverterTNEF,
         ConverterMSG,
         ConverterDocument,

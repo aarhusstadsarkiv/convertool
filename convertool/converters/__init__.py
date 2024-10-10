@@ -3,6 +3,7 @@ from .base import ConverterABC
 from .converter_audio import ConverterAudio
 from .converter_copy import ConverterCopy
 from .converter_document import ConverterDocument
+from .converter_gis import ConverterGIS
 from .converter_image import ConverterImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
@@ -20,6 +21,7 @@ __all__ = [
     "ConverterAudio",
     "ConverterCopy",
     "ConverterDocument",
+    "ConverterGIS",
     "ConverterPDFToImage",
     "ConverterTextToImage",
     "ConverterImage",
