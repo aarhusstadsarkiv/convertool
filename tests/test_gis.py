@@ -13,4 +13,5 @@ def test_gis_to_gml(test_files: dict[str, Path], reference_files: dict[str, Path
     output_files = converter.convert(output_dir, "gml")
     assert len(output_files) == 2
     assert all(of.name in reference_files for of in output_files)
-    assert all(of.read_text() == reference_files[of.name].read_text() for of in output_files)
+    for of in output_files:
+        assert of.read_bytes() == reference_files[of.name].read_bytes()
