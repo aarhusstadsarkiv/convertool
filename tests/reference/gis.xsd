@@ -31,8 +31,8 @@
     </xs:extension>
   </xs:complexContent>
 </xs:complexType>
-<xs:element name="080115_Ny_by_efter_høring" type="ogr:080115_Ny_by_efter_høring_Type" substitutionGroup="gml:_Feature"/>
-<xs:complexType name="080115_Ny_by_efter_høring_Type">
+<xs:element name="gis" type="ogr:gis_Type" substitutionGroup="gml:_Feature"/>
+<xs:complexType name="gis_Type">
   <xs:complexContent>
     <xs:extension base="gml:AbstractFeatureType">
       <xs:sequence>
