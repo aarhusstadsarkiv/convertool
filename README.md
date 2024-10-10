@@ -4,6 +4,7 @@
 
 | Tool         | Output | Explanation                                                         | Extension |
 |--------------|--------|---------------------------------------------------------------------|-----------|
+| gis          | gml    | Convert GIS file with its auxiliaries to GMLv3                      | .gml      |
 | img          | jpg    | Convert image to JPEG                                               | .jpg      |
 | img          | jp2    | Convert image to JPEG2000                                           | .jp2      |
 | img          | png    | Convert image to PNG                                                | .png      |
