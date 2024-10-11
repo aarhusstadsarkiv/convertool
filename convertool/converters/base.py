@@ -39,6 +39,7 @@ class ConverterABC(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[float | None] = None
+    platforms: ClassVar[list[str] | None] = None
 
     def __init__(
         self,
@@ -48,6 +49,7 @@ class ConverterABC(ABC):
         *,
         capture_output: bool = True,
     ) -> None:
+        _test_platform(*self.platforms or [])
         self.dependencies()
         self.file: File = file
         self.database: FileDB | None = database
