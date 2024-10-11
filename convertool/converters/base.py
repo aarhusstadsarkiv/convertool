@@ -54,7 +54,6 @@ class ConverterABC(ABC):
 
         :raise MissingDependency: If the converter's dependencies are missing.
         """
-        pass
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
