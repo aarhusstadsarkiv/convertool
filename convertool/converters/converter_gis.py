@@ -12,6 +12,7 @@ class ConverterGIS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["gis"]
     outputs: ClassVar[list[str]] = ["gml"]
     process_timeout: ClassVar[float] = 120
+    platforms: ClassVar[list[str]] = ["linux"]
 
     @classmethod
     def dependencies(cls):
