@@ -40,10 +40,21 @@ class ConverterABC(ABC):
         *,
         capture_output: bool = True,
     ) -> None:
+        self.dependencies()
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
         self.capture_output: bool = capture_output
+
+    @classmethod
+    @lru_cache
+    def dependencies(cls):
+        """
+        Test dependencies for the converter.
+
+        :raise MissingDependency: If the converter's dependencies are missing.
+        """
+        pass
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
