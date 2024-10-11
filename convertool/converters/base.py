@@ -16,7 +16,7 @@ from .exceptions import ConvertError
 from .exceptions import ConvertTimeoutError
 from .exceptions import MissingDependency
 from .exceptions import OutputDirError
-from .exceptions import OutputExtensionError
+from .exceptions import OutputTargetError
 
 
 @lru_cache
@@ -105,7 +105,7 @@ class ConverterABC(ABC):
         """
         if output := next((o for o in self.outputs if o.lower() == output.lower()), None):
             return output
-        raise OutputExtensionError(self.file, f"Unsupported output {output}")
+        raise OutputTargetError(self.file, f"Unsupported output {output}")
 
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
         """
