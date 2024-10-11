@@ -5,6 +5,7 @@ from os import PathLike
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
+from sys import platform
 from typing import ClassVar
 
 from acacore.database import FileDB
@@ -17,6 +18,7 @@ from .exceptions import ConvertTimeoutError
 from .exceptions import MissingDependency
 from .exceptions import OutputDirError
 from .exceptions import OutputTargetError
+from .exceptions import UnsupportedPlatform
 
 
 @lru_cache
@@ -25,6 +27,12 @@ def _test_dependency(command: str, *args: str):
         run_process(command, *args)
     except CalledProcessError:
         raise MissingDependency(command)
+
+
+@lru_cache
+def _test_platform(*platforms: str):
+    if platforms and platform not in platforms:
+        raise UnsupportedPlatform(platform, f"Not one of {platforms}")
 
 
 class ConverterABC(ABC):
