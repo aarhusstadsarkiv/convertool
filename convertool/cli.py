@@ -1,6 +1,7 @@
 from logging import ERROR
 from logging import INFO
 from logging import Logger
+from logging import WARNING
 from pathlib import Path
 from sqlite3 import DatabaseError
 from typing import Type
@@ -41,6 +42,8 @@ from .converters import ConverterTextToImage
 from .converters import ConverterTNEF
 from .converters import ConverterVideo
 from .converters.exceptions import ConvertError
+from .converters.exceptions import MissingDependency
+from .converters.exceptions import UnsupportedPlatform
 from .util import ctx_params
 
 
@@ -200,6 +203,15 @@ def digiarch(
                             loggers=[log_stdout],
                             verbose=verbose,
                         )
+                    except (MissingDependency, UnsupportedPlatform) as err:
+                        HistoryEntry.command_history(
+                            ctx,
+                            "warning",
+                            file.uuid,
+                            data=err.__class__.__name__,
+                            reason=" ".join(err.args) or None,
+                        ).log(WARNING, log_stdout)
+                        continue
                     except ConvertError as err:
                         HistoryEntry.command_history(ctx, "error", file.uuid, [tool, output], err.msg).log(
                             ERROR, log_stdout
@@ -240,12 +252,15 @@ def standalone(ctx: Context, tool: str, output: str, destination: str, files: tu
     dest: Path = Path(destination)
 
     for file_path in map(Path, files):
-        file = File.from_file(file_path, file_path.parent)
-        converter = converter_cls(file)
         try:
+            file = File.from_file(file_path, file_path.parent)
+            converter = converter_cls(file)
             converted_files = converter.convert(dest, output, keep_relative_path=False)
             for converted_file in converted_files:
                 print(converted_file.relative_to(dest))
+        except (MissingDependency, UnsupportedPlatform) as err:
+            print(repr(err))
+            raise Exit(1)
         except ConvertError as err:
             print(err.msg)
             raise Exit(1)
