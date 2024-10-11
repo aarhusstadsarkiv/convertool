@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from functools import lru_cache
 from os import PathLike
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -13,8 +14,17 @@ from convertool.util import run_process
 
 from .exceptions import ConvertError
 from .exceptions import ConvertTimeoutError
+from .exceptions import MissingDependency
 from .exceptions import OutputDirError
 from .exceptions import OutputExtensionError
+
+
+@lru_cache
+def _test_dependency(command: str, *args: str):
+    try:
+        run_process(command, *args)
+    except CalledProcessError:
+        raise MissingDependency(command)
 
 
 class ConverterABC(ABC):
