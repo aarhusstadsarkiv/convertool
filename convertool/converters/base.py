@@ -1,9 +1,11 @@
 from abc import ABC
 from abc import abstractmethod
+from functools import lru_cache
 from os import PathLike
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
+from sys import platform
 from typing import ClassVar
 
 from acacore.database import FileDB
@@ -13,14 +15,31 @@ from convertool.util import run_process
 
 from .exceptions import ConvertError
 from .exceptions import ConvertTimeoutError
+from .exceptions import MissingDependency
 from .exceptions import OutputDirError
-from .exceptions import OutputExtensionError
+from .exceptions import OutputTargetError
+from .exceptions import UnsupportedPlatform
+
+
+@lru_cache
+def _test_dependency(command: str, *args: str):
+    try:
+        run_process(command, *args)
+    except CalledProcessError:
+        raise MissingDependency(command)
+
+
+@lru_cache
+def _test_platform(*platforms: str):
+    if platforms and platform not in platforms:
+        raise UnsupportedPlatform(platform, f"Not one of {platforms}")
 
 
 class ConverterABC(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[float | None] = None
+    platforms: ClassVar[list[str] | None] = None
 
     def __init__(
         self,
@@ -30,10 +49,21 @@ class ConverterABC(ABC):
         *,
         capture_output: bool = True,
     ) -> None:
+        _test_platform(*self.platforms or [])
+        self.dependencies()
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
         self.capture_output: bool = capture_output
+
+    @classmethod
+    @lru_cache
+    def dependencies(cls):
+        """
+        Test dependencies for the converter.
+
+        :raise MissingDependency: If the converter's dependencies are missing.
+        """
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
@@ -85,7 +115,7 @@ class ConverterABC(ABC):
         """
         if output := next((o for o in self.outputs if o.lower() == output.lower()), None):
             return output
-        raise OutputExtensionError(self.file, f"Unsupported output {output}")
+        raise OutputTargetError(self.file, f"Unsupported output {output}")
 
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
         """

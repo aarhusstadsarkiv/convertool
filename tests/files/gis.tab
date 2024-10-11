@@ -1,0 +1,15 @@
+!table
+!version 300
+!charset WindowsLatin1
+
+Definition Table
+  Type NATIVE Charset "WindowsLatin1"
+  Fields 8
+    ID Integer Index 1 ;
+    Delområde Char (15) ;
+    Lokalitet Char (35) ;
+    Areal_ha Decimal (8, 1) ;
+    Bemærkninger Char (40) ;
+    Boliger_v_15_p_ha Integer ;
+    Boliger_v_20_p_ha Integer ;
+    Boliger_v_25_p_ha Integer ;

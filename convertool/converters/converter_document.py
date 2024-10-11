@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
+from .base import _test_dependency
 from .base import ConverterABC
 
 
@@ -10,6 +11,10 @@ class ConverterDocument(ConverterABC):
     tool_names: ClassVar[list[str]] = ["document"]
     outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
     process_timeout: ClassVar[float] = 60.0
+
+    @classmethod
+    def dependencies(cls):
+        _test_dependency("libreoffice", "--version")
 
     # noinspection PyMethodMayBeStatic
     def output_filter(self, output: str) -> str:  # noqa: ARG002
