@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
+from .base import _test_dependency
 from .base import ConverterABC
 
 
@@ -11,6 +12,10 @@ class ConverterPDF(ConverterABC):
         "pdfa-2",
         "pdfa-3",
     ]
+
+    @classmethod
+    def dependencies(cls):
+        _test_dependency("gs", "--version")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)

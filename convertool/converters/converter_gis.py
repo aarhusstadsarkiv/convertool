@@ -4,12 +4,17 @@ from typing import ClassVar
 from acacore.utils.functions import rm_tree
 
 from convertool.converters import ConverterABC
+from convertool.converters.base import _test_dependency
 
 
 class ConverterGIS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["gis"]
     outputs: ClassVar[list[str]] = ["gml"]
     process_timeout: ClassVar[float] = 120
+
+    @classmethod
+    def dependencies(cls):
+        _test_dependency("ogr2ogr", "--help")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
