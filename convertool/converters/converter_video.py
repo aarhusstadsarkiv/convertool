@@ -3,7 +3,6 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
-from .base import _test_dependency
 from .base import ConverterABC
 
 
@@ -15,10 +14,7 @@ class ConverterVideo(ConverterABC):
         "h265",
     ]
     process_timeout: ClassVar[float] = 7200
-
-    @classmethod
-    def dependencies(cls):
-        _test_dependency("ffmpeg", "-version")
+    dependencies: ClassVar[list[str]] = ["ffmpeg"]
 
     def convert(
         self,

@@ -4,8 +4,6 @@ from typing import ClassVar
 from acacore.utils.functions import rm_tree
 
 from convertool.converters import ConverterABC
-from convertool.converters.base import _test_dependency
-from convertool.converters.exceptions import MissingDependency
 
 
 class ConverterGIS(ConverterABC):
@@ -13,13 +11,7 @@ class ConverterGIS(ConverterABC):
     outputs: ClassVar[list[str]] = ["gml"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
-
-    @classmethod
-    def dependencies(cls):
-        try:
-            _test_dependency("which", "ogr2ogr")
-        except MissingDependency:
-            raise MissingDependency("ogr2ogr")
+    dependencies: ClassVar[list[str]] = ["ogr2ogr"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)

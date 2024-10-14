@@ -3,7 +3,6 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
-from .base import _test_dependency
 from .base import ConverterABC
 
 
@@ -14,10 +13,7 @@ class ConverterAudio(ConverterABC):
         "wav",
     ]
     process_timeout: ClassVar[float] = 1800
-
-    @classmethod
-    def dependencies(cls):
-        _test_dependency("ffmpeg", "-version")
+    dependencies: ClassVar[list[str]] = ["ffmpeg"]
 
     def convert(
         self,

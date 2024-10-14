@@ -1,21 +1,13 @@
 from pathlib import Path
 from typing import ClassVar
 
-from .base import _test_dependency
 from .base import ConverterABC
 
 
 class ConverterPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["pdf"]
-    outputs: ClassVar[list[str]] = [
-        "pdfa-1",
-        "pdfa-2",
-        "pdfa-3",
-    ]
-
-    @classmethod
-    def dependencies(cls):
-        _test_dependency("gs", "--version")
+    outputs: ClassVar[list[str]] = ["pdfa-1", "pdfa-2", "pdfa-3"]
+    dependencies: ClassVar[list[str]] = ["gs"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)

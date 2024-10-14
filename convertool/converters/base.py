@@ -22,9 +22,12 @@ from .exceptions import UnsupportedPlatform
 
 
 @lru_cache
-def _test_dependency(command: str, *args: str):
+def _test_dependency(command: str):
     try:
-        run_process(command, *args)
+        if platform == "win32":
+            run_process("Get-Command", command)
+        elif platform in ("linux", "darwin"):
+            run_process("which", command)
     except CalledProcessError:
         raise MissingDependency(command)
 
@@ -40,6 +43,7 @@ class ConverterABC(ABC):
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[float | None] = None
     platforms: ClassVar[list[str] | None] = None
+    dependencies: ClassVar[list[str] | None] = None
 
     def __init__(
         self,
@@ -49,8 +53,8 @@ class ConverterABC(ABC):
         *,
         capture_output: bool = True,
     ) -> None:
-        _test_platform(*self.platforms or [])
-        self.dependencies()
+        self.test_platforms()
+        self.test_dependencies()
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
@@ -58,12 +62,24 @@ class ConverterABC(ABC):
 
     @classmethod
     @lru_cache
-    def dependencies(cls):
+    def test_platforms(cls):
         """
-        Test dependencies for the converter.
+        Test whether the converter supports the current platform.
 
-        :raise MissingDependency: If the converter's dependencies are missing.
+        :raise UnsupportedPlatform: If the platform is not supported.
         """
+        _test_platform(*cls.platforms or [])
+
+    @classmethod
+    @lru_cache
+    def test_dependencies(cls):
+        """
+        Test whether all the converter's dependencies are available.
+
+        :raise MissingDependency: If a dependency is missing.
+        """
+        for dependency in cls.dependencies or []:
+            _test_dependency(dependency)
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
