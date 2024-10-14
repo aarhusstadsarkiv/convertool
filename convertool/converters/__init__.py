@@ -1,6 +1,7 @@
 from . import exceptions
 from .base import ConverterABC
 from .converter_audio import ConverterAudio
+from .converter_cad import ConverterCAD
 from .converter_copy import ConverterCopy
 from .converter_document import ConverterDocument
 from .converter_gis import ConverterGIS
@@ -19,6 +20,7 @@ __all__ = [
     "exceptions",
     "ConverterABC",
     "ConverterAudio",
+    "ConverterCAD",
     "ConverterCopy",
     "ConverterDocument",
     "ConverterGIS",
