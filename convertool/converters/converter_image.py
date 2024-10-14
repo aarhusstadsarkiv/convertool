@@ -21,7 +21,7 @@ class ConverterImage(ConverterABC):
 
     @classmethod
     def dependencies(cls):
-        _test_dependency("convert", "-version")
+        _test_dependency("convert")
 
     def output(self, output: str) -> str:
         if output == "jpeg":

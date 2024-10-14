@@ -14,7 +14,7 @@ class ConverterSpreadsheet(ConverterABC):
 
     @classmethod
     def dependencies(cls):
-        _test_dependency("libreoffice", "--version")
+        _test_dependency("libreoffice")
 
     # noinspection PyMethodMayBeStatic
     def output_filter(self, output: str) -> str:  # noqa: ARG002

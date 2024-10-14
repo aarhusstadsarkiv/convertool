@@ -22,9 +22,12 @@ from .exceptions import UnsupportedPlatform
 
 
 @lru_cache
-def _test_dependency(command: str, *args: str):
+def _test_dependency(command: str):
     try:
-        run_process(command, *args)
+        if platform == "win32":
+            run_process("Get-Command", command)
+        elif platform in ("linux", "darwin"):
+            run_process("which", command)
     except CalledProcessError:
         raise MissingDependency(command)
 

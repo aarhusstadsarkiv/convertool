@@ -18,7 +18,7 @@ class ConverterVideo(ConverterABC):
 
     @classmethod
     def dependencies(cls):
-        _test_dependency("ffmpeg", "-version")
+        _test_dependency("ffmpeg")
 
     def convert(
         self,

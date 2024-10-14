@@ -15,7 +15,7 @@ class ConverterPDF(ConverterABC):
 
     @classmethod
     def dependencies(cls):
-        _test_dependency("gs", "--version")
+        _test_dependency("gs")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
