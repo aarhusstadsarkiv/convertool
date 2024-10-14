@@ -4,6 +4,9 @@
 
 | Tool         | Output | Explanation                                                         | Extension |
 |--------------|--------|---------------------------------------------------------------------|-----------|
+| cad          | dxf    | Convert CAD file (DWG, DXF, etc.) to DXF                            | .dxf      |
+| cad          | pdf    | Convert CAD file (DWG, DXF, etc.) to PDF                            | .pdf      |
+| cad          | svg    | Convert CAD file (DWG, DXF, etc.) to SVG                            | .svg      |
 | gis          | gml    | Convert GIS file with its auxiliaries to GMLv3                      | .gml      |
 | img          | jpg    | Convert image to JPEG                                               | .jpg      |
 | img          | jp2    | Convert image to JPEG2000                                           | .jp2      |
