@@ -53,12 +53,22 @@ class ConverterABC(ABC):
         *,
         capture_output: bool = True,
     ) -> None:
-        _test_platform(*self.platforms or [])
+        self.test_platforms()
         self.test_dependencies()
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
         self.capture_output: bool = capture_output
+
+    @classmethod
+    @lru_cache
+    def test_platforms(cls):
+        """
+        Test whether the converter supports the current platform.
+
+        :raise UnsupportedPlatform: If the platform is not supported.
+        """
+        _test_platform(*cls.platforms or [])
 
     @classmethod
     @lru_cache
