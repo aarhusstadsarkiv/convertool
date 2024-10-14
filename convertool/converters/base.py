@@ -74,9 +74,9 @@ class ConverterABC(ABC):
     @lru_cache
     def test_dependencies(cls):
         """
-        Test dependencies for the converter.
+        Test whether all the converter's dependencies are available.
 
-        :raise MissingDependency: If the converter's dependencies are missing.
+        :raise MissingDependency: If a dependency is missing.
         """
         for dependency in cls.dependencies or []:
             _test_dependency(dependency)
