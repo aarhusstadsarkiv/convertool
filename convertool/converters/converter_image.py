@@ -3,7 +3,6 @@ from typing import ClassVar
 
 from acacore.utils.functions import rm_tree
 
-from .base import _test_dependency
 from .base import ConverterABC
 
 
@@ -18,10 +17,7 @@ class ConverterImage(ConverterABC):
         "jp2",
     ]
     process_timeout: ClassVar[float] = 180.0
-
-    @classmethod
-    def dependencies(cls):
-        _test_dependency("convert")
+    dependencies: ClassVar[list[str]] = ["convert"]
 
     def output(self, output: str) -> str:
         if output == "jpeg":

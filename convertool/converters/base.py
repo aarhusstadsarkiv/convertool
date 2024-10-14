@@ -43,6 +43,7 @@ class ConverterABC(ABC):
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[float | None] = None
     platforms: ClassVar[list[str] | None] = None
+    dependencies: ClassVar[list[str] | None] = None
 
     def __init__(
         self,
@@ -53,7 +54,7 @@ class ConverterABC(ABC):
         capture_output: bool = True,
     ) -> None:
         _test_platform(*self.platforms or [])
-        self.dependencies()
+        self.test_dependencies()
         self.file: File = file
         self.database: FileDB | None = database
         self.file.root = self.file.root or root
@@ -61,12 +62,14 @@ class ConverterABC(ABC):
 
     @classmethod
     @lru_cache
-    def dependencies(cls):
+    def test_dependencies(cls):
         """
         Test dependencies for the converter.
 
         :raise MissingDependency: If the converter's dependencies are missing.
         """
+        for dependency in cls.dependencies or []:
+            _test_dependency(dependency)
 
     def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
         """
