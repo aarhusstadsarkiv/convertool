@@ -21,6 +21,8 @@ def test_files_dir() -> Path:
 @pytest.fixture(scope="session")
 def test_files_dir_copy(test_files_dir: Path) -> Path:
     copy_dir: Path = test_files_dir.parent.joinpath("_files")
+    rm_tree(copy_dir)
+    copy_dir.mkdir(parents=True, exist_ok=True)
     for file in find_files(test_files_dir):
         copy_dir.joinpath(file.parent.relative_to(test_files_dir)).mkdir(parents=True, exist_ok=True)
         copy2(file, copy_dir.joinpath(file.relative_to(test_files_dir)))
