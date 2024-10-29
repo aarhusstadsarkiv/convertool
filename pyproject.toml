@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "convertool"
-version = "2.0.5"
+version = "2.0.6"
 description = ""
 authors = ["Aarhus City Archive <stadsarkiv@aarhus.dk>"]
 readme = "README.md"
@@ -10,7 +10,7 @@ convertool = "convertool.cli:app"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-acacore = {git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v3.2.0"}
+acacore = {git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v3.3.0"}
 tnefparse = "^1.4.0"
 striprtf = "^0.0.26"
 beautifulsoup4 = "^4.12.3"

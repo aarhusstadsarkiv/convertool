@@ -19,7 +19,8 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
         assert len(output_files) == 1
         assert expected_output_file.name in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
-        assert sf_match and sf_match.mime == "application/vnd.oasis.opendocument.text"
+        assert sf_match is not None
+        assert sf_match.mime == "application/vnd.oasis.opendocument.text"
 
 
 # noinspection DuplicatedCode
@@ -35,7 +36,8 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
         assert len(output_files) == 1
         assert expected_output_file.name in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
-        assert sf_match and sf_match.mime == "application/pdf"
+        assert sf_match is not None
+        assert sf_match.mime == "application/pdf"
 
 
 # noinspection DuplicatedCode
@@ -51,4 +53,5 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         assert len(output_files) == 1
         assert expected_output_file.name in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
-        assert sf_match and sf_match.mime == "text/html"
+        assert sf_match is not None
+        assert sf_match.mime == "text/html"
