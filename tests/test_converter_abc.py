@@ -14,10 +14,10 @@ def test_platforms():
         outputs: ClassVar[list[str]] = ["out"]
         platforms: ClassVar[list[str]] = ["-invalid platform"]
 
-        def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
             return []
 
-    with pytest.raises(UnsupportedPlatform, match=Converter.platforms[0]) as platform_exception:
+    with pytest.raises(UnsupportedPlatform, match=Converter.platforms[0]):
         Converter.test_platforms()
 
 
@@ -27,8 +27,8 @@ def test_dependencies():
         outputs: ClassVar[list[str]] = ["out"]
         dependencies: ClassVar[list[str]] = ["-invalid dependency"]
 
-        def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
             return []
 
-    with pytest.raises(MissingDependency, match=Converter.dependencies[0]) as platform_exception:
+    with pytest.raises(MissingDependency, match=Converter.dependencies[0]):
         Converter.test_dependencies()
