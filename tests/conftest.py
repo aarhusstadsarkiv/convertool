@@ -1,8 +1,10 @@
 from os import environ
 from pathlib import Path
+from shutil import copy2
 
 import pytest
 from acacore.siegfried import Siegfried
+from acacore.utils.functions import find_files
 from acacore.utils.functions import rm_tree
 
 
@@ -14,6 +16,15 @@ def siegfried() -> Siegfried:
 @pytest.fixture(scope="session")
 def test_files_dir() -> Path:
     return Path(__file__).parent.joinpath("files")
+
+
+@pytest.fixture(scope="session")
+def test_files_dir_copy(test_files_dir: Path) -> Path:
+    copy_dir: Path = test_files_dir.parent.joinpath("_files")
+    for file in find_files(test_files_dir):
+        copy_dir.joinpath(file.parent.relative_to(test_files_dir)).mkdir(parents=True, exist_ok=True)
+        copy2(file, copy_dir.joinpath(file.relative_to(test_files_dir)))
+    return copy_dir
 
 
 @pytest.fixture(scope="session")
