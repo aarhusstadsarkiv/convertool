@@ -179,6 +179,7 @@ def digiarch(
                     where="action in ('convert', 'ignore') and not processed",
                     limit=100,
                     offset=offset,
+                    order_by=[("relative_path", "asc")],
                 )
             ):
                 offset += len(files)
