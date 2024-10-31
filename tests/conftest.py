@@ -42,4 +42,5 @@ def reference_files() -> dict[str, Path]:
 @pytest.fixture
 def output_dir() -> Path:
     rm_tree(path := Path(__file__).parent.joinpath("output"))
+    path.mkdir(parents=True, exist_ok=True)
     return path
