@@ -114,6 +114,7 @@ def convert_file(
     *,
     verbose: bool = False,
     loggers: list[Logger] | None = None,
+    dry_run: bool = False,
 ) -> list[Path]:
     loggers = loggers or []
 
@@ -125,11 +126,15 @@ def convert_file(
     if not converter_cls:
         raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
 
-    HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
+    HistoryEntry.command_history(ctx, f"run:{tool}.{output}", file.uuid).log(INFO, *loggers)
+
+    if dry_run:
+        return []
+
     converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
     dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     for dst in dests:
-        HistoryEntry.command_history(ctx, f"output:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
+        HistoryEntry.command_history(ctx, f"out:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
     return dests
 
 
@@ -178,7 +183,7 @@ def digiarch(
             offset: int = 0
             while files := list(
                 database.files.select(
-                    where="action in ('convert', 'ignore') and not processed",
+                    where="action in ('convert', 'ignore')",
                     limit=100,
                     offset=offset,
                     order_by=[("relative_path", "asc")],
@@ -187,6 +192,9 @@ def digiarch(
                 offset += len(files)
 
                 for file in files:
+                    if file.processed:
+                        continue
+
                     tool, output = file_tool_output(file)
 
                     if tool_include and tool not in tool_include:
@@ -207,6 +215,7 @@ def digiarch(
                             output,
                             loggers=[log_stdout],
                             verbose=verbose,
+                            dry_run=dry_run,
                         )
                     except (MissingDependency, UnsupportedPlatform) as err:
                         HistoryEntry.command_history(
@@ -228,6 +237,9 @@ def digiarch(
                         for dst in dests:
                             dst.unlink(missing_ok=True)
                         raise
+
+                    if dry_run:
+                        continue
 
                     file.processed = True
                     file.processed_names = [d.name for d in dests]

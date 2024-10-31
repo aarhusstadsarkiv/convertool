@@ -7,7 +7,7 @@ from .exceptions import ConvertError
 
 class ConverterSymphovert(ConverterABC):
     tool_names: ClassVar[list[str]] = ["symphovert"]
-    outputs: ClassVar[list[str]] = ["odt", "ods"]
+    outputs: ClassVar[list[str]] = ["odt", "ods", "odp"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
