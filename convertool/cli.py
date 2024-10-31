@@ -244,14 +244,7 @@ def digiarch(
                     file.processed = True
                     file.processed_names = [d.name for d in dests]
                     database.files.update(file)
-                    database.history.insert(
-                        HistoryEntry.command_history(
-                            ctx,
-                            "converted",
-                            file.uuid,
-                            [tool, output, file.processed_names],
-                        )
-                    )
+                    database.history.insert(HistoryEntry.command_history(ctx, "converted", file.uuid, [tool, output]))
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
