@@ -114,6 +114,7 @@ def convert_file(
     *,
     verbose: bool = False,
     loggers: list[Logger] | None = None,
+    dry_run: bool = False,
 ) -> list[Path]:
     loggers = loggers or []
 
@@ -126,6 +127,10 @@ def convert_file(
         raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
 
     HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
+
+    if dry_run:
+        return []
+
     converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
     dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     for dst in dests:
@@ -210,6 +215,7 @@ def digiarch(
                             output,
                             loggers=[log_stdout],
                             verbose=verbose,
+                            dry_run=dry_run,
                         )
                     except (MissingDependency, UnsupportedPlatform) as err:
                         HistoryEntry.command_history(
@@ -231,6 +237,9 @@ def digiarch(
                         for dst in dests:
                             dst.unlink(missing_ok=True)
                         raise
+
+                    if dry_run:
+                        continue
 
                     file.processed = True
                     file.processed_names = [d.name for d in dests]
