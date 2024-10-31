@@ -15,7 +15,7 @@ def test_digiarch(test_files_dir_copy: Path, output_dir: Path):
                     where="uuid = ? and operation = 'convertool.digiarch:converted'",
                     parameters=[str(file.uuid)],
                 ).fetchone()
-            ) and event.data != ["template", "temporary-file"]:
-                assert len(file.processed_names) >= 1
-            else:
+            ) and event.data == ["template", "temporary-file"]:
                 assert not file.processed_names
+            else:
+                assert len(file.processed_names) >= 1
