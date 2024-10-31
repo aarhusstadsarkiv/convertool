@@ -126,7 +126,7 @@ def convert_file(
     if not converter_cls:
         raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
 
-    HistoryEntry.command_history(ctx, f"convert:{tool}.{output}", file.uuid).log(INFO, *loggers)
+    HistoryEntry.command_history(ctx, f"run:{tool}.{output}", file.uuid).log(INFO, *loggers)
 
     if dry_run:
         return []
@@ -134,7 +134,7 @@ def convert_file(
     converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
     dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     for dst in dests:
-        HistoryEntry.command_history(ctx, f"output:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
+        HistoryEntry.command_history(ctx, f"out:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
     return dests
 
 
