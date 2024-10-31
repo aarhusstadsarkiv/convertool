@@ -10,12 +10,13 @@ def test_digiarch(test_files_dir_copy: Path, output_dir: Path):
 
     with FileDB(test_files_dir_copy / "_metadata" / "files.db") as db:
         for file in db.files.select():
-            if (
-                event := db.history.select(
-                    where="uuid = ? and operation = 'convertool.digiarch:converted'",
-                    parameters=[str(file.uuid)],
-                ).fetchone()
-            ) and event.data == ["template", "temporary-file"]:
+            event = db.history.select(
+                where="uuid = ? and operation = 'convertool.digiarch:converted'",
+                parameters=[str(file.uuid)],
+            ).fetchone()
+            if event and event.data == ["template", "temporary-file"]:
                 assert not file.processed_names
-            else:
+            elif event:
                 assert len(file.processed_names) >= 1
+            else:
+                assert not file.processed_names
