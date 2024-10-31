@@ -178,7 +178,7 @@ def digiarch(
             offset: int = 0
             while files := list(
                 database.files.select(
-                    where="action in ('convert', 'ignore') and not processed",
+                    where="action in ('convert', 'ignore')",
                     limit=100,
                     offset=offset,
                     order_by=[("relative_path", "asc")],
@@ -187,6 +187,9 @@ def digiarch(
                 offset += len(files)
 
                 for file in files:
+                    if file.processed:
+                        continue
+
                     tool, output = file_tool_output(file)
 
                     if tool_include and tool not in tool_include:
