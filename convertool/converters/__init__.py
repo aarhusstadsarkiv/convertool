@@ -12,6 +12,7 @@ from .converter_msg import ConverterMSG
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_spreadsheet import ConverterSpreadsheet
+from .converter_symphovert import ConverterSymphovert
 from .converter_templates import ConverterTemplate
 from .converter_tnef import ConverterTNEF
 from .converter_video import ConverterVideo
@@ -30,6 +31,7 @@ __all__ = [
     "ConverterPDF",
     "ConverterPresentation",
     "ConverterSpreadsheet",
+    "ConverterSymphovert",
     "ConverterTemplate",
     "ConverterTNEF",
     "ConverterMSG",

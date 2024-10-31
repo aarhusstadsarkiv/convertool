@@ -38,6 +38,7 @@ from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
 from .converters import ConverterSpreadsheet
+from .converters import ConverterSymphovert
 from .converters import ConverterTemplate
 from .converters import ConverterTextToImage
 from .converters import ConverterTNEF
@@ -52,6 +53,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
+        ConverterSymphovert,
         ConverterGIS,
         ConverterCAD,
         ConverterTNEF,
