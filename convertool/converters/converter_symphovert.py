@@ -9,6 +9,11 @@ class ConverterSymphovert(ConverterABC):
     tool_names: ClassVar[list[str]] = ["symphovert"]
     outputs: ClassVar[list[str]] = ["odt", "ods", "odp"]
 
+    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
+        if append:
+            return output_dir / (self.file.name + f".{output}")
+        return output_dir / self.file.relative_path.with_suffix(f".{output}").name
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
