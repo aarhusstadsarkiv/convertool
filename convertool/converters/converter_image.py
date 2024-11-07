@@ -70,6 +70,8 @@ class ConverterPDFToImage(ConverterImage):
                 "convert",
                 "-density",
                 density,
+                "-compress",
+                "LZW",
                 self.file.get_absolute_path(),
                 dest_file.name,
                 cwd=dest_dir_tmp,
