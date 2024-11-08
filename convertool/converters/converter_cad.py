@@ -1,6 +1,7 @@
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import ClassVar
+
+from convertool.util import temp_dir
 
 from .base import ConverterABC
 
@@ -16,7 +17,7 @@ class ConverterCAD(ConverterABC):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
-        with TemporaryDirectory(dir=output_dir, prefix=".tmp_convertool_") as tmp_dir:
+        with temp_dir(output_dir) as tmp_dir:
             tmp_dir = Path(tmp_dir)
             self.run_process("ABViewer", "/c", output, f"dir={tmp_dir}", self.file.get_absolute_path())
             dest_dir.mkdir(parents=True, exist_ok=True)

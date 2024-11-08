@@ -1,8 +1,8 @@
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import ClassVar
 
 from convertool.converters import ConverterABC
+from convertool.util import temp_dir
 
 
 class ConverterGIS(ConverterABC):
@@ -17,7 +17,7 @@ class ConverterGIS(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
-        with TemporaryDirectory(dir=output_dir, prefix=".tmp_convertool_") as tmp_dir:
+        with temp_dir(output_dir) as tmp_dir:
             tmp_dir = Path(tmp_dir)
             self.run_process(
                 "ogr2ogr",
