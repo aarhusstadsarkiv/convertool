@@ -61,6 +61,10 @@ class ConverterABC(ABC):
         self.capture_output: bool = capture_output
 
     @classmethod
+    def match_tool(cls, tool: str, output: str) -> bool:
+        return tool in cls.tool_names and output in cls.outputs
+
+    @classmethod
     @lru_cache
     def test_platforms(cls):
         """

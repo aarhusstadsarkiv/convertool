@@ -68,7 +68,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterVideo,
         ConverterPDF,
     ):
-        if tool in converter.tool_names and output in converter.outputs:
+        if converter.match_tool(tool, output):
             return converter
 
     return None
