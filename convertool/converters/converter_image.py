@@ -95,6 +95,8 @@ class ConverterTextToImage(ConverterImage):
 
         self.run_process(
             "convert",
+            "-compress",
+            "LZW",
             "-size",
             f"{width}x{height}",
             "xc:white",
