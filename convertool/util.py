@@ -1,9 +1,9 @@
 from os import PathLike
-from pathlib import Path
 from platform import system
 from subprocess import CalledProcessError
 from subprocess import CompletedProcess
 from subprocess import run
+from tempfile import TemporaryDirectory
 
 from click import Context
 from click import Parameter
@@ -18,9 +18,13 @@ def ctx_params(ctx: Context) -> dict[str, Parameter]:
     return {p.name: p for p in ctx.command.params}
 
 
+def temp_dir(parent_dir: str | PathLike) -> TemporaryDirectory:
+    return TemporaryDirectory(dir=parent_dir, prefix=".tmp_convertool_")
+
+
 def run_process(
     *args: str | int | PathLike,
-    cwd: Path | None = None,
+    cwd: str | PathLike | None = None,
     env: bool = True,
     capture_output: bool = True,
     timeout: float | None = None,

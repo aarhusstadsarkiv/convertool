@@ -68,7 +68,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterVideo,
         ConverterPDF,
     ):
-        if tool in converter.tool_names and output in converter.outputs:
+        if converter.match_tool(tool, output):
             return converter
 
     return None
@@ -178,6 +178,7 @@ def digiarch(
 
     with FileDB(db_path) as database:
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         with ExceptionManager(BaseException) as exception:
             offset: int = 0
@@ -268,6 +269,7 @@ def standalone(ctx: Context, tool: str, output: str, destination: str, files: tu
         raise BadParameter(f"cannot find converter for tool {tool} with output {output}", ctx, ctx_params(ctx)["tool"])
 
     dest: Path = Path(destination)
+    dest.mkdir(parents=True, exist_ok=True)
 
     for file_path in map(Path, files):
         try:

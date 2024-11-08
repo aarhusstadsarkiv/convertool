@@ -9,6 +9,7 @@ on:
       - Dockerfile
       - pyproject.toml
       - poetry.lock
+      - .github/workflows/test.yml
   workflow_dispatch:
   workflow_call:
 
@@ -76,8 +77,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Test Image
-        run: docker build . -t convertool:latest -f Dockerfile --target test
+        run: |
+          docker build . -t convertool:latest -f Dockerfile --target test
+          docker run -td -v $(pwd):/root/convertool --name convertool convertool:latest
       - name: pytest
-        run: docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage run -m pytest
+        run: docker exec convertool poetry run coverage run -m pytest
       - name: converage
-        run: docker run -v $(pwd):/root/convertool convertool:latest poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
+        run: docker exec convertool poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered

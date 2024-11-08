@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import ClassVar
 
+from convertool.util import temp_dir
+
 from .base import ConverterABC
 
 
@@ -11,7 +13,7 @@ class ConverterPDF(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, "pdf")
         arguments: list[str] = []
 
@@ -22,17 +24,21 @@ class ConverterPDF(ConverterABC):
         elif output == "pdf-a3":
             arguments.extend(["-dPDFA=3", "-dPDFACompatibilityPolicy=1"])
 
-        self.run_process(
-            "gs",
-            "-dNOSAFER",
-            "-dNOPAUSE",
-            "-dBATCH",
-            "-sDEVICE=pdfwrite",
-            "-sColorConversionStrategy=UseDeviceIndependentColor",
-            f"-sOutputFile={dest_file.name}",
-            *arguments,
-            self.file.get_absolute_path(),
-            cwd=dest_dir,
-        )
+        with temp_dir(output_dir) as tmp_dir:
+            tmp_dir = Path(tmp_dir)
+            self.run_process(
+                "gs",
+                "-dNOSAFER",
+                "-dNOPAUSE",
+                "-dBATCH",
+                "-sDEVICE=pdfwrite",
+                "-sColorConversionStrategy=UseDeviceIndependentColor",
+                f"-sOutputFile={dest_file.name}",
+                *arguments,
+                self.file.get_absolute_path(),
+                cwd=tmp_dir,
+            )
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            tmp_dir.joinpath(dest_file.name).replace(dest_file)
 
         return [dest_file]

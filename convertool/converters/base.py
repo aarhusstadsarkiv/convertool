@@ -61,6 +61,10 @@ class ConverterABC(ABC):
         self.capture_output: bool = capture_output
 
     @classmethod
+    def match_tool(cls, tool: str, output: str) -> bool:
+        return tool in cls.tool_names and output in cls.outputs
+
+    @classmethod
     @lru_cache
     def test_platforms(cls):
         """
@@ -81,7 +85,7 @@ class ConverterABC(ABC):
         for dependency in cls.dependencies or []:
             _test_dependency(dependency)
 
-    def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
+    def run_process(self, *args: str | int | PathLike, cwd: str | PathLike | None = None) -> tuple[str, str]:
         """
         Run process and capture output.
 
@@ -103,7 +107,7 @@ class ConverterABC(ABC):
                 err.stderr or err.stdout or f"An unknown error occurred. Return code {err.returncode}",
             )
 
-    def output_dir(self, output_dir: Path, keep_relative_path: bool = True, mkdir: bool = True) -> Path:
+    def output_dir(self, output_dir: Path, *, keep_relative_path: bool = True, mkdir: bool = False) -> Path:
         """
         Compute the output directory and check if it is a valid directory path.
 
