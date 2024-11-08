@@ -2,8 +2,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import ClassVar
 
-from acacore.utils.functions import rm_tree
-
 from .base import ConverterABC
 
 

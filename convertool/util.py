@@ -1,5 +1,4 @@
 from os import PathLike
-from pathlib import Path
 from platform import system
 from subprocess import CalledProcessError
 from subprocess import CompletedProcess
