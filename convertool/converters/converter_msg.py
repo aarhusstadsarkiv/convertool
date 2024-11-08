@@ -164,7 +164,7 @@ class ConverterMSG(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
         msg: Message | MessageSigned = validate_msg(self.file)
 

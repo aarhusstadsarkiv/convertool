@@ -103,7 +103,7 @@ class ConverterABC(ABC):
                 err.stderr or err.stdout or f"An unknown error occurred. Return code {err.returncode}",
             )
 
-    def output_dir(self, output_dir: Path, keep_relative_path: bool = True, mkdir: bool = False) -> Path:
+    def output_dir(self, output_dir: Path, *, keep_relative_path: bool = True, mkdir: bool = False) -> Path:
         """
         Compute the output directory and check if it is a valid directory path.
 
