@@ -81,6 +81,6 @@ jobs:
           docker build . -t convertool:latest -f Dockerfile --target test
           docker run -td -v $(pwd):/root/convertool --name convertool convertool:latest
       - name: pytest
-        run: docker exec -it convertool poetry run coverage run -m pytest
+        run: docker exec convertool poetry run coverage run -m pytest
       - name: converage
-        run: docker exec -it convertool poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
+        run: docker exec convertool poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
