@@ -16,7 +16,7 @@ class ConverterGIS(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path, mkdir=False)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
         with TemporaryDirectory() as tmp_dir:
