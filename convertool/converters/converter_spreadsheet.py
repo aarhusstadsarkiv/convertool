@@ -21,7 +21,7 @@ class ConverterSpreadsheet(ConverterABC):
         output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
-        with TemporaryDirectory() as tmp_dir:
+        with TemporaryDirectory(dir=output_dir, prefix=".tmp_convertool_") as tmp_dir:
             tmp_dir = Path(tmp_dir)
             self.run_process(
                 "libreoffice",

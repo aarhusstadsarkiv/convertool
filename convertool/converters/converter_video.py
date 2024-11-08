@@ -32,7 +32,7 @@ class ConverterVideo(ConverterABC):
 
         dest_file: Path = self.output_file(dest_dir, output)
 
-        with TemporaryDirectory() as tmp_dir:
+        with TemporaryDirectory(dir=output_dir, prefix=".tmp_convertool_") as tmp_dir:
             tmp_dir = Path(tmp_dir)
             self.run_process(
                 "ffmpeg",

@@ -23,7 +23,7 @@ class ConverterPDF(ConverterABC):
         elif output == "pdf-a3":
             arguments.extend(["-dPDFA=3", "-dPDFACompatibilityPolicy=1"])
 
-        with TemporaryDirectory() as tmp_dir:
+        with TemporaryDirectory(dir=output_dir, prefix=".tmp_convertool_") as tmp_dir:
             tmp_dir = Path(tmp_dir)
             self.run_process(
                 "gs",
