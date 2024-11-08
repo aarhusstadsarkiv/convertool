@@ -153,7 +153,7 @@ class ConverterTNEF(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path, mkdir=False)
         dest_file: Path = self.output_file(dest_dir, output)
 
         try:
@@ -176,10 +176,15 @@ class ConverterTNEF(ConverterABC):
                 date_sent=obj_date_sent.data if obj_date_sent else "",
             )
 
+            body: str = ""
+
             if output == "txt":
-                dest_file.write_text(tnef_to_txt(tnef, headers), encoding="utf-8")
+                body = tnef_to_txt(tnef, headers)
             elif output == "html":
-                dest_file.write_text(tnef_to_html(tnef, headers), encoding="utf-8")
+                body = tnef_to_html(tnef, headers)
+
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest_file.write_text(body, encoding="utf-8")
 
             return [dest_file]
         except Exception as e:
