@@ -20,7 +20,7 @@ def ctx_params(ctx: Context) -> dict[str, Parameter]:
 
 def run_process(
     *args: str | int | PathLike,
-    cwd: Path | None = None,
+    cwd: str | PathLike | None = None,
     env: bool = True,
     capture_output: bool = True,
     timeout: float | None = None,

@@ -81,7 +81,7 @@ class ConverterABC(ABC):
         for dependency in cls.dependencies or []:
             _test_dependency(dependency)
 
-    def run_process(self, *args: str | int | PathLike, cwd: Path | None = None) -> tuple[str, str]:
+    def run_process(self, *args: str | int | PathLike, cwd: str | PathLike | None = None) -> tuple[str, str]:
         """
         Run process and capture output.
 
