@@ -56,8 +56,10 @@ def run_process(
 
 
 class TempDir(TemporaryDirectory):
+    prefix: str = ".tmp_convertool_"
+
     def __init__(self, parent_dir: str | PathLike) -> None:
-        super().__init__(dir=parent_dir, prefix=".tmp_convertool_")
+        super().__init__(dir=parent_dir, prefix=self.prefix)
 
     def __enter__(self) -> Path:
         return Path(self.name)
