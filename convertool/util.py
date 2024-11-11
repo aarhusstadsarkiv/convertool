@@ -50,7 +50,7 @@ def run_process(
             check=True,
             timeout=timeout,
         )
-        return process.stderr or "", process.stdout or ""
+        return process.stdout or "", process.stderr or ""
     except FileNotFoundError:
         raise CalledProcessError(127, args[0:1], "", f"Command not found {''.join(args[0:1])}")
 
