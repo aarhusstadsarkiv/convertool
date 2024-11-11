@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from convertool.util import temp_dir
+from convertool.util import TempDir
 
 from .base import ConverterABC
 
@@ -31,8 +31,7 @@ class ConverterImage(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
-        with temp_dir(output_dir) as tmp_dir:
-            tmp_dir = Path(tmp_dir)
+        with TempDir(output_dir) as tmp_dir:
             self.run_process("convert", self.file.get_absolute_path(), dest_file.name, cwd=tmp_dir)
             dest_dir.mkdir(parents=True, exist_ok=True)
             tmp_dir.joinpath(dest_file.name).replace(dest_file)
@@ -48,8 +47,7 @@ class ConverterPDFToImage(ConverterImage):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
-        with temp_dir(output_dir) as tmp_dir:
-            tmp_dir = Path(tmp_dir)
+        with TempDir(output_dir) as tmp_dir:
             density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
             density: int = 0
 
@@ -88,8 +86,7 @@ class ConverterTextToImage(ConverterImage):
         width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
         height: int = max(600, (text.count("\n") + 1) * 25)
 
-        with temp_dir(output_dir) as tmp_dir:
-            tmp_dir = Path(tmp_dir)
+        with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "convert",
                 "-compress",

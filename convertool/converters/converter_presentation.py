@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from convertool.util import temp_dir
+from convertool.util import TempDir
 
 from .base import ConverterABC
 
@@ -22,8 +22,7 @@ class ConverterPresentation(ConverterABC):
         output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
-        with temp_dir(output_dir) as tmp_dir:
-            tmp_dir = Path(tmp_dir)
+        with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "libreoffice",
                 "--headless",
