@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from convertool.util import temp_dir
+from convertool.util import TempDir
 
 from .base import ConverterABC
 
@@ -39,8 +39,7 @@ class ConverterVideo(ConverterABC):
 
         dest_file: Path = self.output_file(dest_dir, output)
 
-        with temp_dir(output_dir) as tmp_dir:
-            tmp_dir = Path(tmp_dir)
+        with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "ffmpeg",
                 "-i",

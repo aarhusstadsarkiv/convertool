@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from convertool.util import temp_dir
+from convertool.util import TempDir
 
 from .base import ConverterABC
 
@@ -24,8 +24,7 @@ class ConverterPDF(ConverterABC):
         elif output == "pdf-a3":
             arguments.extend(["-dPDFA=3", "-dPDFACompatibilityPolicy=1"])
 
-        with temp_dir(output_dir) as tmp_dir:
-            tmp_dir = Path(tmp_dir)
+        with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "gs",
                 "-dNOSAFER",

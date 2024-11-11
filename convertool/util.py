@@ -1,4 +1,5 @@
 from os import PathLike
+from pathlib import Path
 from platform import system
 from subprocess import CalledProcessError
 from subprocess import CompletedProcess
@@ -16,10 +17,6 @@ if system().lower() in ("linux", "darwin"):
 
 def ctx_params(ctx: Context) -> dict[str, Parameter]:
     return {p.name: p for p in ctx.command.params}
-
-
-def temp_dir(parent_dir: str | PathLike) -> TemporaryDirectory:
-    return TemporaryDirectory(dir=parent_dir, prefix=".tmp_convertool_")
 
 
 def run_process(
@@ -56,3 +53,11 @@ def run_process(
         return process.stderr or "", process.stdout or ""
     except FileNotFoundError:
         raise CalledProcessError(127, args[0:1], "", f"Command not found {''.join(args[0:1])}")
+
+
+class TempDir(TemporaryDirectory):
+    def __init__(self, parent_dir: str | PathLike) -> None:
+        super().__init__(dir=parent_dir, prefix=".tmp_convertool_")
+
+    def __enter__(self) -> Path:
+        return Path(self.name)
