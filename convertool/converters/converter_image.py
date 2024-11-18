@@ -85,7 +85,10 @@ class ConverterPDFToImage(ConverterImage):
 
 
 class ConverterTextToImage(ConverterImage):
-    tool_names: ClassVar[list[str]] = ["text-to-image"]
+    tool_names: ClassVar[list[str]] = [
+        "text",
+        "text-to-image",
+    ]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
