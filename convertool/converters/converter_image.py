@@ -30,9 +30,13 @@ class ConverterImage(ConverterABC):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
+        args: list[str] = []
+
+        if output == "tif":
+            args.extend(("-compress", "LZW", "-depth", "16"))
 
         with TempDir(output_dir) as tmp_dir:
-            self.run_process("convert", self.file.get_absolute_path(), dest_file.name, cwd=tmp_dir)
+            self.run_process("convert", self.file.get_absolute_path(), *args, dest_file.name, cwd=tmp_dir)
             dest_dir.mkdir(parents=True, exist_ok=True)
             tmp_dir.joinpath(dest_file.name).replace(dest_file)
 
@@ -46,25 +50,28 @@ class ConverterPDFToImage(ConverterImage):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
+        args: list[str] = []
+
+        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
+        density: int = 0
+
+        for density_line in density_stdout.strip().splitlines():
+            density_x, _, density_y = density_line.strip().partition(",")
+            density_page: int = max(int(density_x), int(density_y), 0) * 2
+            if density_page > density:
+                density = density_page
+
+        density = density or 150
+
+        if output == "tif":
+            args.extend(("-compress", "LZW", "-depth", "24", "-alpha", "off", "-fill", "white"))
 
         with TempDir(output_dir) as tmp_dir:
-            density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
-            density: int = 0
-
-            for density_line in density_stdout.strip().splitlines():
-                density_x, _, density_y = density_line.strip().partition(",")
-                density_page: int = max(int(density_x), int(density_y), 0) * 2
-                if density_page > density:
-                    density = density_page
-
-            density = density or 150
-
             self.run_process(
                 "convert",
                 "-density",
                 density,
-                "-compress",
-                "LZW",
+                *args,
                 self.file.get_absolute_path(),
                 dest_file.name,
                 cwd=tmp_dir,
@@ -85,12 +92,17 @@ class ConverterTextToImage(ConverterImage):
         text: str = self.file.get_absolute_path().read_text().strip()
         width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
         height: int = max(600, (text.count("\n") + 1) * 25)
+        args: list[str] = []
+
+        if output == "tif":
+            args.extend(("-compress", "LZW"))
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "convert",
-                "-compress",
-                "LZW",
+                "-depth",
+                "8",
+                *args,
                 "-size",
                 f"{width}x{height}",
                 "xc:white",
