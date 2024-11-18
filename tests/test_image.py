@@ -14,6 +14,7 @@ MIMETYPES = {
     "tif": "image/tiff",
     "tiff": "image/tiff",
     "jp2": "image/jp2",
+    "pdf": "application/pdf",
 }
 
 
