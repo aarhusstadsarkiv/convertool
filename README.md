@@ -42,6 +42,7 @@
 | image        | jp2      | Convert image to JPEG2000                                           | .jp2      |
 | image        | png      | Convert image to PNG                                                | .png      |
 | image        | tiff     | Convert image to TIFF                                               | .tiff     |
+| image        | pdf      | Convert image to PDF                                                | .pdf      |
 | text         | jpg      | Convert text file to a JPEG image                                   | .jpg      |
 | text         | jp2      | Convert text file to a JPEG2000 image                               | .jp2      |
 | text         | png      | Convert text file to a PNG image                                    | .png      |
