@@ -21,6 +21,10 @@
 | document     | odt      | Convert a document file (Word, LibreOffice, etc.) to ODT            | .odt      |
 | document     | pdf      | Convert a document file (Word, LibreOffice, etc.) to PDF            | .pdf      |
 | document     | html     | Convert a document file (Word, LibreOffice, etc.) to HTML           | .html     |
+| document     | jpg      | Convert a document file (Word, LibreOffice, etc.) to JPEG           | .jpg      |
+| document     | jp2      | Convert a document file (Word, LibreOffice, etc.) to JPEG2000       | .jp2      |
+| document     | png      | Convert a document file (Word, LibreOffice, etc.) to PNG            | .png      |
+| document     | tiff     | Convert a document file (Word, LibreOffice, etc.) to TIFF           | .tiff     |
 | presentation | odp      | Convert a presentation file (PowerPoint, LibreOffice, etc.) to ODP  | .odp      |
 | presentation | pdf      | Convert a presentation file (PowerPoint, LibreOffice, etc.) to PDF  | .pdf      |
 | presentation | html     | Convert a presentation file (PowerPoint, LibreOffice, etc.) to HTML | .html     |
