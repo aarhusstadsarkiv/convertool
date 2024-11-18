@@ -48,6 +48,7 @@ class ConverterImage(ConverterABC):
 
 class ConverterDocumentToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["document"]
+    platforms = list(set(ConverterImage.platforms or []).union(set(ConverterDocument.platforms or []))) or None
     dependencies: ClassVar[list[str]] = [  # noqa: SIM222
         *(ConverterImage.dependencies or []),
         *(ConverterDocument.dependencies or []),
