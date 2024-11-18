@@ -37,7 +37,9 @@ class ConverterImage(ConverterABC):
         args: list[str] = []
 
         if output == "tif":
-            args.extend(("-compress", "LZW", "-depth", "16"))
+            args.extend(("-compress", "LZW", "-depth", "16", "-coalesce"))
+        if output == "pdf":
+            args.extend(("-coalesce",))
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process("convert", self.file.get_absolute_path(), *args, dest_file.name, cwd=tmp_dir)
