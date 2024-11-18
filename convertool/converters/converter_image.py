@@ -48,6 +48,10 @@ class ConverterImage(ConverterABC):
 
 class ConverterDocumentToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["document"]
+    dependencies: ClassVar[list[str]] = [  # noqa: SIM222
+        *(ConverterImage.dependencies or []),
+        *(ConverterDocument.dependencies or []),
+    ] or None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
