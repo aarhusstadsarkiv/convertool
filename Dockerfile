@@ -42,16 +42,6 @@ RUN apt-get update && apt-get install -y /root/google-chrome-stable_current_amd6
 RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
 RUN rm google-chrome-stable_current_amd64.deb
 
-# Install QCAD
-WORKDIR /root
-RUN mkdir -p /root/qcad
-RUN curl https://qcad.org/archives/qcad/qcadcam-3.28.2-trial-linux-x86_64.run -o /root/qcad/qcad-installer.run
-RUN chmod a+x /root/qcad/qcad-installer.run
-RUN /root/qcad/qcad-installer.run
-RUN rm -rf /root/qcad
-RUN mv /root/opt/qcad* /root/opt/qcad
-ENV PATH="/root/opt/qcad:$PATH"
-
 CMD ["bash"]
 
 FROM base AS prod
