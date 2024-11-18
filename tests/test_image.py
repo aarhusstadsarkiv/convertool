@@ -3,6 +3,7 @@ from pathlib import Path
 from acacore.models.file import File
 from acacore.siegfried import Siegfried
 
+from convertool.converters import ConverterDocumentToImage
 from convertool.converters.converter_image import ConverterImage
 from convertool.converters.converter_image import ConverterPDFToImage
 from convertool.converters.converter_image import ConverterTextToImage
@@ -69,4 +70,20 @@ def test_text_to_img(
         output_files = converter.convert(output_dir, output)
         assert len(output_files) == 1
         assert output_files[0].name in reference_files
+        assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)
+
+
+def test_doc_to_img(
+    test_files: dict[str, Path],
+    reference_files: dict[str, Path],
+    output_dir: Path,
+    siegfried: Siegfried,
+):
+    file = File.from_file(test_files["document.docx"], root=test_files["document.docx"].parent)
+    converter = ConverterDocumentToImage(file)
+
+    for output in converter.outputs:
+        print(output)
+        output_files = converter.convert(output_dir, output)
+        assert len(output_files) >= 1
         assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)
