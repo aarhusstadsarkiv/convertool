@@ -18,6 +18,7 @@ class ConverterImage(ConverterABC):
         "tif",
         "tiff",
         "jp2",
+        "pdf",
     ]
     process_timeout: ClassVar[float] = 180.0
     dependencies: ClassVar[list[str]] = ["convert"]
