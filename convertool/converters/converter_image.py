@@ -53,7 +53,7 @@ class ConverterPDFToImage(ConverterImage):
         args: list[str] = []
 
         density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
-        density: int = 0
+        density: int = 150
 
         for density_line in density_stdout.strip().splitlines():
             density_x, _, density_y = density_line.strip().partition(",")
@@ -61,10 +61,9 @@ class ConverterPDFToImage(ConverterImage):
             if density_page > density:
                 density = density_page
 
-        density = density or 150
-
         if output == "tif":
             args.extend(("-compress", "LZW", "-depth", "24", "-alpha", "off", "-fill", "white"))
+            density *= 2
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
