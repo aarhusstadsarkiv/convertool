@@ -38,6 +38,11 @@
 | pdf          | jp2      | Convert PDF to JPEG2000 images (one per page)                       | .jp2      |
 | pdf          | png      | Convert PDF to PNG images (one per page)                            | .png      |
 | pdf          | tiff     | Convert PDF to TIFF image (multipage)                               | .tiff     |
+| html         | pdf      | Convert HTML to PDF                                                 | .pdf      |
+| html         | jpg      | Convert HTML to JPEG images (one per page)                          | .jpg      |
+| html         | jp2      | Convert HTML to JPEG2000 images (one per page)                      | .jp2      |
+| html         | png      | Convert HTML to PNG images (one per page)                           | .png      |
+| html         | tiff     | Convert HTML to TIFF image (multipage)                              | .tiff     |
 | image        | jpg      | Convert image to JPEG                                               | .jpg      |
 | image        | jp2      | Convert image to JPEG2000                                           | .jp2      |
 | image        | png      | Convert image to PNG                                                | .png      |
