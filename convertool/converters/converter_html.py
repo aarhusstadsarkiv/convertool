@@ -55,13 +55,16 @@ class ConverterHTMLToImage(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
         with TempDir(output_dir) as tmp_dir:
-            pdfs = ConverterHTML(self.file, self.database).convert(tmp_dir, "pdf", keep_relative_path=False)
+            pdfs = ConverterHTML(self.file, self.database).convert(tmp_dir, "pdf")
             if not pdfs:
                 return []
 
             pdf = pdfs[0]
 
-            return ConverterPDFToImage(File.from_file(pdf, tmp_dir), self.database, tmp_dir).convert(dest_dir, output)
+            return ConverterPDFToImage(File.from_file(pdf, tmp_dir), self.database, tmp_dir).convert(
+                output_dir,
+                output,
+                keep_relative_path=keep_relative_path,
+            )
