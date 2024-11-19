@@ -5,6 +5,7 @@ from acacore.models.file import File
 
 from convertool.util import TempDir
 
+from .base import _shared_platforms
 from .base import ConverterABC
 from .converter_image import ConverterPDFToImage
 
@@ -39,12 +40,18 @@ class ConverterHTML(ConverterABC):
 class ConverterHTMLToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["html"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML.platforms, ConverterPDFToImage.platforms)
     dependencies: ClassVar[list[str]] = [  # noqa: SIM222
         *(ConverterHTML.dependencies or []),
         *(ConverterPDFToImage.dependencies or []),
     ] or None
-    platforms: ClassVar[list[str] | None] = ConverterPDFToImage.platforms
-    process_timeout: ClassVar[float] = 60
+    process_timeout: ClassVar[float | None] = (
+        max(
+            ConverterHTML.process_timeout or 0,
+            ConverterPDFToImage.process_timeout or 0,
+        )
+        or None
+    )
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
