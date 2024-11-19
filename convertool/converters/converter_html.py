@@ -20,6 +20,7 @@ class ConverterHTML(ConverterABC):
             self.run_process(
                 "chrome",
                 "--headless",
+                "--no-sandbox",
                 "--print-to-pdf",
                 "--no-pdf-header-footer",
                 self.file.get_absolute_path(),
