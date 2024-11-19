@@ -1,9 +1,13 @@
 from pathlib import Path
 from typing import ClassVar
 
+from acacore.models.file import File
+
 from convertool.util import TempDir
 
+from .base import _shared_platforms
 from .base import ConverterABC
+from .converter_image import ConverterPDFToImage
 
 
 class ConverterDocument(ConverterABC):
@@ -34,3 +38,32 @@ class ConverterDocument(ConverterABC):
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
             return [f.replace(dest_dir / f.name) for f in tmp_dir.iterdir() if f.is_file()]
+
+
+class ConverterDocumentToImage(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["document"]
+    outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterDocument.platforms, ConverterPDFToImage.platforms)
+    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
+        *(ConverterDocument.dependencies or []),
+        *(ConverterPDFToImage.dependencies or []),
+    ] or None
+    process_timeout: ClassVar[float | None] = (
+        max(
+            ConverterDocument.process_timeout or 0,
+            ConverterPDFToImage.process_timeout or 0,
+        )
+        or None
+    )
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+
+        with TempDir(output_dir) as tmp_dir:
+            if not (pdfs := ConverterDocument(self.file, self.database, self.file.root).convert(tmp_dir, "pdf")):
+                return []
+
+            pdf = pdfs[0]
+
+            return ConverterPDFToImage(File.from_file(pdf, tmp_dir), self.database, tmp_dir).convert(dest_dir, output)
