@@ -4,6 +4,9 @@ from acacore.models.file import File
 from acacore.siegfried import Siegfried
 
 from convertool.converters.converter_document import ConverterDocument
+from convertool.converters.converter_document import ConverterDocumentToImage
+
+from .test_image import MIMETYPES
 
 
 # noinspection DuplicatedCode
@@ -55,3 +58,14 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
         assert sf_match is not None
         assert sf_match.mime == "text/html"
+
+
+def test_document_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
+    file = File.from_file(test_files["document.docx"], root=test_files["document.docx"].parent)
+    converter = ConverterDocumentToImage(file)
+
+    for output in converter.outputs:
+        print(output)
+        output_files = converter.convert(output_dir, output)
+        assert len(output_files) >= 1
+        assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)

@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 from functools import lru_cache
+from functools import reduce
 from os import PathLike
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -36,6 +37,15 @@ def _test_dependency(command: str):
 def _test_platform(*platforms: str):
     if platforms and platform not in platforms:
         raise UnsupportedPlatform(platform, f"Not one of {platforms}")
+
+
+def _shared_platforms(*platforms: list[str] | None) -> list[str]:
+    platforms = tuple(ps for ps in platforms if ps)
+
+    if not platforms:
+        return []
+
+    return list(reduce(lambda a, c: a.union(set(c)), platforms[1:], set(platforms[0]))) or ["no-platform"]
 
 
 class ConverterABC(ABC):

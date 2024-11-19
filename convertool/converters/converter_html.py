@@ -10,47 +10,44 @@ from .base import ConverterABC
 from .converter_image import ConverterPDFToImage
 
 
-class ConverterDocument(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["document"]
-    outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
-    process_timeout: ClassVar[float] = 60.0
-    dependencies: ClassVar[list[str]] = ["libreoffice"]
+class ConverterHTML(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["html"]
+    outputs: ClassVar[list[str]] = ["pdf"]
+    dependencies: ClassVar[list[str]] = ["chrome"]
+    process_timeout: ClassVar[float] = 60
 
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def output_filter(self, output: str) -> str:  # noqa: ARG002
-        return ""
-
-    # noinspection DuplicatedCode
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = self.output_file(dest_dir, output)
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "libreoffice",
+                "chrome",
                 "--headless",
-                "--convert-to",
-                f"{output}:{output_filter}" if output_filter else output,
-                "--outdir",
-                tmp_dir,
+                "--no-sandbox",
+                "--print-to-pdf",
+                "--no-pdf-header-footer",
                 self.file.get_absolute_path(),
+                cwd=tmp_dir,
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
-            return [f.replace(dest_dir / f.name) for f in tmp_dir.iterdir() if f.is_file()]
+            tmp_dir.joinpath("output.pdf").replace(dest_file)
+
+        return [dest_file]
 
 
-class ConverterDocumentToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["document"]
+class ConverterHTMLToImage(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["html"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterDocument.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
-        *(ConverterDocument.dependencies or []),
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML.platforms, ConverterPDFToImage.platforms)
+    dependencies: ClassVar[list[str]] = [  # noqa: SIM222
+        *(ConverterHTML.dependencies or []),
         *(ConverterPDFToImage.dependencies or []),
     ] or None
     process_timeout: ClassVar[float | None] = (
         max(
-            ConverterDocument.process_timeout or 0,
+            ConverterHTML.process_timeout or 0,
             ConverterPDFToImage.process_timeout or 0,
         )
         or None
@@ -60,7 +57,8 @@ class ConverterDocumentToImage(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            if not (pdfs := ConverterDocument(self.file, self.database, self.file.root).convert(tmp_dir, "pdf")):
+            pdfs = ConverterHTML(self.file, self.database).convert(tmp_dir, "pdf")
+            if not pdfs:
                 return []
 
             pdf = pdfs[0]

@@ -4,8 +4,10 @@ from .converter_audio import ConverterAudio
 from .converter_cad import ConverterCAD
 from .converter_copy import ConverterCopy
 from .converter_document import ConverterDocument
+from .converter_document import ConverterDocumentToImage
 from .converter_gis import ConverterGIS
-from .converter_image import ConverterDocumentToImage
+from .converter_html import ConverterHTML
+from .converter_html import ConverterHTMLToImage
 from .converter_image import ConverterImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
@@ -27,6 +29,8 @@ __all__ = [
     "ConverterDocument",
     "ConverterDocumentToImage",
     "ConverterGIS",
+    "ConverterHTML",
+    "ConverterHTMLToImage",
     "ConverterPDFToImage",
     "ConverterTextToImage",
     "ConverterImage",
