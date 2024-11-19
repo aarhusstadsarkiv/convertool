@@ -63,7 +63,7 @@ class ConverterPDFToImage(ConverterImage):
 
         for density_line in density_stdout.strip().splitlines():
             density_x, _, density_y = density_line.strip().partition(",")
-            density_page: int = max(int(density_x), int(density_y), 0) * 2
+            density_page: int = max(int(density_x), int(density_y), 0)
             if density_page > density:
                 density = density_page
 
