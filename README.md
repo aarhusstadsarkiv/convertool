@@ -21,6 +21,10 @@
 | document     | odt      | Convert a document file (Word, LibreOffice, etc.) to ODT            | .odt      |
 | document     | pdf      | Convert a document file (Word, LibreOffice, etc.) to PDF            | .pdf      |
 | document     | html     | Convert a document file (Word, LibreOffice, etc.) to HTML           | .html     |
+| document     | jpg      | Convert a document file (Word, LibreOffice, etc.) to JPEG           | .jpg      |
+| document     | jp2      | Convert a document file (Word, LibreOffice, etc.) to JPEG2000       | .jp2      |
+| document     | png      | Convert a document file (Word, LibreOffice, etc.) to PNG            | .png      |
+| document     | tiff     | Convert a document file (Word, LibreOffice, etc.) to TIFF           | .tiff     |
 | presentation | odp      | Convert a presentation file (PowerPoint, LibreOffice, etc.) to ODP  | .odp      |
 | presentation | pdf      | Convert a presentation file (PowerPoint, LibreOffice, etc.) to PDF  | .pdf      |
 | presentation | html     | Convert a presentation file (PowerPoint, LibreOffice, etc.) to HTML | .html     |
@@ -30,15 +34,16 @@
 | pdf          | pdfa-1   | Convert PDF to PDF/A-1b                                             | .pdf      |
 | pdf          | pdfa-2   | Convert PDF to PDF/A-2b                                             | .pdf      |
 | pdf          | pdfa-3   | Convert PDF to PDF/A-3b                                             | .pdf      |
-| img          | jpg      | Convert image to JPEG                                               | .jpg      |
-| img          | jp2      | Convert image to JPEG2000                                           | .jp2      |
-| img          | png      | Convert image to PNG                                                | .png      |
-| img          | tiff     | Convert image to TIFF                                               | .tiff     |
-| pdf-to-img   | jpg      | Convert PDF to JPEG images (one per page)                           | .jpg      |
-| pdf-to-img   | jp2      | Convert PDF to JPEG2000 images (one per page)                       | .jp2      |
-| pdf-to-img   | png      | Convert PDF to PNG images (one per page)                            | .png      |
-| pdf-to-img   | tiff     | Convert PDF to TIFF image (multipage)                               | .tiff     |
-| text-to-img  | jpg      | Convert text file to a JPEG image                                   | .jpg      |
-| text-to-img  | jp2      | Convert text file to a JPEG2000 image                               | .jp2      |
-| text-to-img  | png      | Convert text file to a PNG image                                    | .png      |
-| text-to-img  | tiff     | Convert text file to a TIFF image                                   | .tiff     |
+| pdf          | jpg      | Convert PDF to JPEG images (one per page)                           | .jpg      |
+| pdf          | jp2      | Convert PDF to JPEG2000 images (one per page)                       | .jp2      |
+| pdf          | png      | Convert PDF to PNG images (one per page)                            | .png      |
+| pdf          | tiff     | Convert PDF to TIFF image (multipage)                               | .tiff     |
+| image        | jpg      | Convert image to JPEG                                               | .jpg      |
+| image        | jp2      | Convert image to JPEG2000                                           | .jp2      |
+| image        | png      | Convert image to PNG                                                | .png      |
+| image        | tiff     | Convert image to TIFF                                               | .tiff     |
+| image        | pdf      | Convert image to PDF                                                | .pdf      |
+| text         | jpg      | Convert text file to a JPEG image                                   | .jpg      |
+| text         | jp2      | Convert text file to a JPEG2000 image                               | .jp2      |
+| text         | png      | Convert text file to a PNG image                                    | .png      |
+| text         | tiff     | Convert text file to a TIFF image                                   | .tiff     |

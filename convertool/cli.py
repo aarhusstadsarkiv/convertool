@@ -31,6 +31,7 @@ from .converters import ConverterAudio
 from .converters import ConverterCAD
 from .converters import ConverterCopy
 from .converters import ConverterDocument
+from .converters import ConverterDocumentToImage
 from .converters import ConverterGIS
 from .converters import ConverterImage
 from .converters import ConverterMSG
@@ -59,6 +60,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterTNEF,
         ConverterMSG,
         ConverterDocument,
+        ConverterDocumentToImage,
         ConverterPresentation,
         ConverterSpreadsheet,
         ConverterPDFToImage,
