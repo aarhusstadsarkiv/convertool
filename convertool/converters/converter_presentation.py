@@ -12,7 +12,7 @@ class ConverterPresentation(ConverterABC):
     process_timeout: ClassVar[float] = 60.0
     dependencies: ClassVar[list[str]] = ["libreoffice"]
 
-    # noinspection PyMethodMayBeStatic
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def output_filter(self, output: str) -> str:  # noqa: ARG002
         return ""
 
