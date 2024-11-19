@@ -29,6 +29,11 @@
 | image        | tiff     | Convert image to TIFF                                               | .tiff     |
 | msg          | html     | Convert an MSG file to HTML                                         | .html     |
 | msg          | txt      | Convert an MSG file to TXT                                          | .txt      |
+| msg          | pdf      | Convert an MSG file to TXT                                          | .pdf      |
+| msg          | jp2      | Convert an MSG file to JPEG2000                                     | .jp2      |
+| msg          | jpg      | Convert an MSG file to JPEG                                         | .jpg      |
+| msg          | png      | Convert an MSG file to PNG                                          | .png      |
+| msg          | tiff     | Convert an MSG file to TIFF                                         | .tiff     |
 | pdf          | pdfa-1   | Convert PDF to PDF/A-1b                                             | .pdf      |
 | pdf          | pdfa-2   | Convert PDF to PDF/A-2b                                             | .pdf      |
 | pdf          | pdfa-3   | Convert PDF to PDF/A-3b                                             | .pdf      |
