@@ -12,6 +12,8 @@ from .converter_image import ConverterImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
 from .converter_msg import ConverterMSG
+from .converter_msg import ConverterMSGToImage
+from .converter_msg import ConverterMSGToPDF
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_spreadsheet import ConverterSpreadsheet
@@ -31,6 +33,9 @@ __all__ = [
     "ConverterGIS",
     "ConverterHTML",
     "ConverterHTMLToImage",
+    "ConverterMSG",
+    "ConverterMSGToImage",
+    "ConverterMSGToPDF",
     "ConverterPDFToImage",
     "ConverterTextToImage",
     "ConverterImage",
@@ -40,6 +45,5 @@ __all__ = [
     "ConverterSymphovert",
     "ConverterTemplate",
     "ConverterTNEF",
-    "ConverterMSG",
     "ConverterVideo",
 ]

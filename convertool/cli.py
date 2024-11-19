@@ -37,6 +37,8 @@ from .converters import ConverterHTML
 from .converters import ConverterHTMLToImage
 from .converters import ConverterImage
 from .converters import ConverterMSG
+from .converters import ConverterMSGToImage
+from .converters import ConverterMSGToPDF
 from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
@@ -63,6 +65,8 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterCAD,
         ConverterTNEF,
         ConverterMSG,
+        ConverterMSGToImage,
+        ConverterMSGToPDF,
         ConverterDocument,
         ConverterDocumentToImage,
         ConverterPresentation,
