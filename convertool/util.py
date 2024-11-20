@@ -47,6 +47,7 @@ def run_process(
             cwd=cwd,
             capture_output=capture_output,
             encoding="utf-8",
+            errors="replace",
             check=True,
             timeout=timeout,
         )

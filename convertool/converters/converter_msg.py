@@ -16,7 +16,13 @@ from extract_msg.msg_classes import MessageSigned
 from striprtf.striprtf import rtf_to_text
 from zoneinfo import ZoneInfo
 
+from convertool.util import TempDir
+
+from .base import _shared_platforms
 from .base import ConverterABC
+from .converter_html import ConverterHTML
+from .converter_html import ConverterHTMLToImage
+from .converter_image import ConverterPDFToImage
 from .exceptions import ConvertError
 
 
@@ -182,3 +188,67 @@ class ConverterMSG(ConverterABC):
             return [dest_file]
         except Exception as e:
             raise ConvertError(self.file, repr(e))
+
+
+class ConverterMSGToPDF(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["msg"]
+    outputs: ClassVar[list[str]] = ["pdf"]
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG.platforms, ConverterPDFToImage.platforms)
+    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
+        *(ConverterMSG.dependencies or []),
+        *(ConverterHTML.dependencies or []),
+    ] or None
+    process_timeout: ClassVar[float | None] = (
+        max(
+            ConverterMSG.process_timeout or 0,
+            ConverterHTML.process_timeout or 0,
+        )
+        or None
+    )
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+
+        with TempDir(output_dir) as tmp_dir:
+            if not (htmls := ConverterMSG(self.file, self.database, self.file.root).convert(tmp_dir, "html")):
+                return []
+
+            html = htmls[0]
+
+            return ConverterHTML(File.from_file(html, tmp_dir), self.database, tmp_dir).convert(
+                output_dir,
+                output,
+                keep_relative_path=keep_relative_path,
+            )
+
+
+class ConverterMSGToImage(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["msg"]
+    outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG.platforms, ConverterHTMLToImage.platforms)
+    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
+        *(ConverterMSG.dependencies or []),
+        *(ConverterHTMLToImage.dependencies or []),
+    ] or None
+    process_timeout: ClassVar[float | None] = (
+        max(
+            ConverterMSG.process_timeout or 0,
+            ConverterHTMLToImage.process_timeout or 0,
+        )
+        or None
+    )
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+
+        with TempDir(output_dir) as tmp_dir:
+            if not (htmls := ConverterMSG(self.file, self.database, self.file.root).convert(tmp_dir, "html")):
+                return []
+
+            html = htmls[0]
+
+            return ConverterHTMLToImage(File.from_file(html, tmp_dir), self.database, tmp_dir).convert(
+                output_dir,
+                output,
+                keep_relative_path=keep_relative_path,
+            )
