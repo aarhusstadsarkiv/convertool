@@ -271,8 +271,9 @@ def digiarch(
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
     required=True,
 )
+@option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
-def standalone(ctx: Context, tool: str, output: str, destination: str, files: tuple[str, ...]):
+def standalone(ctx: Context, tool: str, output: str, destination: str, files: tuple[str, ...], verbose: bool):
     converter_cls = find_converter(tool, output)
 
     if not converter_cls:
@@ -284,7 +285,7 @@ def standalone(ctx: Context, tool: str, output: str, destination: str, files: tu
     for file_path in map(Path, files):
         try:
             file = File.from_file(file_path, file_path.parent)
-            converter = converter_cls(file)
+            converter = converter_cls(file, capture_output=not verbose)
             converted_files = converter.convert(dest, output, keep_relative_path=False)
             for converted_file in converted_files:
                 print(converted_file.relative_to(dest))
