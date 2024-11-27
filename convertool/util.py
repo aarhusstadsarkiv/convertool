@@ -1,13 +1,16 @@
 from os import PathLike
 from pathlib import Path
 from platform import system
+from sqlite3 import DatabaseError
 from subprocess import CalledProcessError
 from subprocess import CompletedProcess
 from subprocess import run
 from tempfile import TemporaryDirectory
 
+from acacore.database import FilesDB
 from click import Context
 from click import Parameter
+from click import UsageError
 
 ENV: str = ""
 
@@ -15,8 +18,84 @@ if system().lower() in ("linux", "darwin"):
     ENV = "/usr/bin/env"
 
 
+class AVIDDirs:
+    def __init__(self, avid_dir: Path) -> None:
+        self.dir: Path = avid_dir
+
+    @property
+    def original_documents(self):
+        return self.dir / "OriginalDocuments"
+
+    @property
+    def master_documents(self):
+        return self.dir / "MasterDocuments"
+
+    @property
+    def access_documents(self):
+        return self.dir / "AccessDocuments"
+
+    @property
+    def documents(self):
+        return self.dir / "Documents"
+
+
+class AVID:
+    def __init__(self, directory: str | PathLike) -> None:
+        if not self.is_avid_dir(directory):
+            raise ValueError(f"{directory} is not a valid AVID directory")
+
+        self.path: Path = Path(directory).resolve()
+        self.dirs: AVIDDirs = AVIDDirs(self.path)
+
+    def __str__(self) -> str:
+        return str(self.path)
+
+    @classmethod
+    def is_avid_dir(cls, directory: str | PathLike[str]) -> bool:
+        directory = Path(directory)
+        if not directory.is_dir():
+            return False
+        if not (avid_dirs := AVIDDirs(directory)).original_documents.is_dir() and not avid_dirs.documents.is_dir():  # noqa: SIM103
+            return False
+        return True
+
+    @classmethod
+    def find_database_root(cls, directory: str | PathLike[str]) -> Path | None:
+        directory = Path(directory)
+        if directory.joinpath("_metadata", "avid.db").is_file():
+            return directory
+        if directory.parent != directory:
+            return cls.find_database_root(directory.parent)
+        return None
+
+    @property
+    def metadata_dir(self):
+        return self.path / "_metadata"
+
+    @property
+    def database_path(self):
+        return self.metadata_dir / "avid.db"
+
+
 def ctx_params(ctx: Context) -> dict[str, Parameter]:
     return {p.name: p for p in ctx.command.params}
+
+
+def get_avid(ctx: Context, path: str | PathLike[str] | None = None) -> AVID:
+    if path is None and (path := AVID.find_database_root(Path.cwd())) is None:
+        raise UsageError(f"No AVID directory found in path {str(Path.cwd())!r}.", ctx)
+    if not AVID.is_avid_dir(path):
+        raise UsageError(f"Not a valid AVID directory {str(path)!r}.", ctx)
+    if not (avid := AVID(path)).database_path.is_file():
+        raise UsageError(f"No {avid.database_path.relative_to(avid.path)} present in {str(path)!r}.", ctx)
+    return avid
+
+
+def open_database(ctx: Context, avid: AVID) -> FilesDB:
+    try:
+        return FilesDB(avid.database_path, check_initialisation=True, check_version=True)
+    except DatabaseError as e:
+        raise UsageError(e.args[0], ctx)
 
 
 def run_process(
