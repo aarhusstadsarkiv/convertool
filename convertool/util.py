@@ -8,9 +8,9 @@ from subprocess import run
 from tempfile import TemporaryDirectory
 
 from acacore.database import FilesDB
+from click import BadParameter
 from click import Context
 from click import Parameter
-from click import UsageError
 
 ENV: str = ""
 
@@ -81,21 +81,23 @@ def ctx_params(ctx: Context) -> dict[str, Parameter]:
     return {p.name: p for p in ctx.command.params}
 
 
-def get_avid(ctx: Context, path: str | PathLike[str] | None = None) -> AVID:
-    if path is None and (path := AVID.find_database_root(Path.cwd())) is None:
-        raise UsageError(f"No AVID directory found in path {str(Path.cwd())!r}.", ctx)
+def get_avid(ctx: Context, path: str | PathLike[str], param_name: str) -> AVID:
     if not AVID.is_avid_dir(path):
-        raise UsageError(f"Not a valid AVID directory {str(path)!r}.", ctx)
+        raise BadParameter(f"Not a valid AVID directory {str(path)!r}.", ctx, ctx_params(ctx)[param_name])
     if not (avid := AVID(path)).database_path.is_file():
-        raise UsageError(f"No {avid.database_path.relative_to(avid.path)} present in {str(path)!r}.", ctx)
+        raise BadParameter(
+            f"No {avid.database_path.relative_to(avid.path)} present in {str(path)!r}.",
+            ctx,
+            ctx_params(ctx)[param_name],
+        )
     return avid
 
 
-def open_database(ctx: Context, avid: AVID) -> FilesDB:
+def open_database(ctx: Context, avid: AVID, param_name: str) -> FilesDB:
     try:
         return FilesDB(avid.database_path, check_initialisation=True, check_version=True)
     except DatabaseError as e:
-        raise UsageError(e.args[0], ctx)
+        raise BadParameter(e.args[0], ctx, ctx_params(ctx)[param_name:str])
 
 
 def run_process(
