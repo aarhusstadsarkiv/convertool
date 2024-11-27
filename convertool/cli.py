@@ -4,18 +4,24 @@ from logging import Logger
 from logging import WARNING
 from pathlib import Path
 from sqlite3 import DatabaseError
+from typing import Literal
 from typing import Type
 
 from acacore.__version__ import __version__ as __acacore_version__
-from acacore.database import FileDB
+from acacore.database import FilesDB
+from acacore.database.table import Table
 from acacore.database.upgrade import is_latest
-from acacore.models.file import File
-from acacore.models.history import HistoryEntry
+from acacore.models.event import Event
+from acacore.models.file import BaseFile
+from acacore.models.file import ConvertedFile
+from acacore.models.file import MasterFile
+from acacore.models.file import OriginalFile
 from acacore.utils.click import end_program
 from acacore.utils.click import start_program
 from acacore.utils.helpers import ExceptionManager
 from click import argument
 from click import BadParameter
+from click import Choice
 from click import Context
 from click import group
 from click import option
@@ -51,7 +57,10 @@ from .converters import ConverterVideo
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
+from .util import AVID
 from .util import ctx_params
+from .util import get_avid
+from .util import open_database
 
 
 def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
@@ -93,14 +102,14 @@ def root_callback(ctx: Context, param: Parameter, value: str):
 def check_database_version(ctx: Context, param: Parameter, path: Path):
     if not path.is_file():
         return
-    with FileDB(path, check_version=False) as db:
+    with FilesDB(path, check_version=False) as db:
         try:
-            is_latest(db, raise_on_difference=True)
+            is_latest(db.connection, raise_on_difference=True)
         except DatabaseError as err:
             raise BadParameter(err.args[0], ctx, param)
 
 
-def file_tool_output(file: File) -> tuple[str, str]:
+def original_file_tool_output(file: OriginalFile) -> tuple[str, str]:
     if file.action == "convert" and not file.action_data.convert:
         raise ValueError("Missing convert action data", file)
     elif file.action == "convert":
@@ -113,20 +122,38 @@ def file_tool_output(file: File) -> tuple[str, str]:
         raise ValueError(f"Unsupported action {file.action!r}", file)
 
 
+def master_file_tool_output(file: MasterFile, dest_type: Literal["access", "statutory"]) -> tuple[str, str]:
+    if dest_type == "access" and not file.convert_access:
+        raise ValueError("Missing convert action data", file)
+    elif dest_type == "access":
+        return file.convert_access.tool, file.convert_access.output
+    elif dest_type == "statutory" and not file.convert_statutory:
+        raise ValueError("Missing convert action data", file)
+    elif dest_type == "statutory":
+        return file.convert_statutory.tool, file.convert_statutory.output
+    else:
+        raise ValueError(f"Unsupported action {file.action!r}", file)
+
+
 def convert_file(
     ctx: Context,
-    root: Path,
-    database: FileDB,
-    file: File,
-    output_dir: Path,
+    avid: AVID,
+    database: FilesDB,
+    file: BaseFile,
+    file_type: Literal["original", "master"],
+    dest_type: Literal["master", "access", "statutory"],
     tool: str,
     output: str,
     *,
     verbose: bool = False,
     loggers: list[Logger] | None = None,
     dry_run: bool = False,
-) -> list[Path]:
+) -> list[ConvertedFile]:
     loggers = loggers or []
+    root_dir: Path
+    output_dir: Path
+    dst_cls: Type[ConvertedFile]
+    dst_table: Table[ConvertedFile]
 
     if tool in ConverterCopy.tool_names:
         output = ConverterCopy.outputs[0]
@@ -136,16 +163,47 @@ def convert_file(
     if not converter_cls:
         raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
 
-    HistoryEntry.command_history(ctx, f"run:{tool}.{output}", file.uuid).log(INFO, *loggers)
+    if file_type == "original":
+        root_dir = avid.dirs.original_documents
+    elif file_type == "master":
+        root_dir = avid.dirs.master_documents
+    else:
+        raise ValueError(f"Unknown source file type {file_type!r}")
+
+    if dest_type == "master":
+        output_dir = avid.dirs.master_documents
+        dst_cls = MasterFile
+        dst_table = database.master_files
+    elif dest_type == "access":
+        output_dir = avid.dirs.access_documents
+        dst_cls = ConvertedFile
+        dst_table = database.access_files
+    elif dest_type == "statutory":
+        output_dir = avid.dirs.documents
+        dst_cls = ConvertedFile
+        dst_table = database.statutory_files
+    else:
+        raise ValueError(f"Unknown destination file type {dest_type!r}")
+
+    Event.from_command(ctx, f"run:{tool}.{output}", (file.uuid, file_type)).log(INFO, *loggers)
 
     if dry_run:
         return []
 
-    converter: ConverterABC = converter_cls(file, database, root, capture_output=not verbose)
-    dests: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
-    for dst in dests:
-        HistoryEntry.command_history(ctx, f"out:{tool}.{output}", file.uuid).log(INFO, *loggers, output=dst.name)
-    return dests
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    file.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
+    file.root = root_dir
+    converter: ConverterABC = converter_cls(file, database, avid.path, capture_output=not verbose)
+    dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
+    dest_files: list[ConvertedFile] = []
+
+    for dst in dest_paths:
+        dst_file = dst_cls.from_file(dst, avid.path, file.uuid)
+        dst_table.insert(dst_file, on_exists="replace")
+        Event.from_command(ctx, f"out:{tool}.{output}", (file.uuid, dest_type)).log(INFO, *loggers, output=dst.name)
+
+    return dest_files
 
 
 @group("convertool", no_args_is_help=True)
@@ -155,17 +213,11 @@ def app(): ...
 
 @app.command("digiarch", no_args_is_help=True)
 @argument(
-    "root",
-    nargs=1,
+    "avid_dir",
     type=ClickPath(exists=True, file_okay=False, writable=True, resolve_path=True),
-    callback=root_callback,
+    required=True,
 )
-@argument(
-    "output_dir",
-    nargs=1,
-    type=ClickPath(file_okay=False, writable=True, resolve_path=True),
-    callback=lambda _c, _p, v: Path(v),
-)
+@argument("target", type=Choice(["original:master", "master:access", "master:statutory"]), required=True)
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
@@ -173,55 +225,67 @@ def app(): ...
 @pass_context
 def digiarch(
     ctx: Context,
-    root: Path,
-    output_dir: Path,
+    avid_dir: str,
+    target: str,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     dry_run: bool,
     verbose: bool,
 ):
-    check_database_version(
-        ctx,
-        next(p for p in ctx.command.params if p.name == "root"),
-        db_path := root.joinpath("_metadata", "files.db"),
-    )
+    avid = get_avid(ctx, avid_dir, "avid_dir")
+    file_type: Literal["original", "master"]
+    dest_type: Literal["master", "access", "statutory"]
+    file_type, _, dest_type = target.partition(":")
 
-    with FileDB(db_path) as database:
+    with open_database(ctx, avid, "avid_dir") as database:
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
-        output_dir.mkdir(parents=True, exist_ok=True)
+
+        src_table: Table[OriginalFile | MasterFile]
+        query: str
+
+        if file_type == "original":
+            src_table = database.original_files
+            query = "action in ('convert', 'ignore')"
+        elif file_type == "master" and dest_type == "access":
+            query = "convert_access is not null"
+            src_table = database.master_files
+        elif file_type == "master" and dest_type == "statutory":
+            query = "convert_statutory is not null"
+            src_table = database.master_files
 
         with ExceptionManager(BaseException) as exception:
             offset: int = 0
-            while files := list(
-                database.files.select(
-                    where="action in ('convert', 'ignore')",
-                    limit=100,
-                    offset=offset,
-                    order_by=[("relative_path", "asc")],
-                )
-            ):
+            while files := src_table.select(
+                query,
+                order_by=[("lower(relative_path)", "asc")],
+                limit=100,
+                offset=offset,
+            ).fetchall():
                 offset += len(files)
 
                 for file in files:
                     if file.processed:
                         continue
 
-                    tool, output = file_tool_output(file)
+                    if file_type == "original":
+                        tool, output = original_file_tool_output(file)
+                    elif file_type == "master":
+                        # noinspection PyTypeChecker
+                        tool, output = master_file_tool_output(file, dest_type)
 
                     if tool_include and tool not in tool_include:
                         continue
                     if tool in tool_ignore:
                         continue
 
-                    dests: list[Path] = []
-
                     try:
-                        dests = convert_file(
+                        convert_file(
                             ctx,
-                            root,
+                            avid,
                             database,
                             file,
-                            output_dir,
+                            file_type,
+                            dest_type,
                             tool,
                             output,
                             loggers=[log_stdout],
@@ -229,33 +293,27 @@ def digiarch(
                             dry_run=dry_run,
                         )
                     except (MissingDependency, UnsupportedPlatform) as err:
-                        HistoryEntry.command_history(
-                            ctx,
-                            "warning",
-                            file.uuid,
-                            data=err.__class__.__name__,
-                            reason=" ".join(err.args) or None,
-                        ).log(WARNING, log_stdout)
+                        Event.from_command(ctx, "warning", (file.uuid, file_type)).log(
+                            WARNING,
+                            log_stdout,
+                            error=repr(err),
+                        )
                         continue
                     except ConvertError as err:
-                        HistoryEntry.command_history(ctx, "error", file.uuid, [tool, output], err.msg).log(
-                            ERROR, log_stdout
+                        Event.from_command(ctx, "error", (file.uuid, file_type)).log(
+                            ERROR,
+                            log_stdout,
+                            tool=[tool, output],
+                            error=err.msg,
                         )
-                        for dst in dests:
-                            dst.unlink(missing_ok=True)
                         continue
-                    except BaseException:
-                        for dst in dests:
-                            dst.unlink(missing_ok=True)
-                        raise
 
                     if dry_run:
                         continue
 
                     file.processed = True
-                    file.processed_names = [d.name for d in dests]
-                    database.files.update(file)
-                    database.history.insert(HistoryEntry.command_history(ctx, "converted", file.uuid, [tool, output]))
+                    src_table.update(file)
+                    database.log.insert(Event.from_command(ctx, "converted", (file.uuid, file_type), [tool, output]))
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
@@ -284,7 +342,7 @@ def standalone(ctx: Context, tool: str, output: str, destination: str, files: tu
 
     for file_path in map(Path, files):
         try:
-            file = File.from_file(file_path, file_path.parent)
+            file = BaseFile.from_file(file_path, file_path.parent)
             converter = converter_cls(file, capture_output=not verbose)
             converted_files = converter.convert(dest, output, keep_relative_path=False)
             for converted_file in converted_files:
