@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 from acacore.models.reference_files import ActionData
 from acacore.models.reference_files import IgnoreAction
 
@@ -11,7 +11,7 @@ from convertool.converters.exceptions import ConvertError
 
 
 def test_templates(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = File(
+    file = BaseFile(
         checksum="",
         relative_path=Path("template.jpg"),
         is_binary=False,
@@ -44,7 +44,7 @@ def test_templates(test_files: dict[str, Path], reference_files: dict[str, Path]
 
 
 def test_template_errors(output_dir: Path):
-    file = File(
+    file = BaseFile(
         checksum="",
         relative_path=Path("template.jpg"),
         is_binary=False,

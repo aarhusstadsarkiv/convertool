@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
 from convertool.converters.converter_pdf import ConverterPDF
@@ -8,7 +8,7 @@ from convertool.converters.converter_pdf import ConverterPDF
 
 # noinspection DuplicatedCode
 def test_pdf_to_pdfa(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = File.from_file(test_files["pdf-to-pdfa.pdf"], root=test_files["pdf-to-pdfa.pdf"].parent)
+    file = BaseFile.from_file(test_files["pdf-to-pdfa.pdf"], root=test_files["pdf-to-pdfa.pdf"].parent)
     converter = ConverterPDF(file)
 
     for pdfa_ver in (1, 2, 3):

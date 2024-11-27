@@ -1,22 +1,30 @@
 from pathlib import Path
 
-from acacore.database import FileDB
+from acacore.database import FilesDB
 
 from convertool.cli import app
+from convertool.util import AVID
 
 
-def test_digiarch(test_files_dir_copy: Path, output_dir: Path):
-    app.main(["digiarch", str(test_files_dir_copy), str(output_dir)], standalone_mode=False)
+def test_digiarch_original_master(avid_dir_copy: Path):
+    avid = AVID(avid_dir_copy)
 
-    with FileDB(test_files_dir_copy / "_metadata" / "files.db") as db:
-        for file in db.files.select():
-            event = db.history.select(
-                where="uuid = ? and operation = 'convertool.digiarch:converted'",
-                parameters=[str(file.uuid)],
+    app.main(["digiarch", str(avid.path), "original:master"], standalone_mode=False)
+
+    with FilesDB(avid.database_path) as db:
+        for file in db.original_files.select():
+            output_files = db.master_files.select({"original_uuid": str(file.uuid)}).fetchall()
+            event = db.log.select(
+                "file_uuid = ? and operation = 'convertool.digiarch:converted'",
+                [str(file.uuid)],
             ).fetchone()
             if event and event.data == ["template", "temporary-file"]:
-                assert not file.processed_names
+                assert not output_files
+                assert file.processed
             elif event:
-                assert len(file.processed_names) >= 1
+                output_files = db.master_files.select({"original_uuid": str(file.uuid)}).fetchall()
+                assert len(output_files) >= 1
+                assert file.processed
             else:
-                assert not file.processed_names
+                assert not output_files
+                assert not file.processed

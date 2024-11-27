@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 
 from convertool.converters import ConverterSymphovert
 from convertool.converters.exceptions import ConvertError
@@ -9,7 +9,7 @@ from convertool.converters.exceptions import ConvertError
 
 # noinspection DuplicatedCode
 def test_symphovert(test_files: dict[str, Path], output_dir: Path):
-    file = File.from_file(test_files["document.docx"], root=test_files["document.docx"].parent)
+    file = BaseFile.from_file(test_files["document.docx"], root=test_files["document.docx"].parent)
     converter = ConverterSymphovert(file)
 
     for output in converter.outputs:

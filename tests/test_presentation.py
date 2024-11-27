@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
 from convertool.converters.converter_presentation import ConverterPresentation
@@ -11,7 +11,7 @@ def test_presentation_to_odp(test_files: dict[str, Path], output_dir: Path, sieg
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
-        file = File.from_file(path, root=path.parent)
+        file = BaseFile.from_file(path, root=path.parent)
         converter = ConverterPresentation(file)
 
         output_files = converter.convert(output_dir, "odp")
@@ -28,7 +28,7 @@ def test_presentation_to_pdf(test_files: dict[str, Path], output_dir: Path, sieg
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
-        file = File.from_file(path, root=path.parent)
+        file = BaseFile.from_file(path, root=path.parent)
         converter = ConverterPresentation(file)
 
         output_files = converter.convert(output_dir, "pdf")
@@ -45,7 +45,7 @@ def test_presentation_to_html(test_files: dict[str, Path], output_dir: Path, sie
     for path in [f for n, f in test_files.items() if n.startswith("presentation.")]:
         print(path.name)
 
-        file = File.from_file(path, root=path.parent)
+        file = BaseFile.from_file(path, root=path.parent)
         converter = ConverterPresentation(file)
 
         output_files = converter.convert(output_dir, "html")
