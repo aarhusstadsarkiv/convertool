@@ -117,4 +117,5 @@ process.yml
 .vscode/
 
 tests/_files
+tests/_avid
 tests/output
