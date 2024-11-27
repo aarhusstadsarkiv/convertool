@@ -14,8 +14,13 @@ def siegfried() -> Siegfried:
 
 
 @pytest.fixture(scope="session")
-def test_files_dir() -> Path:
-    return Path(__file__).parent.joinpath("files")
+def avid_dir() -> Path:
+    return Path(__file__).parent.joinpath("avid")
+
+
+@pytest.fixture(scope="session")
+def test_files_dir(avid_dir: Path) -> Path:
+    return avid_dir.joinpath("OriginalDocuments")
 
 
 @pytest.fixture(scope="session")
