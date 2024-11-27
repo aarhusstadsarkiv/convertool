@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 
 from convertool.util import TempDir
 
@@ -63,7 +63,7 @@ class ConverterHTMLToImage(ConverterABC):
 
             pdf = pdfs[0]
 
-            return ConverterPDFToImage(File.from_file(pdf, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterPDFToImage(BaseFile.from_file(pdf, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
