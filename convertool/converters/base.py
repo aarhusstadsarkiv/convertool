@@ -9,8 +9,8 @@ from subprocess import TimeoutExpired
 from sys import platform
 from typing import ClassVar
 
-from acacore.database import FileDB
-from acacore.models.file import File
+from acacore.database import FilesDB
+from acacore.models.file import BaseFile
 
 from convertool.util import run_process
 
@@ -57,16 +57,16 @@ class ConverterABC(ABC):
 
     def __init__(
         self,
-        file: File,
-        database: FileDB | None = None,
+        file: BaseFile,
+        database: FilesDB | None = None,
         root: Path | None = None,
         *,
         capture_output: bool = True,
     ) -> None:
         self.test_platforms()
         self.test_dependencies()
-        self.file: File = file
-        self.database: FileDB | None = database
+        self.file: BaseFile = file
+        self.database: FilesDB | None = database
         self.file.root = self.file.root or root
         self.capture_output: bool = capture_output
 
