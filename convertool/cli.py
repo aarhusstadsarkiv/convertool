@@ -192,9 +192,10 @@ def convert_file(
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    file.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
-    file.root = root_dir
-    converter: ConverterABC = converter_cls(file, database, avid.path, capture_output=not verbose)
+    file_copy = file.model_copy(deep=True)
+    file_copy.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
+    file_copy.root = root_dir
+    converter: ConverterABC = converter_cls(file_copy, database, avid.path, capture_output=not verbose)
     dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     dest_files: list[ConvertedFile] = []
 
