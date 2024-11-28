@@ -280,7 +280,7 @@ def digiarch(
                         continue
 
                     try:
-                        convert_file(
+                        output_files: list[ConvertedFile] = convert_file(
                             ctx,
                             avid,
                             database,
@@ -314,7 +314,14 @@ def digiarch(
 
                     file.processed = True
                     src_table.update(file)
-                    database.log.insert(Event.from_command(ctx, "converted", (file.uuid, file_type), [tool, output]))
+                    database.log.insert(
+                        Event.from_command(
+                            ctx,
+                            "converted",
+                            (file.uuid, file_type),
+                            {"tool": tool, "output": output, "files": len(output_files)},
+                        )
+                    )
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
