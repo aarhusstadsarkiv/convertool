@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from acacore.models.file import File
+from acacore.models.file import OriginalFile
 from acacore.models.reference_files import TemplateTypeEnum
 
 from .base import ConverterABC
@@ -35,12 +35,17 @@ class ConverterTemplate(ConverterABC):
             template = "Den originale fil var korrumperet og kunne ikke åbnes."
         elif output == "duplicate" and not self.database:
             raise ConvertError(self.file, f"{output!r} template requires a database")
+        elif output == "duplicate" and not isinstance(self.file, OriginalFile):
+            raise ConvertError(self.file, f"{output!r} template requires OriginalFile")
         elif output == "duplicate":
-            original: File | None = self.database.files.select(
-                where="checksum = ? and action != 'ignore'",
-                parameters=[self.file.checksum],
-                limit=1,
-            ).fetchone()
+            if not (
+                original := self.database.original_files.select(
+                    "checksum = ? and action != 'ignore'",
+                    [self.file.checksum],
+                    limit=1,
+                ).fetchone()
+            ):
+                raise ConvertError(self.file, f"{output!r} template requires a non-ignored duplicate")
             template = f"Den originale fil var en kopi af {original.relative_path}."
         elif output == "not-preservable":
             template = "Den originale fil var ikke bevaringsværdig."
@@ -50,8 +55,7 @@ class ConverterTemplate(ConverterABC):
             raise ConvertError(self.file, f"{output!r} template requires a database")
         elif output == "extracted-archive":
             children: list[Path] = [
-                f.relative_path
-                for f in self.database.files.select(where="parent = ?", parameters=[str(self.file.uuid)])
+                f.relative_path for f in self.database.original_files.select({"parent": str(self.file.uuid)})
             ]
             template = "Den originale fil er udpakket, og indeholdt følgende filer:\n" + "\n".join(
                 f"* {p}" for p in children

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import ClassVar
 from xml.sax.saxutils import escape
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 from bs4 import BeautifulSoup
 from chardet import detect as detect_encoding
 from extract_msg import Message
@@ -36,7 +36,7 @@ def html_to_text(html: str) -> str:
     return BeautifulSoup(html, "lxml").text.replace("\xa0", " ").strip()
 
 
-def validate_msg(file: File) -> Message | MessageSigned:
+def validate_msg(file: BaseFile) -> Message | MessageSigned:
     try:
         msg: MSGFile = openMsg(file.get_absolute_path())
     except ExMsgBaseException as e:
@@ -215,7 +215,7 @@ class ConverterMSGToPDF(ConverterABC):
 
             html = htmls[0]
 
-            return ConverterHTML(File.from_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTML(BaseFile.from_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
@@ -247,7 +247,7 @@ class ConverterMSGToImage(ConverterABC):
 
             html = htmls[0]
 
-            return ConverterHTMLToImage(File.from_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTMLToImage(BaseFile.from_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,

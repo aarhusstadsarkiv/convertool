@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
 from convertool.converters.converter_image import ConverterImage
@@ -20,7 +20,7 @@ MIMETYPES = {
 
 # noinspection DuplicatedCode
 def test_img_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = File.from_file(test_files["img-to-img.webp"], root=test_files["img-to-img.webp"].parent)
+    file = BaseFile.from_file(test_files["img-to-img.webp"], root=test_files["img-to-img.webp"].parent)
     converter = ConverterImage(file)
 
     for output in converter.outputs:
@@ -32,7 +32,7 @@ def test_img_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 # noinspection DuplicatedCode
 def test_pdf_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = File.from_file(test_files["pdf-to-img.pdf"], root=test_files["pdf-to-img.pdf"].parent)
+    file = BaseFile.from_file(test_files["pdf-to-img.pdf"], root=test_files["pdf-to-img.pdf"].parent)
     converter = ConverterPDFToImage(file)
 
     for output in converter.outputs:
@@ -44,7 +44,7 @@ def test_pdf_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 # noinspection DuplicatedCode
 def test_text_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = File.from_file(test_files["text_to_img.txt"], root=test_files["text_to_img.txt"].parent)
+    file = BaseFile.from_file(test_files["text_to_img.txt"], root=test_files["text_to_img.txt"].parent)
     converter = ConverterTextToImage(file)
 
     for output in converter.outputs:

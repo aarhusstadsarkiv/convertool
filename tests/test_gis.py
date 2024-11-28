@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 
 from convertool.converters import ConverterGIS
 
 
 # noinspection DuplicatedCode
 def test_gis_to_gml(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = File.from_file(test_files["gis.tab"], root=test_files["gis.tab"].parent)
+    file = BaseFile.from_file(test_files["gis.tab"], root=test_files["gis.tab"].parent)
     converter = ConverterGIS(file)
 
     output_files = converter.convert(output_dir, "gml")

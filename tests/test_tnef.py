@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 
 from convertool.converters.converter_tnef import ConverterTNEF
 
 
 # noinspection DuplicatedCode
 def test_tnef(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = File.from_file(test_files["winmail.dat"], root=test_files["winmail.dat"].parent)
+    file = BaseFile.from_file(test_files["winmail.dat"], root=test_files["winmail.dat"].parent)
     converter = ConverterTNEF(file)
 
     for output in converter.outputs:

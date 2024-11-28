@@ -14,10 +14,28 @@ def siegfried() -> Siegfried:
 
 
 @pytest.fixture(scope="session")
-def test_files_dir() -> Path:
-    return Path(__file__).parent.joinpath("files")
+def avid_dir() -> Path:
+    return Path(__file__).parent.joinpath("avid")
 
 
+# noinspection DuplicatedCode
+@pytest.fixture(scope="session")
+def avid_dir_copy(avid_dir: Path) -> Path:
+    copy_dir: Path = avid_dir.parent.joinpath("_avid")
+    rm_tree(copy_dir)
+    copy_dir.mkdir(parents=True, exist_ok=True)
+    for file in find_files(avid_dir):
+        copy_dir.joinpath(file.parent.relative_to(avid_dir)).mkdir(parents=True, exist_ok=True)
+        copy2(file, copy_dir.joinpath(file.relative_to(avid_dir)))
+    return copy_dir
+
+
+@pytest.fixture(scope="session")
+def test_files_dir(avid_dir: Path) -> Path:
+    return avid_dir.joinpath("OriginalDocuments")
+
+
+# noinspection DuplicatedCode
 @pytest.fixture(scope="session")
 def test_files_dir_copy(test_files_dir: Path) -> Path:
     copy_dir: Path = test_files_dir.parent.joinpath("_files")

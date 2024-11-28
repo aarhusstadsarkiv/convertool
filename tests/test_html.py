@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from acacore.models.file import File
+from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
 from convertool.converters import ConverterHTML
@@ -11,7 +11,7 @@ from .test_image import MIMETYPES
 
 def test_html_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("html")]:
-        file = File.from_file(path, root=path.parent)
+        file = BaseFile.from_file(path, root=path.parent)
         converter = ConverterHTML(file)
 
         output_files = converter.convert(output_dir, "pdf")
@@ -22,7 +22,7 @@ def test_html_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: S
 
 def test_html_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("html")]:
-        file = File.from_file(path, root=path.parent)
+        file = BaseFile.from_file(path, root=path.parent)
         converter = ConverterHTMLToImage(file)
 
         for output in converter.outputs:
