@@ -37,7 +37,7 @@ def test_digiarch_original_master(avid_dir_copy: Path):
                 assert not output_files
                 assert file.processed
             elif event:
-                assert len(output_files) >= event.data["files"]
+                assert len(output_files) == event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
             else:
@@ -72,7 +72,7 @@ def test_digiarch_master_access(avid_dir_copy: Path):
                 assert not output_files
                 assert file.processed
             elif event:
-                assert len(output_files) >= event.data["files"]
+                assert len(output_files) == event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
             else:
@@ -107,7 +107,7 @@ def test_digiarch_master_statutory(avid_dir_copy: Path):
                 assert not output_files
                 assert file.processed
             elif event:
-                assert len(output_files) >= event.data["files"]
+                assert len(output_files) == event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
             else:
