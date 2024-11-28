@@ -7,6 +7,7 @@ from convertool.cli import app
 from convertool.util import AVID
 
 
+# noinspection DuplicatedCode
 def test_digiarch_original_master(avid_dir_copy: Path):
     avid = AVID(avid_dir_copy)
 
@@ -44,6 +45,7 @@ def test_digiarch_original_master(avid_dir_copy: Path):
                 assert not file.processed
 
 
+# noinspection DuplicatedCode
 def test_digiarch_master_access(avid_dir_copy: Path):
     avid = AVID(avid_dir_copy)
 
@@ -78,6 +80,7 @@ def test_digiarch_master_access(avid_dir_copy: Path):
                 assert not file.processed
 
 
+# noinspection DuplicatedCode
 def test_digiarch_master_statutory(avid_dir_copy: Path):
     avid = AVID(avid_dir_copy)
 
