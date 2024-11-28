@@ -97,7 +97,7 @@ def open_database(ctx: Context, avid: AVID, param_name: str) -> FilesDB:
     try:
         return FilesDB(avid.database_path, check_initialisation=True, check_version=True)
     except DatabaseError as e:
-        raise BadParameter(e.args[0], ctx, ctx_params(ctx)[param_name:str])
+        raise BadParameter(e.args[0], ctx, ctx_params(ctx)[param_name])
 
 
 def run_process(
