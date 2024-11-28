@@ -109,7 +109,7 @@ def test_digiarch_master_statutory(avid_dir_copy: Path):
                 assert not output_files
                 assert file.processed
             elif event:
-                output_files = db.access_files.select({"original_uuid": str(file.uuid)}).fetchall()
+                output_files = db.statutory_files.select({"original_uuid": str(file.uuid)}).fetchall()
                 assert len(output_files) >= event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
