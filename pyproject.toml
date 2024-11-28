@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "convertool"
-version = "2.0.18"
+version = "3.0.0"
 description = ""
 authors = ["Aarhus City Archive <stadsarkiv@aarhus.dk>"]
 readme = "README.md"
