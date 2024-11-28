@@ -32,12 +32,13 @@ def test_digiarch_original_master(avid_dir_copy: Path):
                 "file_uuid = ? and operation = 'convertool.digiarch:converted'",
                 [str(file.uuid)],
             ).fetchone()
-            if event and event.data == ["template", "temporary-file"]:
+            assert event is None or isinstance(event.data, dict)
+            if event and not event.data["files"]:
                 assert not output_files
                 assert file.processed
             elif event:
                 output_files = db.master_files.select({"original_uuid": str(file.uuid)}).fetchall()
-                assert len(output_files) >= 1
+                assert len(output_files) >= event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
             else:
@@ -67,12 +68,13 @@ def test_digiarch_master_access(avid_dir_copy: Path):
                 "file_uuid = ? and operation = 'convertool.digiarch:converted'",
                 [str(file.uuid)],
             ).fetchone()
-            if event and event.data == ["template", "temporary-file"]:
+            assert event is None or isinstance(event.data, dict)
+            if event and not event.data["files"]:
                 assert not output_files
                 assert file.processed
             elif event:
                 output_files = db.access_files.select({"original_uuid": str(file.uuid)}).fetchall()
-                assert len(output_files) >= 1
+                assert len(output_files) >= event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
             else:
@@ -102,12 +104,13 @@ def test_digiarch_master_statutory(avid_dir_copy: Path):
                 "file_uuid = ? and operation = 'convertool.digiarch:converted'",
                 [str(file.uuid)],
             ).fetchone()
-            if event and event.data == ["template", "temporary-file"]:
+            assert event is None or isinstance(event.data, dict)
+            if event and not event.data["files"]:
                 assert not output_files
                 assert file.processed
             elif event:
                 output_files = db.access_files.select({"original_uuid": str(file.uuid)}).fetchall()
-                assert len(output_files) >= 1
+                assert len(output_files) >= event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
                 assert file.processed
             else:
