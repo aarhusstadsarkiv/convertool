@@ -2,16 +2,18 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from acacore.models.file import BaseFile
+from acacore.models.file import OriginalFile
 from acacore.models.reference_files import ActionData
 from acacore.models.reference_files import IgnoreAction
+from acacore.models.reference_files import TemplateTypeEnum
+from acacore.models.reference_files import TTemplateType
 
 from convertool.converters import ConverterTemplate
 from convertool.converters.exceptions import ConvertError
 
 
-def test_templates(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = BaseFile(
+def test_template(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
+    file = OriginalFile(
         checksum="",
         relative_path=Path("template.jpg"),
         is_binary=False,
@@ -23,7 +25,9 @@ def test_templates(test_files: dict[str, Path], reference_files: dict[str, Path]
         root=output_dir,
     )
     converter = ConverterTemplate(file)
-    templates = [t for t in ConverterTemplate.outputs if t not in ["duplicate", "extracted-archive"]]
+    templates: list[TTemplateType] = [
+        t for t in TemplateTypeEnum if t in ConverterTemplate.outputs and t not in ["duplicate", "extracted-archive"]
+    ]
 
     for template in templates:
         print(template)
@@ -44,7 +48,7 @@ def test_templates(test_files: dict[str, Path], reference_files: dict[str, Path]
 
 
 def test_template_errors(output_dir: Path):
-    file = BaseFile(
+    file = OriginalFile(
         checksum="",
         relative_path=Path("template.jpg"),
         is_binary=False,
@@ -56,8 +60,9 @@ def test_template_errors(output_dir: Path):
         root=output_dir,
     )
     converter = ConverterTemplate(file)
+    templates: list[TTemplateType] = ["duplicate", "extracted-archive"]
 
-    for template in ["duplicate", "extracted-archive"]:
+    for template in templates:
         with pytest.raises(ConvertError):
             converter.file.action_data.ignore = IgnoreAction(template=template)
             converter.convert(output_dir, template)
