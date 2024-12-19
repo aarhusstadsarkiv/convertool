@@ -70,11 +70,13 @@ def test_digiarch_master_access(avid_dir_copy: Path):
             assert event is None or isinstance(event.data, dict)
             if event and not event.data["files"]:
                 assert not output_files
-                assert file.processed
+                assert file.processed & 0b01
+                assert not file.processed & 0b10
             elif event:
                 assert len(output_files) == event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
-                assert file.processed
+                assert file.processed & 0b01
+                assert not file.processed & 0b10
             else:
                 assert not output_files
                 assert not file.processed
@@ -105,11 +107,13 @@ def test_digiarch_master_statutory(avid_dir_copy: Path):
             assert event is None or isinstance(event.data, dict)
             if event and not event.data["files"]:
                 assert not output_files
-                assert file.processed
+                assert not file.processed & 0b01
+                assert file.processed & 0b10
             elif event:
                 assert len(output_files) == event.data["files"]
                 assert all(f.get_absolute_path(avid.path).is_file() for f in output_files)
-                assert file.processed
+                assert not file.processed & 0b01
+                assert file.processed & 0b10
             else:
                 assert not output_files
                 assert not file.processed

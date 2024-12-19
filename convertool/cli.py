@@ -4,6 +4,7 @@ from logging import Logger
 from logging import WARNING
 from pathlib import Path
 from sqlite3 import DatabaseError
+from typing import Callable
 from typing import Literal
 from typing import Type
 
@@ -244,16 +245,24 @@ def digiarch(
 
         src_table: Table[OriginalFile | MasterFile]
         query: str
+        is_processed: Callable[[OriginalFile | MasterFile], bool]
+        set_processed: Callable[[OriginalFile | MasterFile], bool | int]
 
         if file_type == "original":
             src_table = database.original_files
             query = "action in ('convert', 'ignore')"
+            is_processed = lambda f: f.processed  # noqa: E731
+            set_processed = lambda _: True  # noqa: E731
         elif file_type == "master" and dest_type == "access":
             query = "convert_access is not null"
             src_table = database.master_files
+            is_processed = lambda f: f.processed & 0b01  # noqa: E731
+            set_processed = lambda f: f.processed | 0b01  # noqa: E731
         elif file_type == "master" and dest_type == "statutory":
             query = "convert_statutory is not null"
             src_table = database.master_files
+            is_processed = lambda f: f.processed & 0b10  # noqa: E731
+            set_processed = lambda f: f.processed | 0b10  # noqa: E731
 
         with ExceptionManager(BaseException) as exception:
             offset: int = 0
@@ -266,7 +275,7 @@ def digiarch(
                 offset += len(files)
 
                 for file in files:
-                    if file.processed:
+                    if is_processed(file):
                         continue
 
                     if file_type == "original":
@@ -313,7 +322,7 @@ def digiarch(
                     if dry_run:
                         continue
 
-                    file.processed = True
+                    file.processed = set_processed(file)
                     src_table.update(file)
                     database.log.insert(
                         Event.from_command(
