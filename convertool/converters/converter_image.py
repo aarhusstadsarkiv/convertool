@@ -70,7 +70,7 @@ class ConverterPDFToImage(ConverterImage):
         density *= 2
 
         if output == "tif":
-            args.extend(("-compress", "LZW", "-depth", "24"))
+            args.extend(("-compress", "LZW", "-depth", "16"))
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
