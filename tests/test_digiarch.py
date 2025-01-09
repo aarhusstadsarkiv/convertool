@@ -45,6 +45,29 @@ def test_digiarch_original_master(avid_dir_copy: Path):
                 assert not file.processed
 
 
+def test_digiarch_exception(avid_dir_copy: Path):
+    avid = AVID(avid_dir_copy)
+
+    with FilesDB(avid.database_path) as db:
+        random_file = db.original_files.select("relative_path like '%/random' and action = 'convert'").fetchone()
+        assert random_file is not None
+
+    app.main(["digiarch", str(avid.path), "original:master"], standalone_mode=False)
+
+    with FilesDB(avid.database_path) as db:
+        event = db.log.select(
+            "file_uuid = ? and operation = 'convertool.digiarch:error'",
+            [str(random_file.uuid)],
+        ).fetchone()
+        assert event is not None
+        assert event.data == {
+            "tool": random_file.action_data.convert.tool,
+            "output": random_file.action_data.convert.output,
+        }
+        assert isinstance(event.reason, str)
+        assert event.reason
+
+
 # noinspection DuplicatedCode
 def test_digiarch_master_access(avid_dir_copy: Path):
     avid = AVID(avid_dir_copy)
