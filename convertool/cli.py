@@ -317,12 +317,8 @@ def digiarch(
                             ctx,
                             "error",
                             (file.uuid, file_type),
-                            repr(convert_error.exception),
-                            (
-                                convert_error.exception.process.stderr
-                                or convert_error.exception.process.stdout
-                                or "".join(format_tb(convert_error.traceback))
-                            )
+                            {"tool": tool, "output": output},
+                            (convert_error.exception.process.stderr or convert_error.exception.process.stdout or None)
                             if convert_error.exception.process
                             else "".join(format_tb(convert_error.traceback)),
                         )
