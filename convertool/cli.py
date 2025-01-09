@@ -4,6 +4,7 @@ from logging import Logger
 from logging import WARNING
 from pathlib import Path
 from sqlite3 import DatabaseError
+from traceback import format_tb
 from typing import Callable
 from typing import Literal
 from typing import Type
@@ -289,7 +290,7 @@ def digiarch(
                     if tool in tool_ignore:
                         continue
 
-                    try:
+                    with ExceptionManager(MissingDependency, UnsupportedPlatform, ConvertError) as convert_error:
                         output_files: list[ConvertedFile] = convert_file(
                             ctx,
                             avid,
@@ -303,19 +304,35 @@ def digiarch(
                             verbose=verbose,
                             dry_run=dry_run,
                         )
-                    except (MissingDependency, UnsupportedPlatform) as err:
+
+                    if isinstance(convert_error.exception, (MissingDependency, UnsupportedPlatform)):
                         Event.from_command(ctx, "warning", (file.uuid, file_type)).log(
                             WARNING,
                             log_stdout,
-                            error=repr(err),
+                            error=repr(convert_error.exception),
                         )
                         continue
-                    except ConvertError as err:
-                        Event.from_command(ctx, "error", (file.uuid, file_type)).log(
+                    if isinstance(convert_error.exception, ConvertError):
+                        error = Event.from_command(
+                            ctx,
+                            "error",
+                            (file.uuid, file_type),
+                            repr(convert_error.exception),
+                            (
+                                convert_error.exception.process.stderr
+                                or convert_error.exception.process.stdout
+                                or "".join(format_tb(convert_error.traceback))
+                            )
+                            if convert_error.exception.process
+                            else "".join(format_tb(convert_error.traceback)),
+                        )
+                        database.log.insert(error)
+                        error.log(
                             ERROR,
                             log_stdout,
+                            show_args=["uuid"],
                             tool=[tool, output],
-                            error=err.msg,
+                            error=convert_error.exception.msg,
                         )
                         continue
 
