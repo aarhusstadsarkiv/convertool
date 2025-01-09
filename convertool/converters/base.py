@@ -110,11 +110,12 @@ class ConverterABC(ABC):
         try:
             return run_process(*args, cwd=cwd, capture_output=self.capture_output, timeout=self.process_timeout)
         except TimeoutExpired as err:
-            raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s")
+            raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s", err)
         except CalledProcessError as err:
             raise ConvertError(
                 self.file,
                 err.stderr or err.stdout or f"An unknown error occurred. Return code {err.returncode}",
+                err,
             )
 
     def output_dir(self, output_dir: Path, *, keep_relative_path: bool = True, mkdir: bool = False) -> Path:
