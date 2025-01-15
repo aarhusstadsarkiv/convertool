@@ -11,7 +11,7 @@ from .converter_image import ConverterPDFToImage
 
 
 class ConverterHTML(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["html"]
+    tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ["pdf"]
     dependencies: ClassVar[list[str]] = ["chrome"]
     process_timeout: ClassVar[float] = 60
@@ -38,7 +38,7 @@ class ConverterHTML(ConverterABC):
 
 
 class ConverterHTMLToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["html"]
+    tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
     platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML.platforms, ConverterPDFToImage.platforms)
     dependencies: ClassVar[list[str]] = [  # noqa: SIM222
