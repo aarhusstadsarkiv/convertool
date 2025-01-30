@@ -59,6 +59,8 @@ jobs:
           acacore_package="${acacore_package#*\"}"
           acacore_package="${acacore_package#v}"
           acacore_package="${acacore_package%\"}"
+          echo "acacore available $acacore_remote"
+          echo "acacore used $acacore_package"
           test "$acacore_remote" = "$acacore_package"
 
   pytest:
