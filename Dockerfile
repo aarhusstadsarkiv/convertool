@@ -1,8 +1,9 @@
-FROM python:3.11.10-bookworm AS base
+FROM python:3.13.1-bookworm AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
 RUN apt-get update && apt-get install -y \
+    vim \
     curl \
     wget \
     git \
@@ -15,8 +16,8 @@ RUN apt-get update && apt-get install -y \
     libxtst6
 RUN rm -rf /var/lib/apt/lists/*
 
-# Install pipx
-RUN pip3 install pipx
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
 # Install GDAL
@@ -48,7 +49,7 @@ FROM base AS prod
 # Install convertool
 WORKDIR /root/convertool
 COPY . .
-RUN pipx install .
+RUN uv tool install .
 WORKDIR /root
 CMD ["bash"]
 
@@ -64,14 +65,9 @@ ENV SIEGFRIED_PATH="$GOPATH/bin/sf"
 ENV SIEGFRIED_HOME="/root/.sf"
 RUN sf -home "$SIEGFRIED_HOME" -update
 
-# Install vim
-RUN apt-get update && apt-get install -y vim
-
-# Install poetry
-RUN pip3 install poetry
-
 # Install convertool w/ poetry
 WORKDIR /root/convertool
 COPY . .
-RUN poetry install
+RUN uv sync --all-extras --dev
+RUN uv tool install .
 CMD ["bash"]
