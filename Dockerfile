@@ -43,17 +43,18 @@ RUN apt-get update && apt-get install -y /root/google-chrome-stable_current_amd6
 RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
 RUN rm google-chrome-stable_current_amd64.deb
 
-CMD ["bash"]
 
 FROM base AS prod
 # Install convertool
 WORKDIR /root/convertool
 COPY . .
+RUN uv sync
 RUN uv tool install .
+
 WORKDIR /root
 CMD ["bash"]
 
-FROM base AS test
+FROM prod AS test
 # Install go and Siegfried
 WORKDIR /root
 RUN curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
@@ -65,9 +66,7 @@ ENV SIEGFRIED_PATH="$GOPATH/bin/sf"
 ENV SIEGFRIED_HOME="/root/.sf"
 RUN sf -home "$SIEGFRIED_HOME" -update
 
-# Install convertool w/ poetry
+# Install extra and dev dependencies
 WORKDIR /root/convertool
-COPY . .
 RUN uv sync --all-extras --dev
-RUN uv tool install .
 CMD ["bash"]
