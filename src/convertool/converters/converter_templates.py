@@ -25,7 +25,7 @@ class ConverterTemplate(ConverterABC):
 
         if output == "text" and not self.file.action_data.ignore.reason:
             raise ConvertError(self.file, f"{output!r} template requires a reason")
-        elif output == "text":
+        if output == "text":
             template = self.file.action_data.ignore.reason
         elif output == "empty":
             template = "Den originale fil var tom."

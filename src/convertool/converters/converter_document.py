@@ -44,7 +44,7 @@ class ConverterDocumentToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["document"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
     platforms: ClassVar[list[str]] = _shared_platforms(ConverterDocument.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
+    dependencies: ClassVar[list[str] | None] = [
         *(ConverterDocument.dependencies or []),
         *(ConverterPDFToImage.dependencies or []),
     ] or None

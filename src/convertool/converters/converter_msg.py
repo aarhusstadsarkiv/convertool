@@ -3,6 +3,7 @@ from contextlib import suppress
 from pathlib import Path
 from typing import ClassVar
 from xml.sax.saxutils import escape
+from zoneinfo import ZoneInfo
 
 from acacore.models.file import BaseFile
 from bs4 import BeautifulSoup
@@ -14,7 +15,6 @@ from extract_msg.exceptions import ExMsgBaseException
 from extract_msg.msg_classes import MessageBase
 from extract_msg.msg_classes import MessageSigned
 from striprtf.striprtf import rtf_to_text
-from zoneinfo import ZoneInfo
 
 from convertool.util import TempDir
 
@@ -42,7 +42,7 @@ def validate_msg(file: BaseFile) -> Message | MessageSigned:
     except ExMsgBaseException as e:
         raise ConvertError(file, e.args[0] if e.args else "File cannot be opened as msg")
 
-    if not isinstance(msg, (Message, MessageSigned)):
+    if not isinstance(msg, Message | MessageSigned):
         raise ConvertError(file, f"Is of type {msg.__class__.__name__}")
 
     return msg
@@ -140,9 +140,9 @@ def msg_html_body(msg: MessageBase) -> str:
         html.select_one("body").append(p)
 
     for attachment in msg.attachments:
-        if not (cid := getattr(attachment, "cid", None)):  # noqa: SIM114
+        if not (cid := getattr(attachment, "cid", None)):
             continue
-        elif attachment.data is None or not isinstance(attachment.data, bytes):
+        if attachment.data is None or not isinstance(attachment.data, bytes):
             continue
         data_b64: str = b64encode(attachment.data or b"").decode()
         for tag in html.select(f'[src="cid:{cid}"]'):
@@ -194,7 +194,7 @@ class ConverterMSGToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
     outputs: ClassVar[list[str]] = ["pdf"]
     platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
+    dependencies: ClassVar[list[str] | None] = [
         *(ConverterMSG.dependencies or []),
         *(ConverterHTML.dependencies or []),
     ] or None
@@ -226,7 +226,7 @@ class ConverterMSGToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
     platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG.platforms, ConverterHTMLToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [  # noqa: SIM222
+    dependencies: ClassVar[list[str] | None] = [
         *(ConverterMSG.dependencies or []),
         *(ConverterHTMLToImage.dependencies or []),
     ] or None
