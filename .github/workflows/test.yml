@@ -3,7 +3,7 @@ name: Test
 on:
   push:
     paths:
-      - convertool/**
+      - src/**
       - config/**
       - tests/**
       - Dockerfile
@@ -13,27 +13,21 @@ on:
   workflow_dispatch:
   workflow_call:
 
-env:
-  PYTHON_VERSION: 3.11.9
-  POETRY_VERSION: 1.8.3
-
 jobs:
   linting:
     name: Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: ${{ env.POETRY_VERSION }}
-      - run: poetry install
+          python-version-file: "pyproject.toml"
+      - run: uv sync --all-extras --dev
       - name: ruff check
-        run: poetry run ruff check convertool
+        run: uv run ruff check src
       - name: ruff format
-        run: poetry run ruff format --check convertool
+        run: uv run ruff format --check src
 
   version:
     name: Test Version
@@ -41,13 +35,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          project_name="$(grep --color=never 'name *= *".*"' pyproject.toml)"
-          project_name="${project_name%\"}"
-          project_name="${project_name#*\"}"
-          version_project="$(grep --color=never 'version *= *".*"' pyproject.toml)"
+          version_project="$(grep --color=never '^version *= *".*"' pyproject.toml)"
           version_project="${version_project%\"}"
           version_project="${version_project#*\"}"
-          version_package="$(grep --color=never '__version__ *= *".*"' "$project_name"/__version__.py)"
+          project_name="$(grep --color=never '^name *= *".*"' pyproject.toml)"
+          project_name="${project_name%\"}"
+          project_name="${project_name#*\"}"
+          version_package="$(grep --color=never '__version__ *= *".*"' "src/$project_name/__version__.py")"
           version_package="${version_package%\"}"
           version_package="${version_package#*\"}"
           test "$version_project" = "$version_package"
@@ -61,7 +55,7 @@ jobs:
         run: |
           acacore_remote="$(python -c 'import urllib.request,json;print(json.loads(urllib.request.urlopen("https://api.github.com/repos/aarhusstadsarkiv/acacore/tags").read())[0]["name"])')"
           acacore_remote="${acacore_remote#v}"
-          acacore_package="$(grep 'acacore =' pyproject.toml | grep -oE 'tag[ ]*=[ ]*"[^"]+"')"
+          acacore_package="$(grep '^acacore =' pyproject.toml | grep -oE 'tag[ ]*=[ ]*"[^"]+"')"
           acacore_package="${acacore_package#*\"}"
           acacore_package="${acacore_package#v}"
           acacore_package="${acacore_package%\"}"
@@ -81,6 +75,6 @@ jobs:
           docker build . -t convertool:latest -f Dockerfile --target test
           docker run -td -v $(pwd):/root/convertool --name convertool convertool:latest
       - name: pytest
-        run: docker exec convertool poetry run coverage run -m pytest
+        run: docker exec convertool uv run coverage run -m pytest
       - name: converage
-        run: docker exec convertool poetry run coverage report -m --fail-under=80 --skip-empty --skip-covered
+        run: docker exec convertool uv run coverage report -m --fail-under=80 --skip-empty --skip-covered
