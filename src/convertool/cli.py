@@ -25,6 +25,7 @@ from click import BadParameter
 from click import Choice
 from click import Context
 from click import group
+from click import IntRange
 from click import option
 from click import Parameter
 from click import pass_context
@@ -149,6 +150,7 @@ def convert_file(
     verbose: bool = False,
     loggers: list[Logger] | None = None,
     dry_run: bool = False,
+    timeout: int | None = None,
 ) -> list[ConvertedFile]:
     loggers = loggers or []
     root_dir: Path
@@ -163,6 +165,9 @@ def convert_file(
 
     if not converter_cls:
         raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
+
+    if timeout is not None:
+        converter_cls.process_timeout = None if timeout == 0 else float(timeout)
 
     if file_type == "original":
         root_dir = avid.dirs.original_documents
@@ -223,6 +228,7 @@ def app(): ...
 @argument("target", type=Choice(["original:master", "master:access", "master:statutory"]), required=True)
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
+@option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
@@ -232,6 +238,7 @@ def digiarch(
     target: str,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
+    timeout: int | None,
     dry_run: bool,
     verbose: bool,
 ):
@@ -302,6 +309,7 @@ def digiarch(
                             loggers=[log_stdout],
                             verbose=verbose,
                             dry_run=dry_run,
+                            timeout=timeout,
                         )
 
                     if isinstance(convert_error.exception, MissingDependency | UnsupportedPlatform):
@@ -359,13 +367,25 @@ def digiarch(
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
     required=True,
 )
+@option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
-def standalone(ctx: Context, tool: str, output: str, destination: str, files: tuple[str, ...], verbose: bool):
+def standalone(
+    ctx: Context,
+    tool: str,
+    output: str,
+    destination: str,
+    files: tuple[str, ...],
+    timeout: int | None,
+    verbose: bool,
+):
     converter_cls = find_converter(tool, output)
 
     if not converter_cls:
         raise BadParameter(f"cannot find converter for tool {tool} with output {output}", ctx, ctx_params(ctx)["tool"])
+
+    if timeout is not None:
+        converter_cls.process_timeout = None if timeout == 0 else float(timeout)
 
     dest: Path = Path(destination)
     dest.mkdir(parents=True, exist_ok=True)
