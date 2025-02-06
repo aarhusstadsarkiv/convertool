@@ -54,6 +54,7 @@ RUN uv tool install .
 WORKDIR /root
 CMD ["bash"]
 
+
 FROM prod AS test
 # Install go and Siegfried
 WORKDIR /root
