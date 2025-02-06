@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install uv
+ENV UV_NO_MODIFY_PATH=1
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
