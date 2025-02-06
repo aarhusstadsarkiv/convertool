@@ -13,6 +13,7 @@ dependencies = [
     "lxml>=5.3.0,<6",
     "chardet>=5.2.0,<6",
     "extract-msg>=0.52.0,<0.53",
+    "sas7bdat>=2.2.3",
 ]
 
 [project.scripts]
