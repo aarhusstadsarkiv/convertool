@@ -1,7 +1,4 @@
 import csv
-from datetime import date
-from datetime import datetime
-from datetime import time
 from pathlib import Path
 from typing import ClassVar
 
@@ -38,7 +35,7 @@ class ConverterSAS(ConverterABC):
             with tmp_file.open("w", encoding="utf-8") as fh:
                 writer = csv.writer(fh, delimiter=delimiter)
                 for row in sas_file:
-                    writer.writerow(v.isoformat() if isinstance(v, datetime | date | time) else v for v in row)
+                    writer.writerow(row)
 
             dest_dir.mkdir(parents=True, exist_ok=True)
             tmp_file.replace(dest_file)
