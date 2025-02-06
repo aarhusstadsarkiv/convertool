@@ -50,6 +50,7 @@ from .converters import ConverterMSGToPDF
 from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
+from .converters import ConverterSAS
 from .converters import ConverterSpreadsheet
 from .converters import ConverterSymphovert
 from .converters import ConverterTemplate
@@ -82,6 +83,7 @@ def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
         ConverterDocumentToImage,
         ConverterPresentation,
         ConverterSpreadsheet,
+        ConverterSAS,
         ConverterPDFToImage,
         ConverterTextToImage,
         ConverterImage,
