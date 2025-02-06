@@ -41,7 +41,7 @@ class ConverterHTMLToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
     platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str]] = [  # noqa: SIM222
+    dependencies: ClassVar[list[str]] = [
         *(ConverterHTML.dependencies or []),
         *(ConverterPDFToImage.dependencies or []),
     ] or None

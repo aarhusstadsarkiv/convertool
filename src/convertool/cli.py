@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from logging import ERROR
 from logging import INFO
 from logging import Logger
@@ -5,9 +6,7 @@ from logging import WARNING
 from pathlib import Path
 from sqlite3 import DatabaseError
 from traceback import format_tb
-from typing import Callable
 from typing import Literal
-from typing import Type
 
 from acacore.__version__ import __version__ as __acacore_version__
 from acacore.database import FilesDB
@@ -26,6 +25,7 @@ from click import BadParameter
 from click import Choice
 from click import Context
 from click import group
+from click import IntRange
 from click import option
 from click import Parameter
 from click import pass_context
@@ -50,6 +50,7 @@ from .converters import ConverterMSGToPDF
 from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
+from .converters import ConverterSAS
 from .converters import ConverterSpreadsheet
 from .converters import ConverterSymphovert
 from .converters import ConverterTemplate
@@ -65,7 +66,7 @@ from .util import get_avid
 from .util import open_database
 
 
-def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
+def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
     for converter in (
         ConverterCopy,
         ConverterTemplate,
@@ -82,6 +83,7 @@ def find_converter(tool: str, output: str) -> Type[ConverterABC] | None:
         ConverterDocumentToImage,
         ConverterPresentation,
         ConverterSpreadsheet,
+        ConverterSAS,
         ConverterPDFToImage,
         ConverterTextToImage,
         ConverterImage,
@@ -114,7 +116,7 @@ def check_database_version(ctx: Context, param: Parameter, path: Path):
 def original_file_tool_output(file: OriginalFile) -> tuple[str, str]:
     if file.action == "convert" and not file.action_data.convert:
         raise ValueError("Missing convert action data", file)
-    elif file.action == "convert":
+    if file.action == "convert":
         return file.action_data.convert.tool, file.action_data.convert.output
     elif file.action == "ignore" and not file.action_data.ignore:
         raise ValueError("Missing ignore action data", file)
@@ -127,7 +129,7 @@ def original_file_tool_output(file: OriginalFile) -> tuple[str, str]:
 def master_file_tool_output(file: MasterFile, dest_type: Literal["access", "statutory"]) -> tuple[str, str]:
     if dest_type == "access" and not file.convert_access:
         raise ValueError("Missing convert action data", file)
-    elif dest_type == "access":
+    if dest_type == "access":
         return file.convert_access.tool, file.convert_access.output
     elif dest_type == "statutory" and not file.convert_statutory:
         raise ValueError("Missing convert action data", file)
@@ -150,11 +152,12 @@ def convert_file(
     verbose: bool = False,
     loggers: list[Logger] | None = None,
     dry_run: bool = False,
+    timeout: int | None = None,
 ) -> list[ConvertedFile]:
     loggers = loggers or []
     root_dir: Path
     output_dir: Path
-    dst_cls: Type[ConvertedFile]
+    dst_cls: type[ConvertedFile]
     dst_table: Table[ConvertedFile]
 
     if tool in ConverterCopy.tool_names:
@@ -164,6 +167,9 @@ def convert_file(
 
     if not converter_cls:
         raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
+
+    if timeout is not None:
+        converter_cls.process_timeout = None if timeout == 0 else float(timeout)
 
     if file_type == "original":
         root_dir = avid.dirs.original_documents
@@ -224,6 +230,7 @@ def app(): ...
 @argument("target", type=Choice(["original:master", "master:access", "master:statutory"]), required=True)
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
+@option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
@@ -233,6 +240,7 @@ def digiarch(
     target: str,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
+    timeout: int | None,
     dry_run: bool,
     verbose: bool,
 ):
@@ -303,9 +311,10 @@ def digiarch(
                             loggers=[log_stdout],
                             verbose=verbose,
                             dry_run=dry_run,
+                            timeout=timeout,
                         )
 
-                    if isinstance(convert_error.exception, (MissingDependency, UnsupportedPlatform)):
+                    if isinstance(convert_error.exception, MissingDependency | UnsupportedPlatform):
                         Event.from_command(ctx, "warning", (file.uuid, file_type)).log(
                             WARNING,
                             log_stdout,
@@ -360,13 +369,25 @@ def digiarch(
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
     required=True,
 )
+@option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
-def standalone(ctx: Context, tool: str, output: str, destination: str, files: tuple[str, ...], verbose: bool):
+def standalone(
+    ctx: Context,
+    tool: str,
+    output: str,
+    destination: str,
+    files: tuple[str, ...],
+    timeout: int | None,
+    verbose: bool,
+):
     converter_cls = find_converter(tool, output)
 
     if not converter_cls:
         raise BadParameter(f"cannot find converter for tool {tool} with output {output}", ctx, ctx_params(ctx)["tool"])
+
+    if timeout is not None:
+        converter_cls.process_timeout = None if timeout == 0 else float(timeout)
 
     dest: Path = Path(destination)
     dest.mkdir(parents=True, exist_ok=True)

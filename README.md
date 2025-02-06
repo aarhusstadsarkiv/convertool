@@ -47,6 +47,8 @@
 | spreadsheet  | ods      | Convert a spreadsheet file (Excel, LibreOffice, etc.) to ODS        | .ods      |
 | spreadsheet  | html     | Convert a spreadsheet file (Excel, LibreOffice, etc.) to HTML       | .html     |
 | spreadsheet  | pdf      | Convert a spreadsheet file (Excel, LibreOffice, etc.) to PDF        | .pdf      |
+| sas          | csv      | Convert a sas7bdat file to CSV                                      | .csv      |
+| sas          | tsv      | Convert a sas7bdat file to TSV                                      | .tsv      |
 | text         | jp2      | Convert text file to a JPEG2000 image                               | .jp2      |
 | text         | jpg      | Convert text file to a JPEG image                                   | .jpg      |
 | text         | png      | Convert text file to a PNG image                                    | .png      |

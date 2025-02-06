@@ -22,12 +22,14 @@ class ConverterSpreadsheet(ConverterABC):
         output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
+        output_filter = f":{output_filter}" if output_filter else ""
+
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "libreoffice",
                 "--headless",
                 "--convert-to",
-                f"{output}:{output_filter}" if output_filter else output,
+                f"{output}{output_filter}" if output_filter else output,
                 "--outdir",
                 tmp_dir,
                 self.file.get_absolute_path(),

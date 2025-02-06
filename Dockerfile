@@ -1,8 +1,9 @@
-FROM python:3.11.10-bookworm AS base
+FROM python:3.13.1-bookworm AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
 RUN apt-get update && apt-get install -y \
+    vim \
     curl \
     wget \
     git \
@@ -15,8 +16,9 @@ RUN apt-get update && apt-get install -y \
     libxtst6
 RUN rm -rf /var/lib/apt/lists/*
 
-# Install pipx
-RUN pip3 install pipx
+# Install uv
+ENV UV_NO_MODIFY_PATH=1
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
 # Install GDAL
@@ -42,17 +44,19 @@ RUN apt-get update && apt-get install -y /root/google-chrome-stable_current_amd6
 RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
 RUN rm google-chrome-stable_current_amd64.deb
 
-CMD ["bash"]
 
 FROM base AS prod
 # Install convertool
 WORKDIR /root/convertool
 COPY . .
-RUN pipx install .
+RUN uv sync
+RUN uv tool install .
+
 WORKDIR /root
 CMD ["bash"]
 
-FROM base AS test
+
+FROM prod AS test
 # Install go and Siegfried
 WORKDIR /root
 RUN curl -L https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o go.tar.gz
@@ -64,14 +68,7 @@ ENV SIEGFRIED_PATH="$GOPATH/bin/sf"
 ENV SIEGFRIED_HOME="/root/.sf"
 RUN sf -home "$SIEGFRIED_HOME" -update
 
-# Install vim
-RUN apt-get update && apt-get install -y vim
-
-# Install poetry
-RUN pip3 install poetry
-
-# Install convertool w/ poetry
+# Install extra and dev dependencies
 WORKDIR /root/convertool
-COPY . .
-RUN poetry install
+RUN uv sync --all-extras --dev
 CMD ["bash"]

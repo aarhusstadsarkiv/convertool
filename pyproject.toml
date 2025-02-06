@@ -1,28 +1,38 @@
-[tool.poetry]
+[project]
 name = "convertool"
-version = "3.0.4"
+version = "4.0.0"
 description = ""
-authors = ["Aarhus City Archive <stadsarkiv@aarhus.dk>"]
+authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
+requires-python = ">=3.12"
 readme = "README.md"
+dependencies = [
+    "acacore",
+    "tnefparse>=1.4.0,<2",
+    "striprtf>=0.0.28,<0.0.29",
+    "beautifulsoup4>=4.12.3,<5",
+    "lxml>=5.3.0,<6",
+    "chardet>=5.2.0,<6",
+    "extract-msg>=0.52.0,<0.53",
+    "sas7bdat>=2.2.3",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 convertool = "convertool.cli:app"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-acacore = {git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v4.1.1"}
-tnefparse = "^1.4.0"
-striprtf = "^0.0.28"
-beautifulsoup4 = "^4.12.3"
-lxml = "^5.3.0"
-chardet = "^5.2.0"
-extract-msg = "^0.52.0"
+[dependency-groups]
+dev = [
+    "ruff>=0.9.3,<0.10",
+    "pytest>=8.3.4,<9",
+    "coverage>=7.6.10,<8",
+    "types-click>=7.1.8,<8",
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.6.2"
-pytest = "^8.3.2"
-coverage = "^7.6.1"
-types-click = "^7.1.8"
+[tool.uv.sources]
+acacore = { git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v5.0.0" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
@@ -69,16 +79,14 @@ select = [
     "RUF",
 ]
 ignore = [
-    "E501",    # line to long, to many false positives, gets handled by black
     "ANN002",  # missing type anottation for *args
     "ANN003",  # missing type anotation for **kwargs
-    "ANN101",  # missing type for self
-    "ANN102",  # missing type for cls
     "ANN201",  # missing return type
     "ANN202",  # missing return type
     "ANN206",  # missing return type
     "ARG001",  # missing type anotattion for args
     "BLE001",  # catching general exceptions
+    "C901",    # complexity check
     "D100",    # missing docstring
     "D101",    # missing docstring
     "D102",    # missing docstring
@@ -92,24 +100,25 @@ ignore = [
     "D212",    # multi-line docstring summary should start at the first line,
     "D213",    # multi-line docstring summary should start at the second line,
     "D300",    # use triple docstring
+    "D400",    # First line should end with a period
     "D401",    # first line of docstring should be in imperative mood
     "DTZ005",  # datetime.datetime.now() called without a tz argument
     "DTZ006",  # datetime.datetime.fromtimestamp() called without a tz argument
+    "E501",    # line to long, to many false positives, gets handled by black
     "E712",    # comparison to True/False, we ignore because we use sqlalchemy
+    "E741",    # Ambiguous variable name: `l`
     "FBT001",  # boolean arguement in function definition
-    "N802",    # name of function should be lower case
+    "INP001",  # implicit namespace without __init__ (throws errors in tests)
+    "ISC001",  # check for implicit concatanation of str on one line, not compatabil with black.
+    "N802",    # name of function should be lowercase
     "PLR2004", # magic value used in comparison
+    "PLW2901", # redefing loop variables
     "PT012",   # ptest.raises should contain a simple statement
     "RET505",  # unnecessary {branch} after return statement
-    "RET506",  # unnecessary `elif` after `raise` statement
-    "RET507",  # unnecessary `elif` after `continue` statement
     "S101",    # use of assert,
+    "SIM114",  # combine `if` branches using logical `or` operator
     "TRY003",  # avoid using long messages outside exception class
     "UP007",   # not using | in type anotations
-    "INP001",  # implicit namespace without __init__ (throws errors in tests)
-    "PLW2901", # redefing loop variables
-    "C901",    # complexity check
-    "ISC001",  # check for implicit concatanation of str on one line, not compatabil with black.
 ]
 exclude = [
     ".venv",
@@ -135,6 +144,6 @@ ignore-decorators = ["pytest.fixture"]
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 300
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+asyncio_mode="strict"
+pythonpath = ["src"]
