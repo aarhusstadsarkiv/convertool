@@ -138,10 +138,15 @@ def run_process(
         raise CalledProcessError(127, args[0:1], "", f"Command not found {''.join(args[0:1])}")
 
 
-def get_encoding(path: Path) -> str | None:
-    """Get the encoding of the file as detected by chardet."""
+def get_encoding(path: Path, bof_length: int = 2048) -> str | None:
+    """
+    Get the encoding of the file as detected by chardet.
+
+    :param path: Path to the file.
+    :param bof_length: The number of bytes to read from the file.
+    """
     with path.open("rb") as fh:
-        return chardet.detect(fh.read(2048))["encoding"]
+        return chardet.detect(fh.read(bof_length))["encoding"]
 
 
 class TempDir(TemporaryDirectory):
