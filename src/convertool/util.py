@@ -7,6 +7,7 @@ from subprocess import CompletedProcess
 from subprocess import run
 from tempfile import TemporaryDirectory
 
+import chardet
 from acacore.database import FilesDB
 from click import BadParameter
 from click import Context
@@ -135,6 +136,12 @@ def run_process(
         return process.stdout or "", process.stderr or ""
     except FileNotFoundError:
         raise CalledProcessError(127, args[0:1], "", f"Command not found {''.join(args[0:1])}")
+
+
+def get_encoding(path: Path) -> str | None:
+    """Get the encoding of the file as detected by chardet."""
+    with path.open("rb") as fh:
+        return chardet.detect(fh.read(2048))["encoding"]
 
 
 class TempDir(TemporaryDirectory):
