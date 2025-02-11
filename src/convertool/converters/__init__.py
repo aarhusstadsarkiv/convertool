@@ -14,6 +14,9 @@ from .converter_image import ConverterTextToImage
 from .converter_msg import ConverterMSG
 from .converter_msg import ConverterMSGToImage
 from .converter_msg import ConverterMSGToPDF
+from .converter_msoffice import ConverterMSExcel
+from .converter_msoffice import ConverterMSPowerPoint
+from .converter_msoffice import ConverterMSWord
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
@@ -24,6 +27,7 @@ from .converter_tnef import ConverterTNEF
 from .converter_video import ConverterVideo
 
 __all__ = [
+    "exceptions",
     "ConverterABC",
     "ConverterAudio",
     "ConverterCAD",
@@ -37,6 +41,9 @@ __all__ = [
     "ConverterMSG",
     "ConverterMSGToImage",
     "ConverterMSGToPDF",
+    "ConverterMSExcel",
+    "ConverterMSPowerPoint",
+    "ConverterMSWord",
     "ConverterPDF",
     "ConverterPDFToImage",
     "ConverterPresentation",
@@ -47,5 +54,4 @@ __all__ = [
     "ConverterTemplate",
     "ConverterTextToImage",
     "ConverterVideo",
-    "exceptions",
 ]
