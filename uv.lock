@@ -145,7 +145,7 @@ requires-dist = [
     { name = "chardet", specifier = ">=5.2.0,<6" },
     { name = "extract-msg", specifier = ">=0.53.0,<1" },
     { name = "lxml", specifier = ">=5.3.0,<6" },
-    { name = "sas7bdat", specifier = ">=2.2.3" },
+    { name = "sas7bdat", specifier = ">=2.2.3,<3" },
     { name = "striprtf", specifier = ">=0.0.28,<1" },
     { name = "tnefparse", specifier = ">=1.4.0,<2" },
 ]
