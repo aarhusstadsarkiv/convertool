@@ -44,9 +44,12 @@ from .converters import ConverterGIS
 from .converters import ConverterHTML
 from .converters import ConverterHTMLToImage
 from .converters import ConverterImage
+from .converters import ConverterMSExcel
 from .converters import ConverterMSG
 from .converters import ConverterMSGToImage
 from .converters import ConverterMSGToPDF
+from .converters import ConverterMSPowerPoint
+from .converters import ConverterMSWord
 from .converters import ConverterPDF
 from .converters import ConverterPDFToImage
 from .converters import ConverterPresentation
@@ -79,6 +82,9 @@ def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
         ConverterMSG,
         ConverterMSGToImage,
         ConverterMSGToPDF,
+        ConverterMSExcel,
+        ConverterMSPowerPoint,
+        ConverterMSWord,
         ConverterDocument,
         ConverterDocumentToImage,
         ConverterPresentation,

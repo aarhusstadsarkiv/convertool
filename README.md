@@ -47,6 +47,14 @@
 | spreadsheet  | ods      | Convert a spreadsheet file (Excel, LibreOffice, etc.) to ODS        | .ods      |
 | spreadsheet  | html     | Convert a spreadsheet file (Excel, LibreOffice, etc.) to HTML       | .html     |
 | spreadsheet  | pdf      | Convert a spreadsheet file (Excel, LibreOffice, etc.) to PDF        | .pdf      |
+| msword       | pdf      | Convert a document file with Microsoft Word to PDF                  | .pdf      |
+| msword       | pdfa     | Convert a document file with Microsoft Word to PDF/A                | .pdf      |
+| msword       | odt      | Convert a document file with Microsoft Word to ODT                  | .odt      |
+| msexcel      | pdf      | Convert a spreadsheet file with Microsoft Excel to PDF              | .pdf      |
+| msexcel      | ods      | Convert a spreadsheet file with Microsoft Excel to ODS              | .ods      |
+| msexcel      | html     | Convert a spreadsheet file with Microsoft Excel to HTML             | .html     |
+| mspowerpoint | pdf      | Convert a presentation file with Microsoft PowerPoint to PDF        | .pdf      |
+| mspowerpoint | odp      | Convert a presentation file with Microsoft PowerPoint to ODP        | .odp      |
 | sas          | csv      | Convert a sas7bdat file to CSV                                      | .csv      |
 | sas          | tsv      | Convert a sas7bdat file to TSV                                      | .tsv      |
 | text         | jp2      | Convert text file to a JPEG2000 image                               | .jp2      |
