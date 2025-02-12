@@ -3,8 +3,8 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "acacore"
-version = "5.0.0"
-source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.0.0#85a85e7dc450b399e9376e9a1c2d1d8396d8ceaa" }
+version = "5.0.1"
+source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.0.1#2330caccc7fada1d1d3e863207b6dd155fafedb6" }
 dependencies = [
     { name = "click" },
     { name = "imagesize" },
@@ -117,7 +117,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/8e/ac/abb196bb0b42a239d
 
 [[package]]
 name = "convertool"
-version = "4.0.0"
+version = "4.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "acacore" },
@@ -140,7 +140,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.0.0" },
+    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.0.1" },
     { name = "beautifulsoup4", specifier = ">=4.12.3,<5" },
     { name = "chardet", specifier = ">=5.2.0,<6" },
     { name = "extract-msg", specifier = ">=0.53.0,<1" },
