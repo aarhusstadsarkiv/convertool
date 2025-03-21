@@ -24,17 +24,18 @@ class ConverterHTML(ConverterABC):
         dest_file: Path = self.output_file(dest_dir, output)
 
         with TempDir(output_dir) as tmp_dir:
+            tmp_file = tmp_dir.joinpath("output.pdf")
             self.run_process(
                 "chromium",
                 "--headless",
                 "--no-sandbox",
-                "--print-to-pdf",
+                f"--print-to-pdf={tmp_file}",
                 "--no-pdf-header-footer",
                 self.file.get_absolute_path(),
                 cwd=tmp_dir,
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
-            tmp_dir.joinpath("output.pdf").replace(dest_file)
+            tmp_file.replace(dest_file)
 
         return [dest_file]
 
