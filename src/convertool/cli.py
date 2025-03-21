@@ -44,6 +44,7 @@ from .converters import ConverterGIS
 from .converters import ConverterHTML
 from .converters import ConverterHTMLToImage
 from .converters import ConverterImage
+from .converters import ConverterMedCom
 from .converters import ConverterMSExcel
 from .converters import ConverterMSG
 from .converters import ConverterMSGToImage
@@ -60,6 +61,7 @@ from .converters import ConverterTemplate
 from .converters import ConverterTextToImage
 from .converters import ConverterTNEF
 from .converters import ConverterVideo
+from .converters import ConverterXSL
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
@@ -79,6 +81,7 @@ def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
         ConverterHTMLToImage,
         ConverterCAD,
         ConverterTNEF,
+        ConverterMedCom,
         ConverterMSG,
         ConverterMSGToImage,
         ConverterMSGToPDF,
@@ -96,6 +99,7 @@ def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
         ConverterAudio,
         ConverterVideo,
         ConverterPDF,
+        ConverterXSL,
     ):
         if converter.match_tool(tool, output):
             return converter
