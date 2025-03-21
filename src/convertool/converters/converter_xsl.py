@@ -12,7 +12,7 @@ from .converter_html import ConverterHTML
 
 
 class ConverterXSL(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["xsl"]
+    tool_names: ClassVar[list[str]] = ["xslt"]
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[list[str]] = ["xmlstarlet"]
