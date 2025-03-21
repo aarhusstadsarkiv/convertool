@@ -8,7 +8,6 @@ from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
 from sys import platform
 from typing import ClassVar
-from typing import Type
 
 from acacore.database import FilesDB
 from acacore.models.file import BaseFile
