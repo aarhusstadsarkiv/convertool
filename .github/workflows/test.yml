@@ -71,7 +71,7 @@ jobs:
       - version
       - version-acacore
     env:
-      PROCESS_TIMEOUT_MULTIPLIER: 3
+      PROCESS_TIMEOUT_MULTIPLIER: 1
     steps:
       - uses: actions/checkout@v4
       - name: Build Test Image
