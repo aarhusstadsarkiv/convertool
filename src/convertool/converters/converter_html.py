@@ -15,7 +15,7 @@ from .converter_image import ConverterPDFToImage
 class ConverterHTML(ConverterABC):
     tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ["pdf"]
-    dependencies: ClassVar[list[str]] = ["chrome"]
+    dependencies: ClassVar[list[str]] = ["chromium"]
     process_timeout: ClassVar[float] = 60
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
@@ -25,7 +25,7 @@ class ConverterHTML(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "chrome",
+                "chromium",
                 "--headless",
                 "--no-sandbox",
                 "--print-to-pdf",

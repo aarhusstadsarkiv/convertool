@@ -42,10 +42,7 @@ RUN apt-get update && apt-get install -y xmlstarlet
 
 # Install chrome
 WORKDIR /root
-RUN curl -L https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /root/google-chrome-stable_current_amd64.deb
-RUN apt-get update && apt-get install -y /root/google-chrome-stable_current_amd64.deb
-RUN ln -s $(which google-chrome-stable) /usr/bin/chrome
-RUN rm google-chrome-stable_current_amd64.deb
+RUN apt-get update && apt-get install -y chromium
 
 
 FROM base AS prod
