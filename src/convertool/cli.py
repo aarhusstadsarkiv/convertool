@@ -33,39 +33,8 @@ from click import Path as ClickPath
 from click import version_option
 from click.exceptions import Exit
 
+from . import converters
 from .__version__ import __version__
-from .converters import ConverterABC
-from .converters import ConverterAudio
-from .converters import ConverterCAD
-from .converters import ConverterCopy
-from .converters import ConverterDocument
-from .converters import ConverterDocumentToImage
-from .converters import ConverterGIS
-from .converters import ConverterHTML
-from .converters import ConverterHTMLToImage
-from .converters import ConverterImage
-from .converters import ConverterMedCom
-from .converters import ConverterMedComToImage
-from .converters import ConverterMedComToPDF
-from .converters import ConverterMSExcel
-from .converters import ConverterMSG
-from .converters import ConverterMSGToImage
-from .converters import ConverterMSGToPDF
-from .converters import ConverterMSPowerPoint
-from .converters import ConverterMSWord
-from .converters import ConverterPDF
-from .converters import ConverterPDFToImage
-from .converters import ConverterPresentation
-from .converters import ConverterSAS
-from .converters import ConverterSpreadsheet
-from .converters import ConverterSymphovert
-from .converters import ConverterTemplate
-from .converters import ConverterTextToImage
-from .converters import ConverterTNEF
-from .converters import ConverterVideo
-from .converters import ConverterXSL
-from .converters import ConverterXSLToImage
-from .converters import ConverterXSLToPDF
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
@@ -75,39 +44,39 @@ from .util import get_avid
 from .util import open_database
 
 
-def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
+def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | None:
     for converter in (
-        ConverterCopy,
-        ConverterTemplate,
-        ConverterSymphovert,
-        ConverterGIS,
-        ConverterHTML,
-        ConverterHTMLToImage,
-        ConverterCAD,
-        ConverterTNEF,
-        ConverterMedCom,
-        ConverterMedComToImage,
-        ConverterMedComToPDF,
-        ConverterMSG,
-        ConverterMSGToImage,
-        ConverterMSGToPDF,
-        ConverterMSExcel,
-        ConverterMSPowerPoint,
-        ConverterMSWord,
-        ConverterDocument,
-        ConverterDocumentToImage,
-        ConverterPresentation,
-        ConverterSpreadsheet,
-        ConverterSAS,
-        ConverterPDFToImage,
-        ConverterTextToImage,
-        ConverterImage,
-        ConverterAudio,
-        ConverterVideo,
-        ConverterPDF,
-        ConverterXSL,
-        ConverterXSLToImage,
-        ConverterXSLToPDF,
+        converters.ConverterCopy,
+        converters.ConverterTemplate,
+        converters.ConverterSymphovert,
+        converters.ConverterGIS,
+        converters.ConverterHTML,
+        converters.ConverterHTMLToImage,
+        converters.ConverterCAD,
+        converters.ConverterTNEF,
+        converters.ConverterMedCom,
+        converters.ConverterMedComToImage,
+        converters.ConverterMedComToPDF,
+        converters.ConverterMSG,
+        converters.ConverterMSGToImage,
+        converters.ConverterMSGToPDF,
+        converters.ConverterMSExcel,
+        converters.ConverterMSPowerPoint,
+        converters.ConverterMSWord,
+        converters.ConverterDocument,
+        converters.ConverterDocumentToImage,
+        converters.ConverterPresentation,
+        converters.ConverterSpreadsheet,
+        converters.ConverterSAS,
+        converters.ConverterPDFToImage,
+        converters.ConverterTextToImage,
+        converters.ConverterImage,
+        converters.ConverterAudio,
+        converters.ConverterVideo,
+        converters.ConverterPDF,
+        converters.ConverterXSL,
+        converters.ConverterXSLToImage,
+        converters.ConverterXSLToPDF,
     ):
         if converter.match_tool(tool, output):
             return converter
@@ -178,8 +147,8 @@ def convert_file(
     dst_cls: type[ConvertedFile]
     dst_table: Table[ConvertedFile]
 
-    if tool in ConverterCopy.tool_names:
-        output = ConverterCopy.outputs[0]
+    if tool in converters.ConverterCopy.tool_names:
+        output = converters.ConverterCopy.outputs[0]
 
     converter_cls = find_converter(tool, output)
 
@@ -221,7 +190,7 @@ def convert_file(
     file_copy = file.model_copy(deep=True)
     file_copy.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
     file_copy.root = root_dir
-    converter: ConverterABC = converter_cls(file_copy, database, avid.path, capture_output=not verbose)
+    converter: converters.ConverterABC = converter_cls(file_copy, database, avid.path, capture_output=not verbose)
     dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     dest_files: list[ConvertedFile] = []
 
