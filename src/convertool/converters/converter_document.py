@@ -5,7 +5,9 @@ from acacore.models.file import BaseFile
 
 from convertool.util import TempDir
 
+from .base import _shared_dependencies
 from .base import _shared_platforms
+from .base import _shared_process_timeout
 from .base import ConverterABC
 from .converter_image import ConverterPDFToImage
 
@@ -45,18 +47,9 @@ class ConverterDocument(ConverterABC):
 class ConverterDocumentToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["document"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterDocument.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [
-        *(ConverterDocument.dependencies or []),
-        *(ConverterPDFToImage.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterDocument.process_timeout or 0,
-            ConverterPDFToImage.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterDocument, ConverterPDFToImage)
+    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterDocument, ConverterPDFToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterDocument, ConverterPDFToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)

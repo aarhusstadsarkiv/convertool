@@ -6,7 +6,9 @@ from acacore.models.file import BaseFile
 from convertool.util import TempDir
 
 from . import ConverterHTMLToImage
+from .base import _shared_dependencies
 from .base import _shared_platforms
+from .base import _shared_process_timeout
 from .base import ConverterABC
 from .converter_html import ConverterHTML
 
@@ -75,21 +77,9 @@ class ConverterMedCom(ConverterABC):
 class ConverterXSLToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterXSL.tool_names
     outputs: ClassVar[list[str]] = ConverterHTML.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(
-        ConverterXSL.platforms,
-        ConverterHTML.platforms,
-    )
-    dependencies: ClassVar[list[str]] = [
-        *(ConverterXSL.dependencies or []),
-        *(ConverterHTML.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterXSL.process_timeout or 0,
-            ConverterHTML.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterXSL, ConverterHTML)
+    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterXSL, ConverterHTML)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterXSL, ConverterHTML)
 
     def convert(
         self,
@@ -114,21 +104,9 @@ class ConverterXSLToPDF(ConverterABC):
 class ConverterXSLToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterXSL.tool_names
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(
-        ConverterXSL.platforms,
-        ConverterHTMLToImage.platforms,
-    )
-    dependencies: ClassVar[list[str]] = [
-        *(ConverterXSL.dependencies or []),
-        *(ConverterHTMLToImage.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterXSL.process_timeout or 0,
-            ConverterHTMLToImage.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterXSL, ConverterHTMLToImage)
+    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterXSL, ConverterHTMLToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterXSL, ConverterHTMLToImage)
 
     def convert(
         self,
@@ -153,21 +131,9 @@ class ConverterXSLToImage(ConverterABC):
 class ConverterMedComToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterMedCom.tool_names
     outputs: ClassVar[list[str]] = ConverterHTML.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(
-        ConverterMedCom.platforms,
-        ConverterHTML.platforms,
-    )
-    dependencies: ClassVar[list[str]] = [
-        *(ConverterMedCom.dependencies or []),
-        *(ConverterHTML.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterMedCom.process_timeout or 0,
-            ConverterHTML.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterMedCom, ConverterHTML)
+    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterMedCom, ConverterHTML)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMedCom, ConverterHTML)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -185,21 +151,9 @@ class ConverterMedComToPDF(ConverterABC):
 class ConverterMedComToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterMedCom.tool_names
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(
-        ConverterMedCom.platforms,
-        ConverterHTMLToImage.platforms,
-    )
-    dependencies: ClassVar[list[str]] = [
-        *(ConverterMedCom.dependencies or []),
-        *(ConverterHTMLToImage.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterMedCom.process_timeout or 0,
-            ConverterHTMLToImage.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterMedCom, ConverterHTMLToImage)
+    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterMedCom, ConverterHTMLToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMedCom, ConverterHTMLToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)

@@ -18,7 +18,9 @@ from striprtf.striprtf import rtf_to_text
 
 from convertool.util import TempDir
 
+from .base import _shared_dependencies
 from .base import _shared_platforms
+from .base import _shared_process_timeout
 from .base import ConverterABC
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
@@ -193,18 +195,9 @@ class ConverterMSG(ConverterABC):
 class ConverterMSGToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
     outputs: ClassVar[list[str]] = ["pdf"]
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [
-        *(ConverterMSG.dependencies or []),
-        *(ConverterHTML.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterMSG.process_timeout or 0,
-            ConverterHTML.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterPDFToImage)
+    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterMSG, ConverterPDFToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterPDFToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -225,18 +218,9 @@ class ConverterMSGToPDF(ConverterABC):
 class ConverterMSGToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG.platforms, ConverterHTMLToImage.platforms)
-    dependencies: ClassVar[list[str] | None] = [
-        *(ConverterMSG.dependencies or []),
-        *(ConverterHTMLToImage.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterMSG.process_timeout or 0,
-            ConverterHTMLToImage.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterHTMLToImage)
+    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterMSG, ConverterHTMLToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterHTMLToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
