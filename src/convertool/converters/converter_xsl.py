@@ -7,7 +7,7 @@ from .base import ConverterABC
 
 
 class ConverterXSL(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["xml-xsl"]
+    tool_names: ClassVar[list[str]] = ["xsl"]
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[list[str]] = ["xmlstarlet"]
