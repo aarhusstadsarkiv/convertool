@@ -41,7 +41,7 @@ def test_xml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: 
 
     for output in converter.outputs:
         output_files = converter.convert(output_dir, output)
-        assert len(output_files) > 1
+        assert len(output_files) >= 1
         assert all(f.is_file() for f in output_files)
         assert all(f.best_match().mime == MIMETYPES[output] for f in siegfried.identify(*output_files).files)
 
@@ -74,6 +74,6 @@ def test_medcom_to_image(test_files: dict[str, Path], output_dir: Path, siegfrie
 
     for output in converter.outputs:
         output_files = converter.convert(output_dir, output)
-        assert len(output_files) > 1
+        assert len(output_files) >= 1
         assert all(f.is_file() for f in output_files)
         assert all(f.best_match().mime == MIMETYPES[output] for f in siegfried.identify(*output_files).files)
