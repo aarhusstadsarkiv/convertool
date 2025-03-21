@@ -7,6 +7,22 @@ from acacore.siegfried import Siegfried
 from acacore.utils.functions import find_files
 from acacore.utils.functions import rm_tree
 
+from convertool import converters
+
+
+@pytest.fixture(scope="session", autouse=True)
+def on_test_start():
+    if not environ.get("PROCESS_TIMEOUT_MULTIPLIER", "").isdigit():
+        return
+    for obj_name in converters.__all__:
+        if (
+            isinstance(obj := getattr(converters, obj_name), type)
+            and issubclass(obj, converters.ConverterABC)
+            and obj.process_timeout
+        ):
+            obj.process_timeout *= int(environ["PROCESS_TIMEOUT_MULTIPLIER"])
+            setattr(converters, obj_name, obj)
+
 
 @pytest.fixture(scope="session")
 def siegfried() -> Siegfried:
