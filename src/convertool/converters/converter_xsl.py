@@ -38,3 +38,24 @@ class ConverterXSL(ConverterABC):
         dest_file.write_text(stdout)
 
         return [dest_file]
+
+
+class ConverterMedCom(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["medcom"]
+    outputs: ClassVar[list[str]] = ["html"]
+    process_timeout: ClassVar[float] = 10
+    dependencies: ClassVar[list[str]] = ["xmlstarlet"]
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = self.output_file(dest_dir, output)
+
+        xsl: Path = Path(__file__).parent.joinpath("resources", "medcom", "viewEmessage.xslt")
+
+        stdout, _ = self.run_process("xmlstarlet", "tr", "-E", xsl, self.file.get_absolute_path())
+
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest_file.write_text(stdout)
+
+        return [dest_file]
