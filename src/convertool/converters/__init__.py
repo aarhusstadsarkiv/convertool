@@ -25,6 +25,12 @@ from .converter_symphovert import ConverterSymphovert
 from .converter_templates import ConverterTemplate
 from .converter_tnef import ConverterTNEF
 from .converter_video import ConverterVideo
+from .converter_xsl import ConverterMedCom
+from .converter_xsl import ConverterMedComToImage
+from .converter_xsl import ConverterMedComToPDF
+from .converter_xsl import ConverterXSL
+from .converter_xsl import ConverterXSLToImage
+from .converter_xsl import ConverterXSLToPDF
 
 __all__ = [
     "exceptions",
@@ -38,6 +44,9 @@ __all__ = [
     "ConverterHTML",
     "ConverterHTMLToImage",
     "ConverterImage",
+    "ConverterMedCom",
+    "ConverterMedComToImage",
+    "ConverterMedComToPDF",
     "ConverterMSG",
     "ConverterMSGToImage",
     "ConverterMSGToPDF",
@@ -54,4 +63,7 @@ __all__ = [
     "ConverterTemplate",
     "ConverterTextToImage",
     "ConverterVideo",
+    "ConverterXSL",
+    "ConverterXSLToImage",
+    "ConverterXSLToPDF",
 ]

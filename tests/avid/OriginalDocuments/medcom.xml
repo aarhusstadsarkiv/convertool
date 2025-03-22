@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="../../../src/convertool/converters/resources/medcom/viewEmessage.xslt"?>
+<Emessage xmlns="http://rep.oio.dk/sundcom.dk/medcom.dk/xml/schemas/2006/07/01/">
+    <Envelope>
+        <Sent>
+            <Date>2016-09-15</Date>
+            <Time>02:15</Time>
+        </Sent>
+        <Identifier>0123456789AB</Identifier>
+        <AcknowledgementCode>pluspositivkvitt</AcknowledgementCode>
+    </Envelope>
+    <ClinicalEmail>
+        <Letter>
+            <Identifier>0123456789AB</Identifier>
+            <VersionCode>XD9134L</VersionCode>
+            <StatisticalCode>XDIS91</StatisticalCode>
+            <Authorisation>
+                <Date>2016-09-15</Date>
+                <Time>02:15</Time>
+            </Authorisation>
+            <TypeCode>XDIS91</TypeCode>
+            <StatusCode>nytbrev</StatusCode>
+        </Letter>
+        <Sender>
+            <EANIdentifier>0123456789123</EANIdentifier>
+            <Identifier>0123456</Identifier>
+            <IdentifierCode>sygehusafdelingsnummer</IdentifierCode>
+            <OrganisationName>Aarhus Universitetshospital</OrganisationName>
+            <DepartmentName>Fødsler</DepartmentName>
+            <UnitName>ukendt</UnitName>
+            <DistrictName>Aarhus N</DistrictName>
+            <PostCodeIdentifier>8200</PostCodeIdentifier>
+            <TelephoneSubscriberIdentifier>01234567</TelephoneSubscriberIdentifier>
+            <MedicalSpecialityCode>ikkeklassificeret</MedicalSpecialityCode>
+        </Sender>
+        <Receiver>
+            <EANIdentifier>1234567891234</EANIdentifier>
+            <Identifier>012</Identifier>
+            <IdentifierCode>kommunenummer</IdentifierCode>
+            <OrganisationName>Aarhus Kommune</OrganisationName>
+            <DepartmentName>ukendt</DepartmentName>
+            <UnitName>ukendt</UnitName>
+            <SuburbName>ukendt</SuburbName>
+            <DistrictName>ukendt</DistrictName>
+            <PostCodeIdentifier>8000</PostCodeIdentifier>
+        </Receiver>
+        <Patient>
+            <CivilRegistrationNumber>0101010000</CivilRegistrationNumber>
+            <PersonSurnameName>John</PersonSurnameName>
+            <PersonGivenName>Smith</PersonGivenName>
+            <StreetName>Hack Kampman Plads 2</StreetName>
+            <DistrictName>Aarhus C</DistrictName>
+            <PostCodeIdentifier>8000</PostCodeIdentifier>
+            <EpisodeOfCareStatusCode>inaktiv</EpisodeOfCareStatusCode>
+        </Patient>
+        <AdditionalInformation>
+            <Priority>rutine</Priority>
+            <Subject>Udskrivningsrapport - Brev til sundhedsplejersken</Subject>
+        </AdditionalInformation>
+        <ClinicalInformation>
+            <Text01>Udskrivningsstatus, barn
+                <Break/>
+                <Break/>Indlagt fra: 12.09.16 til: 14.09.16
+                <Break/>
+                <Break/>æåø
+                <Break/>
+                <Break/>Test line with
+                <Break/>
+                break.
+                <Break/>
+                <Break/>
+                <Break/>
+                <Break/>Med venlig hilsen<Break/>Lægenavnet<Break/>Sygeplejerske
+                <Break/>
+            </Text01>
+        </ClinicalInformation>
+    </ClinicalEmail>
+</Emessage>

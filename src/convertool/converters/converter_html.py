@@ -5,7 +5,9 @@ from acacore.models.file import BaseFile
 
 from convertool.util import TempDir
 
+from .base import _shared_dependencies
 from .base import _shared_platforms
+from .base import _shared_process_timeout
 from .base import ConverterABC
 from .converter_image import ConverterPDFToImage
 
@@ -13,7 +15,7 @@ from .converter_image import ConverterPDFToImage
 class ConverterHTML(ConverterABC):
     tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ["pdf"]
-    dependencies: ClassVar[list[str]] = ["chrome"]
+    dependencies: ClassVar[list[str]] = ["chromium"]
     process_timeout: ClassVar[float] = 60
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
@@ -22,17 +24,18 @@ class ConverterHTML(ConverterABC):
         dest_file: Path = self.output_file(dest_dir, output)
 
         with TempDir(output_dir) as tmp_dir:
+            tmp_file = tmp_dir.joinpath("output.pdf")
             self.run_process(
-                "chrome",
+                "chromium",
                 "--headless",
                 "--no-sandbox",
-                "--print-to-pdf",
+                f"--print-to-pdf={tmp_file}",
                 "--no-pdf-header-footer",
                 self.file.get_absolute_path(),
                 cwd=tmp_dir,
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
-            tmp_dir.joinpath("output.pdf").replace(dest_file)
+            tmp_file.replace(dest_file)
 
         return [dest_file]
 
@@ -40,18 +43,9 @@ class ConverterHTML(ConverterABC):
 class ConverterHTMLToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML.platforms, ConverterPDFToImage.platforms)
-    dependencies: ClassVar[list[str]] = [
-        *(ConverterHTML.dependencies or []),
-        *(ConverterPDFToImage.dependencies or []),
-    ] or None
-    process_timeout: ClassVar[float | None] = (
-        max(
-            ConverterHTML.process_timeout or 0,
-            ConverterPDFToImage.process_timeout or 0,
-        )
-        or None
-    )
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML, ConverterPDFToImage)
+    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterHTML, ConverterPDFToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterHTML, ConverterPDFToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)

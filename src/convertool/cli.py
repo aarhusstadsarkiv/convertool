@@ -33,33 +33,8 @@ from click import Path as ClickPath
 from click import version_option
 from click.exceptions import Exit
 
+from . import converters
 from .__version__ import __version__
-from .converters import ConverterABC
-from .converters import ConverterAudio
-from .converters import ConverterCAD
-from .converters import ConverterCopy
-from .converters import ConverterDocument
-from .converters import ConverterDocumentToImage
-from .converters import ConverterGIS
-from .converters import ConverterHTML
-from .converters import ConverterHTMLToImage
-from .converters import ConverterImage
-from .converters import ConverterMSExcel
-from .converters import ConverterMSG
-from .converters import ConverterMSGToImage
-from .converters import ConverterMSGToPDF
-from .converters import ConverterMSPowerPoint
-from .converters import ConverterMSWord
-from .converters import ConverterPDF
-from .converters import ConverterPDFToImage
-from .converters import ConverterPresentation
-from .converters import ConverterSAS
-from .converters import ConverterSpreadsheet
-from .converters import ConverterSymphovert
-from .converters import ConverterTemplate
-from .converters import ConverterTextToImage
-from .converters import ConverterTNEF
-from .converters import ConverterVideo
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
@@ -69,33 +44,39 @@ from .util import get_avid
 from .util import open_database
 
 
-def find_converter(tool: str, output: str) -> type[ConverterABC] | None:
+def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | None:
     for converter in (
-        ConverterCopy,
-        ConverterTemplate,
-        ConverterSymphovert,
-        ConverterGIS,
-        ConverterHTML,
-        ConverterHTMLToImage,
-        ConverterCAD,
-        ConverterTNEF,
-        ConverterMSG,
-        ConverterMSGToImage,
-        ConverterMSGToPDF,
-        ConverterMSExcel,
-        ConverterMSPowerPoint,
-        ConverterMSWord,
-        ConverterDocument,
-        ConverterDocumentToImage,
-        ConverterPresentation,
-        ConverterSpreadsheet,
-        ConverterSAS,
-        ConverterPDFToImage,
-        ConverterTextToImage,
-        ConverterImage,
-        ConverterAudio,
-        ConverterVideo,
-        ConverterPDF,
+        converters.ConverterCopy,
+        converters.ConverterTemplate,
+        converters.ConverterSymphovert,
+        converters.ConverterGIS,
+        converters.ConverterHTML,
+        converters.ConverterHTMLToImage,
+        converters.ConverterCAD,
+        converters.ConverterTNEF,
+        converters.ConverterMedCom,
+        converters.ConverterMedComToImage,
+        converters.ConverterMedComToPDF,
+        converters.ConverterMSG,
+        converters.ConverterMSGToImage,
+        converters.ConverterMSGToPDF,
+        converters.ConverterMSExcel,
+        converters.ConverterMSPowerPoint,
+        converters.ConverterMSWord,
+        converters.ConverterDocument,
+        converters.ConverterDocumentToImage,
+        converters.ConverterPresentation,
+        converters.ConverterSpreadsheet,
+        converters.ConverterSAS,
+        converters.ConverterPDFToImage,
+        converters.ConverterTextToImage,
+        converters.ConverterImage,
+        converters.ConverterAudio,
+        converters.ConverterVideo,
+        converters.ConverterPDF,
+        converters.ConverterXSL,
+        converters.ConverterXSLToImage,
+        converters.ConverterXSLToPDF,
     ):
         if converter.match_tool(tool, output):
             return converter
@@ -166,8 +147,8 @@ def convert_file(
     dst_cls: type[ConvertedFile]
     dst_table: Table[ConvertedFile]
 
-    if tool in ConverterCopy.tool_names:
-        output = ConverterCopy.outputs[0]
+    if tool in converters.ConverterCopy.tool_names:
+        output = converters.ConverterCopy.outputs[0]
 
     converter_cls = find_converter(tool, output)
 
@@ -209,7 +190,7 @@ def convert_file(
     file_copy = file.model_copy(deep=True)
     file_copy.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
     file_copy.root = root_dir
-    converter: ConverterABC = converter_cls(file_copy, database, avid.path, capture_output=not verbose)
+    converter: converters.ConverterABC = converter_cls(file_copy, database, avid.path, capture_output=not verbose)
     dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     dest_files: list[ConvertedFile] = []
 
@@ -377,6 +358,12 @@ def digiarch(
 )
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
+@option(
+    "--root",
+    type=ClickPath(file_okay=False, writable=True, resolve_path=True),
+    default=None,
+    help="Set a root for the given files to keep the relative paths in the output.",
+)
 @pass_context
 def standalone(
     ctx: Context,
@@ -386,11 +373,15 @@ def standalone(
     files: tuple[str, ...],
     timeout: int | None,
     verbose: bool,
+    root: str | None,
 ):
+    if root and any(not Path(f).is_relative_to(root) for f in files):
+        raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
+
     converter_cls = find_converter(tool, output)
 
     if not converter_cls:
-        raise BadParameter(f"cannot find converter for tool {tool} with output {output}", ctx, ctx_params(ctx)["tool"])
+        raise BadParameter(f"cannot find converter for tool {tool} with output {output}.", ctx, ctx_params(ctx)["tool"])
 
     if timeout is not None:
         converter_cls.process_timeout = None if timeout == 0 else float(timeout)
@@ -400,9 +391,9 @@ def standalone(
 
     for file_path in map(Path, files):
         try:
-            file = BaseFile.from_file(file_path, file_path.parent)
+            file = BaseFile.from_file(file_path, root or file_path.parent)
             converter = converter_cls(file, capture_output=not verbose)
-            converted_files = converter.convert(dest, output, keep_relative_path=False)
+            converted_files = converter.convert(dest, output, keep_relative_path=root is not None)
             for converted_file in converted_files:
                 print(converted_file.relative_to(dest))
         except (MissingDependency, UnsupportedPlatform) as err:

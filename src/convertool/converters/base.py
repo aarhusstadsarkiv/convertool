@@ -39,13 +39,22 @@ def _test_platform(*platforms: str):
         raise UnsupportedPlatform(platform, f"Not one of {platforms}")
 
 
-def _shared_platforms(*platforms: list[str] | None) -> list[str]:
-    platforms = tuple(ps for ps in platforms if ps)
+def _shared_platforms(*converters: type["ConverterABC"]) -> list[str]:
+    platforms: list[list[str]] = [c.platforms for c in converters if c.platforms]
 
     if not platforms:
         return []
 
     return list(reduce(lambda a, c: a.union(set(c)), platforms[1:], set(platforms[0]))) or ["no-platform"]
+
+
+def _shared_dependencies(*converters: type["ConverterABC"]) -> list[str] | None:
+    dependencies: list[str] = [d for c in converters for d in c.dependencies or []]
+    return sorted(set(dependencies), key=dependencies.index) or None
+
+
+def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
+    return max([c.process_timeout or 0.0 for c in converters], default=0.0) or None
 
 
 class ConverterABC(ABC):
