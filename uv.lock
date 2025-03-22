@@ -118,7 +118,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/8e/ac/abb196bb0b42a239d
 
 [[package]]
 name = "convertool"
-version = "4.0.2"
+version = "4.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "acacore" },
