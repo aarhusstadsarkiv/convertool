@@ -358,6 +358,12 @@ def digiarch(
 )
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
+@option(
+    "--root",
+    type=ClickPath(file_okay=False, writable=True, resolve_path=True),
+    default=None,
+    help="Set a root for the given files to keep the relative paths in the output.",
+)
 @pass_context
 def standalone(
     ctx: Context,
@@ -367,11 +373,15 @@ def standalone(
     files: tuple[str, ...],
     timeout: int | None,
     verbose: bool,
+    root: str | None,
 ):
+    if root and any(not Path(f).is_relative_to(root) for f in files):
+        raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
+
     converter_cls = find_converter(tool, output)
 
     if not converter_cls:
-        raise BadParameter(f"cannot find converter for tool {tool} with output {output}", ctx, ctx_params(ctx)["tool"])
+        raise BadParameter(f"cannot find converter for tool {tool} with output {output}.", ctx, ctx_params(ctx)["tool"])
 
     if timeout is not None:
         converter_cls.process_timeout = None if timeout == 0 else float(timeout)
@@ -381,9 +391,9 @@ def standalone(
 
     for file_path in map(Path, files):
         try:
-            file = BaseFile.from_file(file_path, file_path.parent)
+            file = BaseFile.from_file(file_path, root or file_path.parent)
             converter = converter_cls(file, capture_output=not verbose)
-            converted_files = converter.convert(dest, output, keep_relative_path=False)
+            converted_files = converter.convert(dest, output, keep_relative_path=root is not None)
             for converted_file in converted_files:
                 print(converted_file.relative_to(dest))
         except (MissingDependency, UnsupportedPlatform) as err:
