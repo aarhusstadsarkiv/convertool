@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y xmlstarlet
 
 # Install chrome
 WORKDIR /root
-RUN apt-get update && apt-get install -y chromium
+RUN apt-get update && apt-get install -y chromium-123456
 
 
 FROM base AS prod
