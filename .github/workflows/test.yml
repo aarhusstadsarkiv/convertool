@@ -84,7 +84,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: false
-          load: true
       - name: Create container
         run: docker run -td -v $(pwd):/root/convertool -e "PROCESS_TIMEOUT_MULTIPLIER=$PROCESS_TIMEOUT_MULTIPLIER" --name convertool convertool:latest
       - name: pytest
