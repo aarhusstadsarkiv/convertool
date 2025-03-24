@@ -80,5 +80,5 @@ jobs:
           docker run -td -v $(pwd):/root/convertool -e "PROCESS_TIMEOUT_MULTIPLIER=$PROCESS_TIMEOUT_MULTIPLIER" --name convertool convertool:latest
       - name: pytest
         run: docker exec convertool uv run coverage run -m pytest
-      - name: converage
+      - name: coverage
         run: docker exec convertool uv run coverage report -m --fail-under=80 --skip-empty --skip-covered
