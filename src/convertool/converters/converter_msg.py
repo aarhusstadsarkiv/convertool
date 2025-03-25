@@ -77,6 +77,8 @@ def msg_body(msg: MessageBase) -> tuple[str | None, str | None, str | None]:
 
 # noinspection DuplicatedCode
 def msg_front_matter(msg: MessageBase) -> str:
+    attachment_names: list[str] = [a.longFilename for a in msg.attachments if getattr(a, "cid", None) is None]
+
     items: dict[str, str | list[str]] = {
         "From": msg.sender or "",
         "To": msg.to or "",
@@ -84,7 +86,7 @@ def msg_front_matter(msg: MessageBase) -> str:
         "BCC": msg.bcc or "",
         "Date": msg.date.astimezone(ZoneInfo("UTC")).isoformat() if msg.date else "",
         "Subject": msg.subject or "",
-        "Attachments": [a.longFilename for a in msg.attachments if getattr(a, "cid", None) is None],
+        "Attachments": sorted(set(attachment_names), key=attachment_names.index),
     }
 
     text: str = ""
