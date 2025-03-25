@@ -11,6 +11,7 @@ from chardet import detect as detect_encoding
 from extract_msg import Message
 from extract_msg import MSGFile
 from extract_msg import openMsg
+from extract_msg.enums import ErrorBehavior
 from extract_msg.exceptions import ExMsgBaseException
 from extract_msg.msg_classes import MessageBase
 from extract_msg.msg_classes import MessageSigned
@@ -40,8 +41,12 @@ def html_to_text(html: str) -> str:
 
 def validate_msg(file: BaseFile) -> Message | MessageSigned:
     try:
-        msg: MSGFile = openMsg(file.get_absolute_path())
-    except ExMsgBaseException as e:
+        msg: MSGFile = openMsg(
+            file.get_absolute_path(),
+            delayAttachments=False,
+            errorBehavior=ErrorBehavior.ATTACH_NOT_IMPLEMENTED,
+        )
+    except (ExMsgBaseException, OSError) as e:
         raise ConvertError(file, e.args[0] if e.args else "File cannot be opened as msg")
 
     if not isinstance(msg, Message | MessageSigned):
