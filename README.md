@@ -81,6 +81,7 @@
 | medcom       | jpg                | Convert a MedCom XML file to JPEG images (one per page)                        | .jpg      |
 | medcom       | png                | Convert a MedCom XML file to PNG images (one per page)                         | .png      |
 | medcom       | tiff               | Convert a MedCom XML file to TIFF image (multipage)                            | .tiff     |
+| zipfile      | -                  | Extract a single file from a ZIP                                               | *         |
 | template     | text               | Create a TXT template with custom text                                         | .txt      |
 | template     | empty              | Create a TXT template for an empty file                                        | .txt      |
 | template     | password-protected | Create a TXT template for a password-protected file                            | .txt      |

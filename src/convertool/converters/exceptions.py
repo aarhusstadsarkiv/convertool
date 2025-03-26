@@ -10,6 +10,9 @@ class MissingDependency(Exception): ...
 class UnsupportedPlatform(Exception): ...
 
 
+class BadOption(Exception): ...
+
+
 class ConvertError(Exception):
     def __init__(
         self,

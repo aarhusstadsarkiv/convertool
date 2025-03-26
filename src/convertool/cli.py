@@ -6,6 +6,7 @@ from logging import WARNING
 from pathlib import Path
 from sqlite3 import DatabaseError
 from traceback import format_tb
+from typing import Any
 from typing import Literal
 
 from acacore.__version__ import __version__ as __acacore_version__
@@ -77,6 +78,7 @@ def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | No
         converters.ConverterXSL,
         converters.ConverterXSLToImage,
         converters.ConverterXSLToPDF,
+        converters.ConverterZIPFile,
     ):
         if converter.match_tool(tool, output):
             return converter
@@ -100,28 +102,31 @@ def check_database_version(ctx: Context, param: Parameter, path: Path):
             raise BadParameter(err.args[0], ctx, param)
 
 
-def original_file_tool_output(file: OriginalFile) -> tuple[str, str]:
+def original_file_tool_output(file: OriginalFile) -> tuple[str, str, dict[str, Any] | None]:
     if file.action == "convert" and not file.action_data.convert:
         raise ValueError("Missing convert action data", file)
     if file.action == "convert":
-        return file.action_data.convert.tool, file.action_data.convert.output
+        return file.action_data.convert.tool, file.action_data.convert.output, file.action_data.convert.options
     elif file.action == "ignore" and not file.action_data.ignore:
         raise ValueError("Missing ignore action data", file)
     elif file.action == "ignore":
-        return "template", file.action_data.ignore.template
+        return "template", file.action_data.ignore.template, None
     else:
         raise ValueError(f"Unsupported action {file.action!r}", file)
 
 
-def master_file_tool_output(file: MasterFile, dest_type: Literal["access", "statutory"]) -> tuple[str, str]:
+def master_file_tool_output(
+    file: MasterFile,
+    dest_type: Literal["access", "statutory"],
+) -> tuple[str, str, dict[str, Any] | None]:
     if dest_type == "access" and not file.convert_access:
         raise ValueError("Missing convert action data", file)
     if dest_type == "access":
-        return file.convert_access.tool, file.convert_access.output
+        return file.convert_access.tool, file.convert_access.output, file.convert_access.options
     elif dest_type == "statutory" and not file.convert_statutory:
         raise ValueError("Missing convert action data", file)
     elif dest_type == "statutory":
-        return file.convert_statutory.tool, file.convert_statutory.output
+        return file.convert_statutory.tool, file.convert_statutory.output, file.convert_statutory.options
     else:
         raise ValueError(f"Unsupported action {file.action!r}", file)
 
@@ -135,6 +140,7 @@ def convert_file(
     dest_type: Literal["master", "access", "statutory"],
     tool: str,
     output: str,
+    options: dict[str, Any] | None,
     *,
     verbose: bool = False,
     loggers: list[Logger] | None = None,
@@ -190,7 +196,13 @@ def convert_file(
     file_copy = file.model_copy(deep=True)
     file_copy.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
     file_copy.root = root_dir
-    converter: converters.ConverterABC = converter_cls(file_copy, database, avid.path, capture_output=not verbose)
+    converter: converters.ConverterABC = converter_cls(
+        file_copy,
+        database,
+        avid.path,
+        options,
+        capture_output=not verbose,
+    )
     dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     dest_files: list[ConvertedFile] = []
 
@@ -275,10 +287,10 @@ def digiarch(
                         continue
 
                     if file_type == "original":
-                        tool, output = original_file_tool_output(file)
+                        tool, output, options = original_file_tool_output(file)
                     elif file_type == "master":
                         # noinspection PyTypeChecker
-                        tool, output = master_file_tool_output(file, dest_type)
+                        tool, output, options = master_file_tool_output(file, dest_type)
 
                     if tool_include and tool not in tool_include:
                         continue
@@ -295,6 +307,7 @@ def digiarch(
                             dest_type,
                             tool,
                             output,
+                            options,
                             loggers=[log_stdout],
                             verbose=verbose,
                             dry_run=dry_run,
@@ -327,6 +340,23 @@ def digiarch(
                             error=convert_error.exception.msg,
                         )
                         continue
+                    if convert_error.exception:
+                        error = Event.from_command(
+                            ctx,
+                            "error",
+                            (file.uuid, file_type),
+                            {"tool": tool, "output": output},
+                            "".join(format_tb(convert_error.traceback)),
+                        )
+                        database.log.insert(error)
+                        error.log(
+                            ERROR,
+                            log_stdout,
+                            show_args=["uuid"],
+                            tool=[tool, output],
+                            error=repr(convert_error.exception),
+                        )
+                        continue
 
                     if dry_run:
                         continue
@@ -356,6 +386,7 @@ def digiarch(
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
     required=True,
 )
+@option("--option", "-o", "options", type=(str, str), multiple=True, help="Pass options to the converter.")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @option(
@@ -371,6 +402,7 @@ def standalone(
     output: str,
     destination: str,
     files: tuple[str, ...],
+    options: tuple[tuple[str, str], ...],
     timeout: int | None,
     verbose: bool,
     root: str | None,
@@ -392,7 +424,7 @@ def standalone(
     for file_path in map(Path, files):
         try:
             file = BaseFile.from_file(file_path, root or file_path.parent)
-            converter = converter_cls(file, capture_output=not verbose)
+            converter = converter_cls(file, options=dict(options), capture_output=not verbose)
             converted_files = converter.convert(dest, output, keep_relative_path=root is not None)
             for converted_file in converted_files:
                 print(converted_file.relative_to(dest))

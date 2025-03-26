@@ -7,6 +7,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
 from sys import platform
+from typing import Any
 from typing import ClassVar
 
 from acacore.database import FilesDB
@@ -69,6 +70,7 @@ class ConverterABC(ABC):
         file: BaseFile,
         database: FilesDB | None = None,
         root: Path | None = None,
+        options: dict[str, Any] | None = None,
         *,
         capture_output: bool = True,
     ) -> None:
@@ -77,7 +79,10 @@ class ConverterABC(ABC):
         self.file: BaseFile = file
         self.database: FilesDB | None = database
         self.file.root = self.file.root or root
+        self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
+
+        self.test_options()
 
     @classmethod
     def match_tool(cls, tool: str, output: str) -> bool:
@@ -103,6 +108,13 @@ class ConverterABC(ABC):
         """
         for dependency in cls.dependencies or []:
             _test_dependency(dependency)
+
+    def test_options(self):
+        """
+        Test whether the given options are valid.
+
+        :raise BadOption: If the given options are invalid.
+        """
 
     def run_process(self, *args: str | int | PathLike, cwd: str | PathLike | None = None) -> tuple[str, str]:
         """
