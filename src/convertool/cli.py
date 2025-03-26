@@ -386,6 +386,7 @@ def digiarch(
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
     required=True,
 )
+@option("--option", "-o", "options", type=(str, str), multiple=True, help="Pass options to the converter.")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @option(
@@ -401,6 +402,7 @@ def standalone(
     output: str,
     destination: str,
     files: tuple[str, ...],
+    options: tuple[tuple[str, str], ...],
     timeout: int | None,
     verbose: bool,
     root: str | None,
@@ -422,7 +424,7 @@ def standalone(
     for file_path in map(Path, files):
         try:
             file = BaseFile.from_file(file_path, root or file_path.parent)
-            converter = converter_cls(file, capture_output=not verbose)
+            converter = converter_cls(file, options=dict(options), capture_output=not verbose)
             converted_files = converter.convert(dest, output, keep_relative_path=root is not None)
             for converted_file in converted_files:
                 print(converted_file.relative_to(dest))
