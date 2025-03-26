@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import ClassVar
 from zipfile import ZipFile
 
-from convertool.converters import ConverterABC
-from convertool.converters.exceptions import ConvertError
 from convertool.util import TempDir
+
+from .base import ConverterABC
+from .exceptions import BadOption
+from .exceptions import ConvertError
 
 
 class ConverterZIPFile(ConverterABC):
@@ -17,12 +19,12 @@ class ConverterZIPFile(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
         if "path" not in self.options:
-            raise ConvertError(self.file, "Missing 'path' option.")
+            raise BadOption(self.file, "Missing 'path' option.")
 
         target_file: Path = Path(self.options["path"])
 
         if target_file.is_absolute():
-            raise ConvertError(self.file, "Absolute paths are not supported.")
+            raise BadOption(self.file, "Absolute paths are not supported.")
 
         with TempDir(self.file.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:
