@@ -7,6 +7,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
 from sys import platform
+from typing import Any
 from typing import ClassVar
 
 from acacore.database import FilesDB
@@ -69,6 +70,7 @@ class ConverterABC(ABC):
         file: BaseFile,
         database: FilesDB | None = None,
         root: Path | None = None,
+        options: dict[str, Any] | None = None,
         *,
         capture_output: bool = True,
     ) -> None:
@@ -77,6 +79,7 @@ class ConverterABC(ABC):
         self.file: BaseFile = file
         self.database: FilesDB | None = database
         self.file.root = self.file.root or root
+        self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
 
     @classmethod
