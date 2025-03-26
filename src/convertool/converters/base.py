@@ -82,6 +82,8 @@ class ConverterABC(ABC):
         self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
 
+        self.test_options()
+
     @classmethod
     def match_tool(cls, tool: str, output: str) -> bool:
         return tool in cls.tool_names and output in cls.outputs
@@ -106,6 +108,13 @@ class ConverterABC(ABC):
         """
         for dependency in cls.dependencies or []:
             _test_dependency(dependency)
+
+    def test_options(self):
+        """
+        Test whether the given options are valid.
+
+        :raise BadOption: If the given options are invalid.
+        """
 
     def run_process(self, *args: str | int | PathLike, cwd: str | PathLike | None = None) -> tuple[str, str]:
         """
