@@ -78,6 +78,7 @@ def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | No
         converters.ConverterXSL,
         converters.ConverterXSLToImage,
         converters.ConverterXSLToPDF,
+        converters.ConverterZIPFile,
     ):
         if converter.match_tool(tool, output):
             return converter

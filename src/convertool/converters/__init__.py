@@ -31,6 +31,7 @@ from .converter_xsl import ConverterMedComToPDF
 from .converter_xsl import ConverterXSL
 from .converter_xsl import ConverterXSLToImage
 from .converter_xsl import ConverterXSLToPDF
+from .converter_zipfile import ConverterZIPFile
 
 __all__ = [
     "exceptions",
@@ -66,4 +67,5 @@ __all__ = [
     "ConverterXSL",
     "ConverterXSLToImage",
     "ConverterXSLToPDF",
+    "ConverterZIPFile",
 ]
