@@ -17,23 +17,19 @@ class ConverterZIPFile(ConverterABC):
     def match_tool(cls, tool: str, output: str) -> bool:  # noqa: ARG003
         return tool in cls.tool_names
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
+    def test_options(self):
         if "path" not in self.options:
             raise BadOption(self.file, "Missing 'path' option.")
 
-        target_file: Path = Path(self.options["path"])
-
-        if target_file.is_absolute():
-            raise BadOption(self.file, "Absolute paths are not supported.")
-
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, target_file.suffix.lstrip("."))
+        dest_file: Path = self.output_file(dest_dir, Path(self.options["path"]).suffix.lstrip("."))
 
         with TempDir(self.file.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:
                 try:
-                    tmp_file = Path(zf.extract(str(target_file), tmp_dir))
+                    tmp_file = Path(zf.extract(self.options["path"], tmp_dir))
                 except KeyError:
-                    raise ConvertError(self.file, f"{target_file} is not in ZIP file.")
+                    raise ConvertError(self.file, f"{self.options['path']!r} is not in ZIP file.")
 
             return [tmp_file.replace(dest_file)]
