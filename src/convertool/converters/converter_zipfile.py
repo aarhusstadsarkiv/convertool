@@ -12,10 +12,10 @@ class ConverterZIPFile(ConverterABC):
     outputs: ClassVar[list[str]] = []
 
     @classmethod
-    def match_tool(cls, tool: str, output: str) -> bool:
+    def match_tool(cls, tool: str, output: str) -> bool:  # noqa: ARG003
         return tool in cls.tool_names
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
         if "path" not in self.options:
             raise ConvertError(self.file, "Missing 'path' option.")
 
