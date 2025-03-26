@@ -26,6 +26,9 @@ class ConverterZIPFile(ConverterABC):
         if target_file.is_absolute():
             raise BadOption(self.file, "Absolute paths are not supported.")
 
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = self.output_file(dest_dir, target_file.suffix.lstrip("."))
+
         with TempDir(self.file.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:
                 try:
@@ -33,4 +36,4 @@ class ConverterZIPFile(ConverterABC):
                 except KeyError:
                     raise ConvertError(self.file, f"{target_file} is not in ZIP file.")
 
-            return [tmp_file.replace(output_dir / target_file.name)]
+            return [tmp_file.replace(dest_file)]
