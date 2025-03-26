@@ -11,6 +11,7 @@ from chardet import detect as detect_encoding
 from extract_msg import Message
 from extract_msg import MSGFile
 from extract_msg import openMsg
+from extract_msg.enums import ErrorBehavior
 from extract_msg.exceptions import ExMsgBaseException
 from extract_msg.msg_classes import MessageBase
 from extract_msg.msg_classes import MessageSigned
@@ -40,8 +41,12 @@ def html_to_text(html: str) -> str:
 
 def validate_msg(file: BaseFile) -> Message | MessageSigned:
     try:
-        msg: MSGFile = openMsg(file.get_absolute_path())
-    except ExMsgBaseException as e:
+        msg: MSGFile = openMsg(
+            file.get_absolute_path(),
+            delayAttachments=False,
+            errorBehavior=ErrorBehavior.ATTACH_NOT_IMPLEMENTED,
+        )
+    except (ExMsgBaseException, OSError) as e:
         raise ConvertError(file, e.args[0] if e.args else "File cannot be opened as msg")
 
     if not isinstance(msg, Message | MessageSigned):
@@ -72,6 +77,8 @@ def msg_body(msg: MessageBase) -> tuple[str | None, str | None, str | None]:
 
 # noinspection DuplicatedCode
 def msg_front_matter(msg: MessageBase) -> str:
+    attachment_names: list[str] = [a.longFilename for a in msg.attachments if getattr(a, "cid", None) is None]
+
     items: dict[str, str | list[str]] = {
         "From": msg.sender or "",
         "To": msg.to or "",
@@ -79,7 +86,7 @@ def msg_front_matter(msg: MessageBase) -> str:
         "BCC": msg.bcc or "",
         "Date": msg.date.astimezone(ZoneInfo("UTC")).isoformat() if msg.date else "",
         "Subject": msg.subject or "",
-        "Attachments": [a.longFilename for a in msg.attachments if getattr(a, "cid", None) is None],
+        "Attachments": sorted(set(attachment_names), key=attachment_names.index),
     }
 
     text: str = ""
