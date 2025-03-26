@@ -28,8 +28,13 @@ class ConverterZIPFile(ConverterABC):
         with TempDir(self.file.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:
                 try:
-                    tmp_file = Path(zf.extract(self.options["path"], tmp_dir))
+                    member = zf.getinfo(self.options["path"])
                 except KeyError:
                     raise ConvertError(self.file, f"{self.options['path']!r} is not in ZIP file.")
+
+                if member.is_dir():
+                    raise ConvertError(self.file, f"{self.options['path']!r} is a directory.")
+
+                tmp_file = Path(zf.extract(member, tmp_dir))
 
             return [tmp_file.replace(dest_file)]
