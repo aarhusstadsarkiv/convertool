@@ -1,0 +1,1 @@
+from .medcom import medcom
