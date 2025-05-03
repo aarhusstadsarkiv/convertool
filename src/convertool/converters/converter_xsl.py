@@ -59,6 +59,11 @@ class ConverterMedCom(ConverterABC):
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[list[str]] = ["xmlstarlet"]
 
+    def output_puid(self, output: str) -> str | None:
+        if output == "html":
+            return "fmt/471"
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)

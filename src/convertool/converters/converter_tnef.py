@@ -151,6 +151,13 @@ class ConverterTNEF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["tnef"]
     outputs: ClassVar[list[[str]]] = ["html", "txt"]
 
+    def output(self, output: str) -> str | None:
+        if output == "txt":
+            return "x-fmt/111"
+        if output == "html":
+            return "fmt/471"
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)

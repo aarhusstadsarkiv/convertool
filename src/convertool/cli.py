@@ -208,6 +208,7 @@ def convert_file(
 
     for dst in dest_paths:
         dst_file = dst_cls.from_file(dst, avid.path, file.uuid)
+        dst_file.puid = converter.output_puid(output)
         dst_table.insert(dst_file, on_exists="replace")
         Event.from_command(ctx, f"out:{tool}.{output}", (dst_file.uuid, dest_type)).log(INFO, *loggers, output=dst.name)
         dest_files.append(dst_file)

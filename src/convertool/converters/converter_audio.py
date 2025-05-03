@@ -15,6 +15,11 @@ class ConverterAudio(ConverterABC):
     process_timeout: ClassVar[float] = 1800
     dependencies: ClassVar[list[str]] = ["ffmpeg"]
 
+    def output_puid(self, output: str) -> str | None:
+        if output == "mp3":
+            return "fmt/134"
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)

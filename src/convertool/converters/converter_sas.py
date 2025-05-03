@@ -14,6 +14,13 @@ class ConverterSAS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["sas"]
     outputs: ClassVar[list[str]] = ["csv", "tsv"]
 
+    def output_puid(self, output: str) -> str | None:
+        if output == "csv":
+            return "x-fmt/18"
+        if output == "tsv":
+            return "x-fmt/13"
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)

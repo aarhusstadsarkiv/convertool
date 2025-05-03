@@ -12,6 +12,11 @@ class ConverterSpreadsheet(ConverterABC):
     process_timeout: ClassVar[float] = 60.0
     dependencies: ClassVar[list[str]] = ["libreoffice"]
 
+    def output(self, output: str) -> str | None:
+        if output == "html":
+            return "fmt/471"
+        return None
+
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def output_filter(self, output: str) -> str:  # noqa: ARG002
         return ""
