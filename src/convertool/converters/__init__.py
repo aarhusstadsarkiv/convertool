@@ -9,6 +9,7 @@ from .converter_gis import ConverterGIS
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
 from .converter_image import ConverterImage
+from .converter_image import ConverterPDFLargeToImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
 from .converter_msg import ConverterMSG
@@ -56,6 +57,7 @@ __all__ = [
     "ConverterMSWord",
     "ConverterPDF",
     "ConverterPDFToImage",
+    "ConverterPDFLargeToImage",
     "ConverterPresentation",
     "ConverterSAS",
     "ConverterSpreadsheet",

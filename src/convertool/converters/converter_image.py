@@ -94,6 +94,78 @@ class ConverterPDFToImage(ConverterImage):
             return [f.replace(dest_dir / f.name) for f in sorted(tmp_dir.iterdir()) if f.is_file()]
 
 
+class ConverterPDFLargeToImage(ConverterImage):
+    tool_names: ClassVar[list[str]] = ["pdf-large"]
+    outputs: ClassVar[list[str]] = ["tif", "tiff"]
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = self.output_file(dest_dir, output)
+
+        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
+        density: int = 150
+        pages: int = 0
+
+        for density_line in density_stdout.strip().splitlines():
+            pages += 1
+            density_x, _, density_y = density_line.strip().partition(",")
+            density_page: int = max(int(density_x), int(density_y), 0)
+            if density_page > density:
+                density = density_page
+
+        density *= 2
+
+        print(pages, density)
+
+        with TempDir(output_dir) as tmp_dir:
+            print(0)
+            self.run_process(
+                "convert",
+                "-density",
+                density,
+                "-background",
+                "white",
+                "-alpha",
+                "remove",
+                "-alpha",
+                "off",
+                "-compress",
+                "LZW",
+                "-depth",
+                "16",
+                f"{self.file.get_absolute_path()}[0]",
+                dest_file.name,
+                cwd=tmp_dir,
+            )
+
+            for page in range(1, pages):
+                print(page)
+                self.run_process(
+                    "convert",
+                    "-density",
+                    density,
+                    "-background",
+                    "white",
+                    "-alpha",
+                    "remove",
+                    "-alpha",
+                    "off",
+                    "-compress",
+                    "LZW",
+                    "-depth",
+                    "16",
+                    dest_file.name,
+                    f"{self.file.get_absolute_path()}[{page}]",
+                    dest_file.name,
+                    cwd=tmp_dir,
+                )
+
+            dest_dir.mkdir(parents=True, exist_ok=True)
+
+            return [tmp_dir.joinpath(dest_file.name).replace(dest_file)]
+
+
 class ConverterTextToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = [
         "text",
