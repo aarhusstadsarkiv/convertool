@@ -119,28 +119,11 @@ class ConverterPDFLargeToImage(ConverterImage):
         print(pages, density)
 
         with TempDir(output_dir) as tmp_dir:
-            print(0)
-            self.run_process(
-                "convert",
-                "-density",
-                density,
-                "-background",
-                "white",
-                "-alpha",
-                "remove",
-                "-alpha",
-                "off",
-                "-compress",
-                "LZW",
-                "-depth",
-                "16",
-                f"{self.file.get_absolute_path()}[0]",
-                dest_file.name,
-                cwd=tmp_dir,
-            )
+            page_files: list[str] = []
 
-            for page in range(1, pages):
+            for page in range(pages):
                 print(page)
+                page_files.append(f"{tmp_dir.name}-{page:06d}.jpg")
                 self.run_process(
                     "convert",
                     "-density",
@@ -151,15 +134,23 @@ class ConverterPDFLargeToImage(ConverterImage):
                     "remove",
                     "-alpha",
                     "off",
-                    "-compress",
-                    "LZW",
-                    "-depth",
-                    "16",
-                    dest_file.name,
                     f"{self.file.get_absolute_path()}[{page}]",
-                    dest_file.name,
+                    page_files[-1],
                     cwd=tmp_dir,
                 )
+
+            self.run_process(
+                "convert",
+                "-density",
+                density,
+                "-compress",
+                "LZW",
+                "-depth",
+                "16",
+                f"{tmp_dir.name}-*.jpg",
+                dest_file.name,
+                cwd=tmp_dir,
+            )
 
             dest_dir.mkdir(parents=True, exist_ok=True)
 
