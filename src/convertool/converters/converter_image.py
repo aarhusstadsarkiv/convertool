@@ -116,13 +116,10 @@ class ConverterPDFLargeToImage(ConverterImage):
 
         density *= 2
 
-        print(pages, density)
-
         with TempDir(output_dir) as tmp_dir:
             page_files: list[str] = []
 
             for page in range(pages):
-                print(page)
                 page_files.append(f"{tmp_dir.name}-{page:06d}.jpg")
                 self.run_process(
                     "convert",
