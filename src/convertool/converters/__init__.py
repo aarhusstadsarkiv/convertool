@@ -11,6 +11,7 @@ from .converter_html import ConverterHTMLToImage
 from .converter_image import ConverterImage
 from .converter_image import ConverterPDFLargeToImage
 from .converter_image import ConverterPDFToImage
+from .converter_image import ConverterPDFToTIFF
 from .converter_image import ConverterTextToImage
 from .converter_msg import ConverterMSG
 from .converter_msg import ConverterMSGToImage
@@ -57,6 +58,7 @@ __all__ = [
     "ConverterMSWord",
     "ConverterPDF",
     "ConverterPDFToImage",
+    "ConverterPDFToTIFF",
     "ConverterPDFLargeToImage",
     "ConverterPresentation",
     "ConverterSAS",

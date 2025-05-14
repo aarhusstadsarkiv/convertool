@@ -48,6 +48,7 @@ class ConverterImage(ConverterABC):
 
 class ConverterPDFToImage(ConverterImage):
     tool_names: ClassVar[list[str]] = ["pdf"]
+    outputs: ClassVar[list[str]] = ["jpg", "jpeg", "png", "jp2", "pdf"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -66,9 +67,6 @@ class ConverterPDFToImage(ConverterImage):
 
         density *= 2
 
-        if output == "tif":
-            args.extend(("-compress", "LZW", "-depth", "16"))
-
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 "convert",
@@ -82,6 +80,31 @@ class ConverterPDFToImage(ConverterImage):
                 "off",
                 *args,
                 self.file.get_absolute_path(),
+                dest_file.name,
+                cwd=tmp_dir,
+            )
+
+            dest_dir.mkdir(parents=True, exist_ok=True)
+
+            return [f.replace(dest_dir / f.name) for f in sorted(tmp_dir.iterdir()) if f.is_file()]
+
+
+class ConverterPDFToTIFF(ConverterPDFToImage):
+    outputs: ClassVar[list[str]] = ["tif", "tiff"]
+    process_timeout: ClassVar[float] = 180.0
+    dependencies: ClassVar[list[str]] = ["vips"]
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = self.output_file(dest_dir, output)
+
+        with TempDir(output_dir) as tmp_dir:
+            self.run_process(
+                "vips",
+                "tiffsave",
+                "--compression lzw",
+                f"{self.file.get_absolute_path()}[n=-1]",
                 dest_file.name,
                 cwd=tmp_dir,
             )
