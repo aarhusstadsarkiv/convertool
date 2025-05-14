@@ -28,6 +28,9 @@ RUN apt-get update && apt-get install -y libproj-dev gdal-bin
 RUN apt-get update && apt-get install -y imagemagick
 COPY config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 
+# Install vipps
+RUN apt-get update && apt-get install -y libvips-tools
+
 # Install LibreOffice
 RUN apt-get update && apt-get install -y libreoffice
 
