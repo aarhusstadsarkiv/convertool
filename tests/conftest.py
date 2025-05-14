@@ -19,7 +19,7 @@ def on_test_start():
             and issubclass(obj, converters.ConverterABC)
             and obj.process_timeout
         ):
-            if environ.get("PROCESS_TIMEOUT_MULTIPLIER", "").isdigit():
+            if obj.process_timeout and environ.get("PROCESS_TIMEOUT_MULTIPLIER", "").isdigit():
                 obj.process_timeout *= int(environ["PROCESS_TIMEOUT_MULTIPLIER"])
 
             if environ.get("NO_CAPTURE_OUTPUT", "") == "true":
