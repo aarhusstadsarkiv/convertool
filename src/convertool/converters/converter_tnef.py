@@ -151,7 +151,7 @@ class ConverterTNEF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["tnef"]
     outputs: ClassVar[list[[str]]] = ["html", "txt"]
 
-    def output(self, output: str) -> str | None:
+    def output_puid(self, output: str) -> str | None:
         if output == "txt":
             return "x-fmt/111"
         if output == "html":

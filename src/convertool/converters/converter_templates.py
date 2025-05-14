@@ -12,7 +12,7 @@ class ConverterTemplate(ConverterABC):
     tool_names: ClassVar[list[str]] = ["template"]
     outputs: ClassVar[list[str]] = TemplateTypeEnum
 
-    def output(self, output: str) -> str | None:
+    def output_puid(self, output: str) -> str | None:
         if output == "temporary-file":
             return None
         return "x-fmt/111"
