@@ -47,10 +47,7 @@ class ConverterImage(ConverterABC):
 
 
 class ConverterPDFToImage(ConverterImage):
-    tool_names: ClassVar[list[str]] = [
-        "pdf",
-        "pdf-to-image",
-    ]
+    tool_names: ClassVar[list[str]] = ["pdf"]
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
