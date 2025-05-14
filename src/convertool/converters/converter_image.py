@@ -54,7 +54,8 @@ class ConverterPDFToImage(ConverterImage):
             self.run_process(
                 "vips",
                 "tiffsave",
-                "--compression lzw",
+                "--compression",
+                "lzw",
                 f"{self.file.get_absolute_path()}[n=-1]",
                 dest_file.name,
                 cwd=tmp_dir,
