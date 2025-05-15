@@ -9,6 +9,9 @@ class ConverterCopy(ConverterABC):
     tool_names: ClassVar[list[str]] = ["copy"]
     outputs: ClassVar[list[str]] = ["copy"]
 
+    def output_puid(self, output: str) -> str | None:  # noqa: ARG002
+        return self.file.puid
+
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
         return output_dir / self.file.name
 

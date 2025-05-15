@@ -183,5 +183,15 @@ class ConverterABC(ABC):
             return output_dir / (self.file.name + f".{output}")
         return output_dir / (self.file.name.removesuffix(self.file.suffixes) + f".{output}")
 
+    # noinspection PyMethodMayBeStatic
+    def output_puid(self, output: str) -> str | None:  # noqa: ARG002
+        """
+        Get the PUID of a given output, if available.
+
+        :param output: The output value.
+        :return: A PUID if available, else ``None``.
+        """
+        return None
+
     @abstractmethod
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...

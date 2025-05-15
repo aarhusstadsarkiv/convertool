@@ -51,5 +51,3 @@ jobs:
             git.openaws.dk/aarhusstadsarkiv/convertool:${{ steps.tag.outputs.major }}
             git.openaws.dk/aarhusstadsarkiv/convertool:latest
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max

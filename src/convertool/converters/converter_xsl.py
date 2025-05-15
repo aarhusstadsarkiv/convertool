@@ -5,12 +5,13 @@ from acacore.models.file import BaseFile
 
 from convertool.util import TempDir
 
-from . import ConverterHTMLToImage
+from . import resources
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
 from .base import ConverterABC
 from .converter_html import ConverterHTML
+from .converter_html import ConverterHTMLToImage
 
 
 class ConverterXSL(ConverterABC):
@@ -59,12 +60,17 @@ class ConverterMedCom(ConverterABC):
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[list[str]] = ["xmlstarlet"]
 
+    def output_puid(self, output: str) -> str | None:
+        if output == "html":
+            return "fmt/471"
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
-        xsl: Path = Path(__file__).parent.joinpath("resources", "medcom", "viewEmessage.xslt")
+        xsl: Path = resources.medcom.joinpath("viewEmessage.xslt")
 
         stdout, _ = self.run_process("xmlstarlet", "tr", xsl, self.file.get_absolute_path())
 
