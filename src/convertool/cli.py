@@ -18,6 +18,7 @@ from acacore.models.file import BaseFile
 from acacore.models.file import ConvertedFile
 from acacore.models.file import MasterFile
 from acacore.models.file import OriginalFile
+from acacore.models.file import StatutoryFile
 from acacore.utils.click import end_program
 from acacore.utils.click import start_program
 from acacore.utils.helpers import ExceptionManager
@@ -182,7 +183,7 @@ def convert_file(
         dst_table = database.access_files
     elif dest_type == "statutory":
         output_dir = avid.dirs.documents
-        dst_cls = ConvertedFile
+        dst_cls = StatutoryFile
         dst_table = database.statutory_files
     else:
         raise ValueError(f"Unknown destination file type {dest_type!r}")

@@ -76,7 +76,7 @@ def test_digiarch_master_access(avid_dir_copy: Path):
         db.access_files.delete("uuid is not null")
         db.statutory_files.delete("uuid is not null")
         # noinspection SqlWithoutWhere
-        db.execute(f"update {db.master_files.name} set processed = false")
+        db.execute(f"update {db.master_files.name} set processed = 0")
         db.commit()
         rm_tree(avid.dirs.access_documents)
         rm_tree(avid.dirs.documents)
@@ -113,7 +113,7 @@ def test_digiarch_master_statutory(avid_dir_copy: Path):
         db.access_files.delete("uuid is not null")
         db.statutory_files.delete("uuid is not null")
         # noinspection SqlWithoutWhere
-        db.execute(f"update {db.master_files.name} set processed = false")
+        db.execute(f"update {db.master_files.name} set processed = 0")
         db.commit()
         rm_tree(avid.dirs.access_documents)
         rm_tree(avid.dirs.documents)

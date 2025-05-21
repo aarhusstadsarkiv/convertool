@@ -71,7 +71,7 @@ class ConverterPDFToImage(ConverterImage):
         dest_file: Path = self.output_file(dest_dir, output)
 
         if output in ("tif", "tiff"):
-            return self.convert_tiff(output_dir, dest_file, dest_file)
+            return self.convert_tiff(output_dir, dest_dir, dest_file)
 
         density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
         density: int = 150
