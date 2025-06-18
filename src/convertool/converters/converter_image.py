@@ -20,6 +20,27 @@ class ConverterImage(ConverterABC):
     process_timeout: ClassVar[float] = 180.0
     dependencies: ClassVar[list[str]] = ["convert", "vips"]
 
+    def image_dpi(self, file: Path, default_density: int = 150) -> tuple[int, int]:
+        """
+        Find maximum DPI of an image/PDF and return the number of pages in it.
+
+        :param file: The path to the image/PDf.
+        :param default_density: The default max DPI value.
+        :return: The DPI and the number of pages in the file.
+        """
+        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", file)
+        density: int = default_density
+        pages: int = 0
+
+        for density_line in density_stdout.strip().splitlines():
+            pages += 1
+            density_x, _, density_y = density_line.strip().partition(",")
+            density_page: int = max(int(density_x), int(density_y), 0)
+            if density_page > density:
+                density = density_page
+
+        return density, pages
+
     def output(self, output: str) -> str:
         if output == "jpeg":
             output = "jpg"
@@ -73,14 +94,7 @@ class ConverterPDFToImage(ConverterImage):
         if output in ("tif", "tiff"):
             return self.convert_tiff(output_dir, dest_dir, dest_file)
 
-        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
-        density: int = 150
-
-        for density_line in density_stdout.strip().splitlines():
-            density_x, _, density_y = density_line.strip().partition(",")
-            density_page: int = max(int(density_x), int(density_y), 0)
-            if density_page > density:
-                density = density_page
+        density, _ = self.image_dpi(self.file.get_absolute_path())
 
         density *= 2
 
@@ -114,17 +128,7 @@ class ConverterPDFLargeToImage(ConverterImage):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
-        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", self.file.get_absolute_path())
-        density: int = 150
-        pages: int = 0
-
-        for density_line in density_stdout.strip().splitlines():
-            pages += 1
-            density_x, _, density_y = density_line.strip().partition(",")
-            density_page: int = max(int(density_x), int(density_y), 0)
-            if density_page > density:
-                density = density_page
-
+        density, pages = self.image_dpi(self.file.get_absolute_path())
         density *= 2
 
         with TempDir(output_dir) as tmp_dir:
