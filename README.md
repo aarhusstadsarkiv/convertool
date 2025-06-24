@@ -93,3 +93,26 @@
 | symphovert   | odt                | Check if the file exists as an ODT file in the output directory                | .odt      |
 | symphovert   | ods                | Check if the file exists as an ODS file in the output directory                | .ods      |
 | symphovert   | odp                | Check if the file exists as an ODP file in the output directory                | .odp      |
+
+## Dependencies
+
+| Tool         | OS      | Program              |
+|--------------|---------|----------------------|
+| audio        |         | ffmpeg               |
+| cad          | Windows | ABViewer             |
+| document     |         | libreoffice, convert |
+| gis          | Linux   | ogr2ogr              |
+| html         |         | chromium, convert    |
+| image        |         | convert              |
+| medcom       |         | xmlstarlet, chromium |
+| msg          |         | convert              |
+| msexcel      | Windows | docto                |
+| mspowerpoint | Windows | docto                |
+| msword       | Windows | docto                |
+| pdf          |         | convert              |
+| pdf-large    |         | convert              |
+| presentation |         | libreoffice          |
+| spreadsheet  |         | libreoffice          |
+| text         |         | convert              |
+| video        |         | ffmpeg               |
+| xslt         |         | xmlstarlet, chromium |
