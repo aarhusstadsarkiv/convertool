@@ -287,10 +287,10 @@ def digiarch(
             is_processed = lambda f: f.processed & 0b10  # noqa: E731
             set_processed = lambda f: f.processed | 0b10  # noqa: E731
 
-        if query:  # noqa: SIM108
+        if query[0]:  # noqa: SIM108
             query = (f"({query[0]}) and ({src_query})", query[1])
         else:
-            query = (src_query, query[1])
+            query = (src_query, [])
 
         with ExceptionManager(BaseException) as exception:
             offset: int = 0
