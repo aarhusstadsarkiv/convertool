@@ -164,7 +164,7 @@ class ConverterTextToImage(ConverterImage):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
-        text: str = self.file.get_absolute_path().read_text().strip()
+        text: str = self.file.get_absolute_path().read_text((self.file.encoding or {}).get("encoding")).strip()
         width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
         height: int = max(600, (text.count("\n") + 1) * 25)
         args: list[str] = []

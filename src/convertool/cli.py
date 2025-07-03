@@ -20,6 +20,7 @@ from acacore.models.file import MasterFile
 from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
 from acacore.utils.click import end_program
+from acacore.utils.click import param_callback_query
 from acacore.utils.click import start_program
 from acacore.utils.helpers import ExceptionManager
 from click import argument
@@ -220,16 +221,41 @@ def convert_file(
 
 @group("convertool", no_args_is_help=True)
 @version_option(__version__, message=f"%(prog)s, version %(version)s\nacacore, version {__acacore_version__}")
-def app(): ...
+def app():
+    """Convert files either by themselves or by following the instructions in a digiarch database."""
 
 
-@app.command("digiarch", no_args_is_help=True)
+@app.command("digiarch", no_args_is_help=True, short_help="Convert files from digiarch")
 @argument(
     "avid_dir",
     type=ClickPath(exists=True, file_okay=False, writable=True, resolve_path=True),
     required=True,
 )
 @argument("target", type=Choice(["original:master", "master:access", "master:statutory"]), required=True)
+@argument(
+    "query",
+    nargs=1,
+    required=False,
+    callback=param_callback_query(
+        False,
+        "uuid",
+        [
+            "action",
+            "action_data",
+            "checksum",
+            "convert_access",
+            "convert_statutory",
+            "encoding",
+            "lock",
+            "processed",
+            "puid",
+            "relative_path",
+            "signature",
+            "uuid",
+            "warning",
+        ],
+    ),
+)
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
@@ -240,12 +266,35 @@ def digiarch(
     ctx: Context,
     avid_dir: str,
     target: str,
+    query: tuple[str | None, list[str]],
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
     dry_run: bool,
     verbose: bool,
 ):
+    """
+    Convert files contained in a digiarch database.
+
+    To convert original files to master files, use the "original:master" TARGET.
+
+    To convert master files to access files, use the "master:access" TARGET.
+
+    To convert master files to statutory files, use the "master:statutory" TARGET.
+
+    The QUERY argument allows to restrict which files will be converted. For details on its usage see the
+    "digiarch edit" command.
+
+    To restrict the tools that should be used for conversion, use the --tool-ignore and --tool-include options.
+    The former will skip files whose tools are in the list, the second will skip files whose tools are not in the list.
+
+    Use the --timeout option to override the converters' timeout, set to 0 to disable timeouts altogether.
+
+    Use the --verbose option to print the standard output from the converters. The output (standard or error) is always
+    printed in case of an error.
+
+    Use the --dry-run option to list files that would be converted without performing any action.
+    """
     avid = get_avid(ctx, avid_dir, "avid_dir")
     file_type: Literal["original", "master"]
     dest_type: Literal["master", "access", "statutory"]
@@ -255,30 +304,35 @@ def digiarch(
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
 
         src_table: Table[OriginalFile | MasterFile]
-        query: str
         is_processed: Callable[[OriginalFile | MasterFile], bool]
+        src_query: str
         set_processed: Callable[[OriginalFile | MasterFile], bool | int]
 
         if file_type == "original":
             src_table = database.original_files
-            query = "action in ('convert', 'ignore')"
+            src_query = "action in ('convert', 'ignore')"
             is_processed = lambda f: f.processed  # noqa: E731
             set_processed = lambda _: True  # noqa: E731
         elif file_type == "master" and dest_type == "access":
-            query = "convert_access is not null"
+            src_query = "convert_access is not null"
             src_table = database.master_files
             is_processed = lambda f: f.processed & 0b01  # noqa: E731
             set_processed = lambda f: f.processed | 0b01  # noqa: E731
         elif file_type == "master" and dest_type == "statutory":
-            query = "convert_statutory is not null"
+            src_query = "convert_statutory is not null"
             src_table = database.master_files
             is_processed = lambda f: f.processed & 0b10  # noqa: E731
             set_processed = lambda f: f.processed | 0b10  # noqa: E731
 
+        if query[0]:  # noqa: SIM108
+            query = (f"({query[0]}) and ({src_query})", query[1])
+        else:
+            query = (src_query, [])
+
         with ExceptionManager(BaseException) as exception:
             offset: int = 0
             while files := src_table.select(
-                query,
+                *query,
                 order_by=[("lower(relative_path)", "asc")],
                 limit=100,
                 offset=offset,
@@ -378,7 +432,7 @@ def digiarch(
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
 
-@app.command("standalone", no_args_is_help=True)
+@app.command("standalone", no_args_is_help=True, short_help="Convert single files.")
 @argument("tool", nargs=1)
 @argument("output", nargs=1)
 @argument("destination", nargs=1, type=ClickPath(file_okay=False, writable=True, resolve_path=True))
@@ -389,7 +443,15 @@ def digiarch(
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
     required=True,
 )
-@option("--option", "-o", "options", type=(str, str), multiple=True, help="Pass options to the converter.")
+@option(
+    "--option",
+    "-o",
+    "options",
+    metavar="<KEY VALUE>",
+    type=(str, str),
+    multiple=True,
+    help="Pass options to the converter.",
+)
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @option(
@@ -410,6 +472,20 @@ def standalone(
     verbose: bool,
     root: str | None,
 ):
+    """
+    Convert FILEs to OUTPUT with the given TOOL.
+
+    The converted FILEs will be placed in the DESTINATION directory. To maintain the relative paths of the files, use
+    the --root option to set their common parent directory.
+
+    To pass options to the given converter tool, use the --option option with a KEY and VALUE. Values can only be
+    strings.
+
+    Use the --timeout option to override the converters' timeout, set to 0 to disable timeouts altogether.
+
+    Use the --verbose option to print the standard output from the converters. The output (standard or error) is always
+    printed in case of an error.
+    """
     if root and any(not Path(f).is_relative_to(root) for f in files):
         raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
 

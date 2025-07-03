@@ -45,7 +45,7 @@ def avid_dir() -> Path:
 
 
 # noinspection DuplicatedCode
-@pytest.fixture(scope="function")
+@pytest.fixture
 def avid_dir_copy(avid_dir: Path) -> Path:
     copy_dir: Path = avid_dir.parent.joinpath(f"_{avid_dir.name}")
     rm_tree(copy_dir)
@@ -62,7 +62,7 @@ def test_files_dir(avid_dir: Path) -> Path:
 
 
 # noinspection DuplicatedCode
-@pytest.fixture(scope="function")
+@pytest.fixture
 def test_files_dir_copy(test_files_dir: Path) -> Path:
     copy_dir: Path = test_files_dir.parent.joinpath(f"_{test_files_dir.name}")
     rm_tree(copy_dir)

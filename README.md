@@ -1,5 +1,92 @@
 # Convertool (new)
 
+## Usage
+
+```
+Usage: convertool [OPTIONS] COMMAND [ARGS]...
+
+  Convert files either by themselves or by following the instructions in a
+  digiarch database.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  digiarch    Convert files from digiarch
+  standalone  Convert single files.
+```
+
+### convertool digiarch
+
+```
+Usage: convertool digiarch [OPTIONS] AVID_DIR
+                           {original:master|master:access|master:statutory}
+                           [QUERY]
+
+  Convert files contained in a digiarch database.
+
+  To convert original files to master files, use the "original:master" TARGET.
+
+  To convert master files to access files, use the "master:access" TARGET.
+
+  To convert master files to statutory files, use the "master:statutory"
+  TARGET.
+
+  The QUERY argument allows to restrict which files will be converted. For
+  details on its usage see the "digiarch edit" command.
+
+  To restrict the tools that should be used for conversion, use the --tool-
+  ignore and --tool-include options. The former will skip files whose tools
+  are in the list, the second will skip files whose tools are not in the list.
+
+  Use the --timeout option to override the converters' timeout, set to 0 to
+  disable timeouts altogether.
+
+  Use the --verbose option to print the standard output from the converters.
+  The output (standard or error) is always printed in case of an error.
+
+  Use the --dry-run option to list files that would be converted without
+  performing any action.
+
+Options:
+  --tool-ignore TOOL   Exclude specific tools.  [multiple]
+  --tool-include TOOL  Include only specific tools.  [multiple]
+  --timeout SECONDS    Override converters' timeout.  [x>=0]
+  --dry-run            Show changes without committing them.
+  --verbose            Show all outputs from converters.
+  --help               Show this message and exit.
+```
+
+### convertool standalone
+
+```
+Usage: convertool standalone [OPTIONS] TOOL OUTPUT DESTINATION FILE...
+
+  Convert FILEs to OUTPUT with the given TOOL.
+
+  The converted FILEs will be placed in the DESTINATION directory. To maintain
+  the relative paths of the files, use the --root option to set their common
+  parent directory.
+
+  To pass options to the given converter tool, use the --option option with a
+  KEY and VALUE. Values can only be strings.
+
+  Use the --timeout option to override the converters' timeout, set to 0 to
+  disable timeouts altogether.
+
+  Use the --verbose option to print the standard output from the converters.
+  The output (standard or error) is always printed in case of an error.
+
+Options:
+  -o, --option <KEY VALUE>  Pass options to the converter.
+  --timeout SECONDS         Override converters' timeout.  [x>=0]
+  --verbose                 Show all outputs from converters.
+  --root DIRECTORY          Set a root for the given files to keep the
+                            relative paths in the output.
+  --help                    Show this message and exit.
+```
+
 ## Tools
 
 | Tool         | Output             | Explanation                                                                    | Extension |

@@ -15,7 +15,9 @@ from convertool.converters.exceptions import ConvertError
 def test_template(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = OriginalFile(
         checksum="",
+        encoding=None,
         relative_path=Path("template.jpg"),
+        original_path=Path("template.jpg"),
         is_binary=False,
         size=0,
         puid=None,
@@ -50,7 +52,9 @@ def test_template(test_files: dict[str, Path], reference_files: dict[str, Path],
 def test_template_errors(output_dir: Path):
     file = OriginalFile(
         checksum="",
+        encoding=None,
         relative_path=Path("template.jpg"),
+        original_path=Path("template.jpg"),
         is_binary=False,
         size=0,
         puid=None,
