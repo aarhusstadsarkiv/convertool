@@ -1,6 +1,6 @@
 [project]
 name = "convertool"
-version = "4.1.1"
+version = "4.1.2"
 description = ""
 authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
 requires-python = ">=3.12"
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [tool.uv.sources]
-acacore = { git = "https://github.com/aarhusstadsarkiv/acacore", tag = "v5.2.1" }
+acacore = { git = "https://github.com/aarhusstadsarkiv/acacore", tag = "v5.2.2" }
 
 [build-system]
 requires = ["hatchling"]
