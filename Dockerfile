@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 AS base
+FROM python:3.13.1-bookworm AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
