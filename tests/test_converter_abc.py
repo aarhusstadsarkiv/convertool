@@ -32,3 +32,7 @@ def test_dependencies():
 
     with pytest.raises(MissingDependency, match=Converter.dependencies["dep"][0]):
         Converter.test_dependencies()
+
+    Converter.dependencies = {"dep": ["-invalid dependency", "echo"]}
+    Converter.test_dependencies()
+    assert Converter.dependencies["dep"] == ["echo"]
