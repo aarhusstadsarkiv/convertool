@@ -9,7 +9,7 @@ from convertool.util import TempDir
 
 class ConverterMSOffice(ConverterABC):
     platforms: ClassVar[list[str]] = ["win32"]
-    dependencies: ClassVar[list[str]] = ["docto"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"docto": ["docto"]}
     _application: ClassVar[str]
 
     @abstractmethod
@@ -29,7 +29,7 @@ class ConverterMSOffice(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             tmp_file: Path = tmp_dir.joinpath(dest_file.name)
             self.run_process(
-                "docto",
+                self.dependencies["docto"][0],
                 self._application,
                 "-f",
                 self.file.get_absolute_path(),

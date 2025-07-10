@@ -9,7 +9,7 @@ from .base import ConverterABC
 class ConverterPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["pdf"]
     outputs: ClassVar[list[str]] = ["pdfa-1", "pdfa-2", "pdfa-3"]
-    dependencies: ClassVar[list[str]] = ["gs"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"ghostscript": ["gs"]}
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -26,7 +26,7 @@ class ConverterPDF(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "gs",
+                self.dependencies["ghostscript"][0],
                 "-dNOSAFER",
                 "-dNOPAUSE",
                 "-dBATCH",

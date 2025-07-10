@@ -18,7 +18,7 @@ class ConverterXSL(ConverterABC):
     tool_names: ClassVar[list[str]] = ["xslt"]
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
-    dependencies: ClassVar[list[str]] = ["xmlstarlet"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
 
     def convert(
         self,
@@ -41,7 +41,7 @@ class ConverterXSL(ConverterABC):
                     encoding="utf-8",
                 )
             stdout, _ = self.run_process(
-                "xmlstarlet",
+                self.dependencies["xmlstarlet"][0],
                 "tr",
                 "" if xsl else "--embed",
                 tmp_xsl,
@@ -58,7 +58,7 @@ class ConverterMedCom(ConverterABC):
     tool_names: ClassVar[list[str]] = ["medcom"]
     outputs: ClassVar[list[str]] = ["html"]
     process_timeout: ClassVar[float] = 10
-    dependencies: ClassVar[list[str]] = ["xmlstarlet"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
 
     def output_puid(self, output: str) -> str | None:
         if output == "html":
@@ -72,7 +72,7 @@ class ConverterMedCom(ConverterABC):
 
         xsl: Path = resources.medcom.joinpath("viewEmessage.xslt")
 
-        stdout, _ = self.run_process("xmlstarlet", "tr", xsl, self.file.get_absolute_path())
+        stdout, _ = self.run_process(self.dependencies["xmlstarlet"][0], "tr", xsl, self.file.get_absolute_path())
 
         dest_dir.mkdir(parents=True, exist_ok=True)
         dest_file.write_text(stdout)
@@ -84,7 +84,7 @@ class ConverterXSLToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterXSL.tool_names
     outputs: ClassVar[list[str]] = ConverterHTML.outputs
     platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterXSL, ConverterHTML)
-    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterXSL, ConverterHTML)
+    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterXSL, ConverterHTML)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterXSL, ConverterHTML)
 
     def convert(
@@ -111,7 +111,7 @@ class ConverterXSLToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterXSL.tool_names
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
     platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterXSL, ConverterHTMLToImage)
-    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterXSL, ConverterHTMLToImage)
+    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterXSL, ConverterHTMLToImage)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterXSL, ConverterHTMLToImage)
 
     def convert(
@@ -138,7 +138,7 @@ class ConverterMedComToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterMedCom.tool_names
     outputs: ClassVar[list[str]] = ConverterHTML.outputs
     platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterMedCom, ConverterHTML)
-    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterMedCom, ConverterHTML)
+    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterMedCom, ConverterHTML)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMedCom, ConverterHTML)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
@@ -158,7 +158,7 @@ class ConverterMedComToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterMedCom.tool_names
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
     platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterMedCom, ConverterHTMLToImage)
-    dependencies: ClassVar[list[str]] = _shared_dependencies(ConverterMedCom, ConverterHTMLToImage)
+    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterMedCom, ConverterHTMLToImage)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMedCom, ConverterHTMLToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
