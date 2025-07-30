@@ -10,7 +10,7 @@ class ConverterSpreadsheet(ConverterABC):
     tool_names: ClassVar[list[str]] = ["spreadsheet"]
     outputs: ClassVar[list[str]] = ["ods", "pdf", "html"]
     process_timeout: ClassVar[float] = 60.0
-    dependencies: ClassVar[list[str]] = ["libreoffice"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"libreoffice": ["libreoffice"]}
 
     def output_puid(self, output: str) -> str | None:
         if output == "html":
@@ -31,7 +31,7 @@ class ConverterSpreadsheet(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "libreoffice",
+                self.dependencies["libreoffice"][0],
                 "--headless",
                 "--convert-to",
                 f"{output}{output_filter}" if output_filter else output,

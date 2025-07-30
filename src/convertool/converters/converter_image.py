@@ -18,7 +18,7 @@ class ConverterImage(ConverterABC):
         "pdf",
     ]
     process_timeout: ClassVar[float] = 180.0
-    dependencies: ClassVar[list[str]] = ["convert"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"imagemagick": ["magick", "convert"]}
 
     def image_dpi(self, file: Path, default_density: int = 150) -> tuple[int, int]:
         """
@@ -60,7 +60,13 @@ class ConverterImage(ConverterABC):
             args.extend(("-coalesce",))
 
         with TempDir(output_dir) as tmp_dir:
-            self.run_process("convert", self.file.get_absolute_path(), *args, dest_file.name, cwd=tmp_dir)
+            self.run_process(
+                self.dependencies["imagemagick"][0],
+                self.file.get_absolute_path(),
+                *args,
+                dest_file.name,
+                cwd=tmp_dir,
+            )
             dest_dir.mkdir(parents=True, exist_ok=True)
             tmp_dir.joinpath(dest_file.name).replace(dest_file)
 
@@ -84,7 +90,7 @@ class ConverterPDFToImage(ConverterImage):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "convert",
+                self.dependencies["imagemagick"][0],
                 "-density",
                 density,
                 "-background",
@@ -122,7 +128,7 @@ class ConverterPDFLargeToImage(ConverterImage):
             for page in range(pages):
                 page_files.append(f"{tmp_dir.name}-{page:06d}.jpg")
                 self.run_process(
-                    "convert",
+                    self.dependencies["imagemagick"][0],
                     "-density",
                     density,
                     "-background",
@@ -137,7 +143,7 @@ class ConverterPDFLargeToImage(ConverterImage):
                 )
 
             self.run_process(
-                "convert",
+                self.dependencies["imagemagick"][0],
                 "-density",
                 density,
                 "-compress",
@@ -174,7 +180,7 @@ class ConverterTextToImage(ConverterImage):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "convert",
+                self.dependencies["imagemagick"][0],
                 "-depth",
                 "1",
                 "-density",

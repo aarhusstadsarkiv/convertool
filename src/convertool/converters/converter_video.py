@@ -15,7 +15,7 @@ class ConverterVideo(ConverterABC):
         "h265",
     ]
     process_timeout: ClassVar[float] = 7200
-    dependencies: ClassVar[list[str]] = ["ffmpeg"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"ffmpeg": ["ffmpeg"]}
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -41,7 +41,7 @@ class ConverterVideo(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "ffmpeg",
+                self.dependencies["ffmpeg"][0],
                 "-i",
                 self.file.get_absolute_path(),
                 "-nostdin",

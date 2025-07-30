@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema 
+	xmlns="http://www.w3.org/2001/XMLSchema" 
+	xmlns:gml="http://www.opengis.net/gml" 
+	xmlns:xlink="http://www.w3.org/1999/xlink" 
+	xmlns:fme="http://www.safe.com/gml/fme" 
+	targetNamespace="http://www.safe.com/gml/fme" elementFormDefault="qualified">
+	<import namespace="http://www.opengis.net/gml" 
+	schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	
+	<element name="GEOMETRI" type="fme:GEOMETRIType" substitutionGroup="gml:_Feature"/>
+	
+	<annotation>
+		<documentation>Geodata i gml-filen er arealer (polygoner), der angiver kommunearelaer i Danmark. Gml-filens geodata fungerer som baggrundskort for de geodata der er registreret i gml-filen 1.gml i mappe 1 i docCollection1 og viser Danmark med kommuneopdelig i målestoksforholdet 1:2mil.</documentation>
+	</annotation>
+		
+	<complexType name="GEOMETRIType">
+		<complexContent>
+			<extension base="gml:AbstractFeatureType">
+				<sequence>
+					<element name="FEAT_ID" minOccurs="0" type="integer">
+					 	<annotation>
+							<documentation>Feature ID</documentation>
+						</annotation>
+					</element>
+					<element name="FEAT_KODE" minOccurs="0">
+						<annotation>
+							<documentation>Featurekode</documentation>
+						</annotation>
+						<simpleType>
+							<restriction base="string">
+								<maxLength value="15"/>
+							</restriction>
+						</simpleType>
+					</element>
+					<element name="FEAT_TYPE" minOccurs="0">
+						<annotation>
+							<documentation>Featuretype</documentation>
+						</annotation>
+						<simpleType>
+							<restriction base="string">
+								<maxLength value="40"/>
+							</restriction>
+						</simpleType>
+					</element>
+					<element name="KOMKODE" minOccurs="0">
+						<annotation>
+							<documentation>Kommunenummer</documentation>
+						</annotation>
+						<simpleType>
+							<restriction base="string">
+								<maxLength value="4"/>
+							</restriction>
+						</simpleType>
+					</element>
+					<element name="KOMNAVN" minOccurs="0">
+						<annotation>
+							<documentation>Kommunenavn</documentation>
+						</annotation>
+						<simpleType>
+							<restriction base="string">
+								<maxLength value="50"/>
+							</restriction>
+						</simpleType>
+					</element>
+					<element ref="gml:surfaceProperty" minOccurs="0">
+						<annotation>
+							<documentation>Polygon som angiver arealet af en kommune.</documentation>
+						</annotation>
+					</element>
+					<element ref="gml:multiSurfaceProperty" minOccurs="0">
+					  <annotation>
+							<documentation>Flade, der kan indeholde andre flader</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+</schema>

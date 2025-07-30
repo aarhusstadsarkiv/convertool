@@ -24,14 +24,18 @@ from .exceptions import UnsupportedPlatform
 
 
 @lru_cache
-def _test_dependency(command: str):
-    try:
-        if platform == "win32":
-            run_process("Get-Command", command)
-        elif platform in ("linux", "darwin"):
-            run_process("which", command)
-    except CalledProcessError:
-        raise MissingDependency(command)
+def _test_dependency(*commands: str) -> str:
+    for command in commands:
+        try:
+            if platform == "win32":
+                run_process("Get-Command", command)
+            elif platform in ("linux", "darwin"):
+                run_process("which", command)
+            return command
+        except CalledProcessError:
+            continue
+
+    raise MissingDependency(*commands)
 
 
 @lru_cache
@@ -49,9 +53,8 @@ def _shared_platforms(*converters: type["ConverterABC"]) -> list[str]:
     return list(reduce(lambda a, c: a.union(set(c)), platforms[1:], set(platforms[0]))) or ["no-platform"]
 
 
-def _shared_dependencies(*converters: type["ConverterABC"]) -> list[str] | None:
-    dependencies: list[str] = [d for c in converters for d in c.dependencies or []]
-    return sorted(set(dependencies), key=dependencies.index) or None
+def _shared_dependencies(*converters: type["ConverterABC"]) -> dict[str, list[str]] | None:
+    return {dep: cmds for conv in converters for dep, cmds in (conv.dependencies or {}).items()} or None
 
 
 def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
@@ -63,7 +66,7 @@ class ConverterABC(ABC):
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[float | None] = None
     platforms: ClassVar[list[str] | None] = None
-    dependencies: ClassVar[list[str] | None] = None
+    dependencies: ClassVar[dict[str, list[str]] | None] = None
 
     def __init__(
         self,
@@ -106,8 +109,10 @@ class ConverterABC(ABC):
 
         :raise MissingDependency: If a dependency is missing.
         """
-        for dependency in cls.dependencies or []:
-            _test_dependency(dependency)
+        dependencies: dict[str, list[str]] = {}
+        for dependency, commands in (cls.dependencies or {}).items():
+            dependencies[dependency] = [_test_dependency(*commands)]
+        cls.dependencies = dependencies
 
     def test_options(self):
         """

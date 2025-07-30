@@ -13,7 +13,7 @@ class ConverterAudio(ConverterABC):
         "wav",
     ]
     process_timeout: ClassVar[float] = 1800
-    dependencies: ClassVar[list[str]] = ["ffmpeg"]
+    dependencies: ClassVar[dict[str, list[str]]] = {"ffmpeg": ["ffmpeg"]}
 
     def output_puid(self, output: str) -> str | None:
         if output == "mp3":
@@ -33,7 +33,7 @@ class ConverterAudio(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
-                "ffmpeg",
+                self.dependencies["ffmpeg"][0],
                 "-i",
                 self.file.get_absolute_path(),
                 "-nostdin",
