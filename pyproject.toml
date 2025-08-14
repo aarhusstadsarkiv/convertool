@@ -28,7 +28,7 @@ dev = [
 ]
 
 [tool.uv.sources]
-acacore = { git = "https://github.com/aarhusstadsarkiv/acacore", tag = "v5.2.2" }
+acacore = { git = "https://github.com/aarhusstadsarkiv/acacore", tag = "v5.2.3" }
 
 [build-system]
 requires = ["hatchling"]
