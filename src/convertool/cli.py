@@ -429,6 +429,9 @@ def digiarch(
                         )
                     )
 
+                if not dry_run:
+                    database.commit()
+
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
 
