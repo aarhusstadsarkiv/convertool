@@ -2,16 +2,17 @@ FROM python:3.13-trixie AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
-RUN apt update
-RUN apt install -y \
+RUN apt update && apt install -y \
     vim \
     curl \
     wget \
     git \
     cmake \
     apt-transport-https \
-    software-properties-common \
-    ca-certificates
+    ca-certificates \
+    libc6-i386 \
+    libc6-x32 \
+    libxtst6
 
 # Install uv
 ENV UV_NO_MODIFY_PATH=1
