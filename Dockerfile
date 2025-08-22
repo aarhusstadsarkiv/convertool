@@ -2,7 +2,7 @@ FROM python:3.13-trixie AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     vim \
     curl \
     wget \
@@ -19,30 +19,30 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
 # Install GDAL
-RUN apt-get update && apt-get install -y libproj-dev gdal-bin
+RUN apt update && apt install -y libproj-dev gdal-bin
 
 # Install Imagemagick
-RUN apt-get update && apt-get install -y imagemagick
+RUN apt update && apt install -y imagemagick
 COPY config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 
 # Install vipps
-RUN apt-get update && apt-get install -y libvips-tools
+RUN apt update && apt install -y libvips-tools
 
 # Install LibreOffice
-RUN apt-get update && apt-get install -y libreoffice
+RUN apt update && apt install -y libreoffice
 
 # Install GhostScript
-RUN apt-get update && apt-get install -y ghostscript
+RUN apt update && apt install -y ghostscript
 
 # Install ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt update && apt install -y ffmpeg
 
 # Install xmlstarlet
-RUN apt-get update && apt-get install -y xmlstarlet
+RUN apt update && apt install -y xmlstarlet
 
 # Install chrome
 WORKDIR /root
-RUN apt-get update && apt-get install -y chromium
+RUN apt update && apt install -y chromium
 
 
 FROM base AS prod
