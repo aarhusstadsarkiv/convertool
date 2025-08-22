@@ -2,7 +2,8 @@ FROM python:3.13-trixie AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install base dependencies
-RUN apt update && apt install -y \
+RUN apt update
+RUN apt install -y \
     vim \
     curl \
     wget \
@@ -11,7 +12,6 @@ RUN apt update && apt install -y \
     apt-transport-https \
     software-properties-common \
     ca-certificates
-RUN rm -rf /var/lib/apt/lists/*
 
 # Install uv
 ENV UV_NO_MODIFY_PATH=1
