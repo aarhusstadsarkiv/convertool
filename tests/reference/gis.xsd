@@ -61,7 +61,7 @@
         <xs:element name="Areal_ha" nillable="true" minOccurs="0" maxOccurs="1">
           <xs:simpleType>
             <xs:restriction base="xs:decimal">
-              <xs:totalDigits value="8"/>
+              <xs:totalDigits value="7"/>
               <xs:fractionDigits value="1"/>
             </xs:restriction>
           </xs:simpleType>
