@@ -10,10 +10,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     apt-transport-https \
     software-properties-common \
-    ca-certificates \
-    libc6-i386 \
-    libc6-x32 \
-    libxtst6
+    ca-certificates
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install uv
