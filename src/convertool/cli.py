@@ -259,6 +259,14 @@ def app():
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
+@option(
+    "--commit",
+    metavar="INTEGER",
+    type=IntRange(0),
+    default=1,
+    show_default=True,
+    help="Number of files edited per commit.",
+)
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
@@ -270,6 +278,7 @@ def digiarch(
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
+    commit: int,
     dry_run: bool,
     verbose: bool,
 ):
@@ -290,6 +299,9 @@ def digiarch(
 
     Use the --timeout option to override the converters' timeout, set to 0 to disable timeouts altogether.
 
+    Use the --commit option to change the number of files to be processed for each commit.
+    To avoid committing changes until all files have been processed, use 0 as value.
+
     Use the --verbose option to print the standard output from the converters. The output (standard or error) is always
     printed in case of an error.
 
@@ -307,6 +319,14 @@ def digiarch(
         is_processed: Callable[[OriginalFile | MasterFile], bool]
         src_query: str
         set_processed: Callable[[OriginalFile | MasterFile], bool | int]
+        committer: Callable[[FilesDB, int], None] | None
+
+        if commit <= 0:
+            committer = None
+        elif commit == 1:
+            committer = lambda _db, _: _db.commit()  # noqa: E731
+        else:
+            committer = lambda _db, _n: _db.commit() if _n % commit == 0 else None  # noqa: E731
 
         if file_type == "original":
             src_table = database.original_files
@@ -339,7 +359,7 @@ def digiarch(
             ).fetchall():
                 offset += len(files)
 
-                for file in files:
+                for file_index, file in enumerate(files, offset + 1):
                     if is_processed(file):
                         continue
 
@@ -429,8 +449,8 @@ def digiarch(
                         )
                     )
 
-                if not dry_run:
-                    database.commit()
+                    if not dry_run and committer:
+                        committer(database, file_index)
 
         end_program(ctx, database, exception, dry_run, log_file, log_stdout)
 
