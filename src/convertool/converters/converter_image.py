@@ -53,7 +53,11 @@ class ConverterImage(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
         args: list[str] = []
+        filename: Path = self.file.get_absolute_path()
 
+        if self.options.get("layers") in ("true", "TRUE", True):
+            filename = filename.with_name(filename.name + "[0]")
+            args.extend(("-background", "none", "-flatten"))
         if output == "tif":
             args.extend(("-compress", "LZW", "-depth", "16", "-coalesce"))
         if output == "pdf":
@@ -62,7 +66,7 @@ class ConverterImage(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
                 self.dependencies["imagemagick"][0],
-                self.file.get_absolute_path(),
+                filename,
                 *args,
                 dest_file.name,
                 cwd=tmp_dir,
