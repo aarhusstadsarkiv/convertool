@@ -4,6 +4,7 @@ from functools import lru_cache
 from functools import reduce
 from os import PathLike
 from pathlib import Path
+from shutil import which
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
 from sys import platform
@@ -26,14 +27,8 @@ from .exceptions import UnsupportedPlatform
 @lru_cache
 def _test_dependency(*commands: str) -> str:
     for command in commands:
-        try:
-            if platform == "win32":
-                run_process("Get-Command", command)
-            elif platform in ("linux", "darwin"):
-                run_process("which", command)
-            return command
-        except CalledProcessError:
-            continue
+        if command_path := which(command):
+            return command_path
 
     raise MissingDependency(*commands)
 
