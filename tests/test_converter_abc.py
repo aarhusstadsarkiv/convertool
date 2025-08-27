@@ -1,4 +1,5 @@
 from pathlib import Path
+from shutil import which
 from typing import ClassVar
 
 import pytest
@@ -35,4 +36,4 @@ def test_dependencies():
 
     Converter.dependencies = {"dep": ["-invalid dependency", "echo"]}
     Converter.test_dependencies()
-    assert Converter.dependencies["dep"] == ["echo"]
+    assert Converter.dependencies["dep"] == [which("echo")]

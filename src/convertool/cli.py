@@ -1,9 +1,11 @@
 from collections.abc import Callable
+from datetime import datetime
 from logging import ERROR
 from logging import INFO
 from logging import Logger
 from logging import WARNING
 from pathlib import Path
+from shutil import copy2
 from sqlite3 import DatabaseError
 from traceback import format_tb
 from typing import Any
@@ -268,6 +270,7 @@ def app():
     help="Number of files edited per commit.",
 )
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
+@option("--backup/--no-backup", is_flag=True, default=False, help="Create a backup of the database at start.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
 def digiarch(
@@ -280,6 +283,7 @@ def digiarch(
     timeout: int | None,
     commit: int,
     dry_run: bool,
+    backup: bool,
     verbose: bool,
 ):
     """
@@ -306,6 +310,9 @@ def digiarch(
     printed in case of an error.
 
     Use the --dry-run option to list files that would be converted without performing any action.
+
+    Use the --backup option to create a backup of the database when the program starts, the backup file will have the
+    same stem with the current date and time as suffix.
     """
     avid = get_avid(ctx, avid_dir, "avid_dir")
     file_type: Literal["original", "master"]
@@ -314,6 +321,13 @@ def digiarch(
 
     with open_database(ctx, avid, "avid_dir") as database:
         log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
+
+        if backup and not dry_run:
+            backup_path: Path = avid.database_path.with_stem(f"{avid.database_path.stem}-{datetime.now():%Y%m%d%H%M%S}")
+            Event.from_command(ctx, "backup:start").log(INFO, log_stdout, name=backup_path.name)
+            backup_path.unlink(missing_ok=True)
+            copy2(avid.database_path, backup_path)
+            Event.from_command(ctx, "backup:complete").log(INFO, log_stdout, name=backup_path.name)
 
         src_table: Table[OriginalFile | MasterFile]
         is_processed: Callable[[OriginalFile | MasterFile], bool]
