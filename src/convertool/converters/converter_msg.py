@@ -19,6 +19,7 @@ from striprtf.striprtf import rtf_to_text
 
 from convertool.util import TempDir
 
+from .base import _dummy_base_file
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
@@ -222,7 +223,7 @@ class ConverterMSGToPDF(ConverterABC):
 
             html = htmls[0]
 
-            return ConverterHTML(BaseFile.from_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTML(_dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
@@ -245,7 +246,7 @@ class ConverterMSGToImage(ConverterABC):
 
             html = htmls[0]
 
-            return ConverterHTMLToImage(BaseFile.from_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTMLToImage(_dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,

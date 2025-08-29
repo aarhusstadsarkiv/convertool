@@ -12,6 +12,8 @@ from .converter_image import ConverterImage
 from .converter_image import ConverterPDFLargeToImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
+from .converter_mdi import ConverterMDI
+from .converter_mdi import ConverterMDIToPDF
 from .converter_msg import ConverterMSG
 from .converter_msg import ConverterMSGToImage
 from .converter_msg import ConverterMSGToPDF
@@ -35,7 +37,6 @@ from .converter_xsl import ConverterXSLToPDF
 from .converter_zipfile import ConverterZIPFile
 
 __all__ = [
-    "exceptions",
     "ConverterABC",
     "ConverterAudio",
     "ConverterCAD",
@@ -46,18 +47,20 @@ __all__ = [
     "ConverterHTML",
     "ConverterHTMLToImage",
     "ConverterImage",
-    "ConverterMedCom",
-    "ConverterMedComToImage",
-    "ConverterMedComToPDF",
+    "ConverterMDI",
+    "ConverterMDIToPDF",
+    "ConverterMSExcel",
     "ConverterMSG",
     "ConverterMSGToImage",
     "ConverterMSGToPDF",
-    "ConverterMSExcel",
     "ConverterMSPowerPoint",
     "ConverterMSWord",
+    "ConverterMedCom",
+    "ConverterMedComToImage",
+    "ConverterMedComToPDF",
     "ConverterPDF",
-    "ConverterPDFToImage",
     "ConverterPDFLargeToImage",
+    "ConverterPDFToImage",
     "ConverterPresentation",
     "ConverterSAS",
     "ConverterSpreadsheet",
@@ -70,4 +73,5 @@ __all__ = [
     "ConverterXSLToImage",
     "ConverterXSLToPDF",
     "ConverterZIPFile",
+    "exceptions",
 ]

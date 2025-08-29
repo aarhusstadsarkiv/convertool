@@ -56,6 +56,19 @@ def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
     return max([c.process_timeout or 0.0 for c in converters], default=0.0) or None
 
 
+def _dummy_base_file(path: Path, root: Path | None = None) -> BaseFile:
+    return BaseFile(
+        checksum="",
+        encoding=None,
+        relative_path=path.relative_to(root or path.parent),
+        is_binary=True,
+        size=1,
+        puid=None,
+        signature=None,
+        root=root or path.parent,
+    )
+
+
 class ConverterABC(ABC):
     tool_names: ClassVar[list[str]]
     outputs: ClassVar[list[str]]
