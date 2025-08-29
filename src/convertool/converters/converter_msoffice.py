@@ -41,6 +41,7 @@ class ConverterMSOffice(ConverterABC):
             )
 
             if tmp_file.is_file():
+                dest_file.parent.mkdir(parents=True, exist_ok=True)
                 return [tmp_file.replace(dest_file)]
 
             raise ConvertError(self.file, "Could not convert file.")
