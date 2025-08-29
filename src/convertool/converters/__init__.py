@@ -13,6 +13,7 @@ from .converter_image import ConverterPDFLargeToImage
 from .converter_image import ConverterPDFToImage
 from .converter_image import ConverterTextToImage
 from .converter_mdi import ConverterMDI
+from .converter_mdi import ConverterMDIToPDF
 from .converter_msg import ConverterMSG
 from .converter_msg import ConverterMSGToImage
 from .converter_msg import ConverterMSGToPDF
@@ -47,6 +48,7 @@ __all__ = [
     "ConverterHTMLToImage",
     "ConverterImage",
     "ConverterMDI",
+    "ConverterMDIToPDF",
     "ConverterMSExcel",
     "ConverterMSG",
     "ConverterMSGToImage",
