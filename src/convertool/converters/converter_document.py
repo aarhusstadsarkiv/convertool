@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import ClassVar
 
-from acacore.models.file import BaseFile
-
 from convertool.util import TempDir
 
+from .base import _dummy_base_file
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
@@ -65,7 +64,7 @@ class ConverterDocumentToImage(ConverterABC):
 
             pdf = pdfs[0]
 
-            return ConverterPDFToImage(BaseFile.from_file(pdf, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterPDFToImage(_dummy_base_file(pdf, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
