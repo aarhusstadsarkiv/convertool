@@ -46,7 +46,7 @@ class ConverterMDI(ConverterABC):
                 dest_dir.mkdir(parents=True, exist_ok=True)
                 return [tmp_file.replace(dest_file)]
 
-        raise ConvertError(self.file, "Could not convert file.")
+            raise ConvertError(self.file, tmp_log.read_text() if tmp_log.is_file() else "Could not convert file.")
 
 
 class ConverterMDIToPDF(ConverterABC):
