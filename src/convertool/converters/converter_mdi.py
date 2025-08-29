@@ -1,4 +1,5 @@
 from pathlib import Path
+from sys import stderr
 from typing import ClassVar
 
 from convertool.util import TempDir
@@ -42,11 +43,14 @@ class ConverterMDI(ConverterABC):
                 tmp_log,
             )
 
+            if not self.capture_output and tmp_log.is_file() and (log := tmp_log.read_text().strip()):
+                print(log, file=stderr)
+
             if tmp_file.is_file():
                 dest_dir.mkdir(parents=True, exist_ok=True)
                 return [tmp_file.replace(dest_file)]
 
-            raise ConvertError(self.file, tmp_log.read_text() if tmp_log.is_file() else "Could not convert file.")
+            raise ConvertError(self.file, "Could not convert file.")
 
 
 class ConverterMDIToPDF(ConverterABC):
