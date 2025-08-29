@@ -35,11 +35,11 @@ class ConverterMDI(ConverterABC):
             tmp_log: Path = tmp_dir.joinpath("log.txt")
             self.run_process(
                 self.dependencies["mdi2tif"][0],
-                "--source",
+                "-source",
                 self.file.get_absolute_path(),
-                "--dest",
+                "-dest",
                 tmp_file,
-                "--log",
+                "-log",
                 tmp_log,
             )
 
