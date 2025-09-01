@@ -32,8 +32,8 @@ RUN apt update && apt install -y libvips-tools
 # Install LibreOffice
 RUN curl -o libreoffice.tar.gz 'https://downloadarchive.documentfoundation.org/libreoffice/old/24.8.7.2/deb/x86_64/LibreOffice_24.8.7.2_Linux_x86-64_deb.tar.gz'
 RUN tar zxvf libreoffice.tar.gz
-RUN dpkg -i libreoffice/DEBS/*.debs
-RUN ln -s /usr/bin/libreoffice /opt/libreoffice24.8/program/soffice
+RUN dpkg -i LibreOffice_24.8.7.2_Linux_x86-64_deb/DEBS/*.deb
+RUN ln -s /opt/libreoffice24.8/program/soffice /usr/bin/libreoffice
 
 # Install GhostScript
 RUN apt update && apt install -y ghostscript
