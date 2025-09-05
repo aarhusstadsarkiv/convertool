@@ -37,6 +37,7 @@ from click import pass_context
 from click import Path as ClickPath
 from click import version_option
 from click.exceptions import Exit
+from structlog.stdlib import BoundLogger
 
 from . import converters
 from .__version__ import __version__
@@ -150,7 +151,7 @@ def convert_file(
     options: dict[str, Any] | None,
     *,
     verbose: bool = False,
-    loggers: list[Logger] | None = None,
+    loggers: list[Logger | BoundLogger] | None = None,
     dry_run: bool = False,
     timeout: int | None = None,
 ) -> list[ConvertedFile]:
@@ -322,14 +323,14 @@ def digiarch(
     file_type, _, dest_type = target.partition(":")
 
     with open_database(ctx, avid, "avid_dir") as database:
-        log_file, log_stdout, _ = start_program(ctx, database, __version__, None, not dry_run, True, False)
+        logger, _ = start_program(ctx, database, __version__, dry_run)
 
         if backup and not dry_run:
             backup_path: Path = avid.database_path.with_stem(f"{avid.database_path.stem}-{datetime.now():%Y%m%d%H%M%S}")
-            Event.from_command(ctx, "backup:start").log(INFO, log_stdout, name=backup_path.name)
+            Event.from_command(ctx, "backup:start").log(INFO, logger, name=backup_path.name)
             backup_path.unlink(missing_ok=True)
             copy2(avid.database_path, backup_path)
-            Event.from_command(ctx, "backup:complete").log(INFO, log_stdout, name=backup_path.name)
+            Event.from_command(ctx, "backup:complete").log(INFO, logger, name=backup_path.name)
 
         src_table: Table[OriginalFile | MasterFile]
         is_processed: Callable[[OriginalFile | MasterFile], bool]
@@ -401,7 +402,7 @@ def digiarch(
                             tool,
                             output,
                             options,
-                            loggers=[log_stdout],
+                            loggers=[logger],
                             verbose=verbose,
                             dry_run=dry_run,
                             timeout=timeout,
@@ -410,7 +411,7 @@ def digiarch(
                     if isinstance(convert_error.exception, MissingDependency | UnsupportedPlatform):
                         Event.from_command(ctx, "warning", (file.uuid, file_type)).log(
                             WARNING,
-                            log_stdout,
+                            logger,
                             error=repr(convert_error.exception),
                         )
                         continue
@@ -427,7 +428,7 @@ def digiarch(
                         database.log.insert(error)
                         error.log(
                             ERROR,
-                            log_stdout,
+                            logger,
                             show_args=["uuid"],
                             tool=[tool, output],
                             error=convert_error.exception.msg,
@@ -444,7 +445,7 @@ def digiarch(
                         database.log.insert(error)
                         error.log(
                             ERROR,
-                            log_stdout,
+                            logger,
                             show_args=["uuid"],
                             tool=[tool, output],
                             error=repr(convert_error.exception),
@@ -468,7 +469,7 @@ def digiarch(
                     if not dry_run and committer:
                         committer(database, file_index)
 
-        end_program(ctx, database, exception, dry_run, log_file, log_stdout)
+        end_program(ctx, database, exception, dry_run, logger)
 
 
 @app.command("standalone", no_args_is_help=True, short_help="Convert single files.")
