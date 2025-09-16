@@ -75,6 +75,7 @@ class ConverterABC(ABC):
     process_timeout: ClassVar[float | None] = None
     platforms: ClassVar[list[str] | None] = None
     dependencies: ClassVar[dict[str, list[str]] | None] = None
+    multithreading: ClassVar[bool] = False
 
     def __init__(
         self,
