@@ -1,11 +1,11 @@
 from collections.abc import Callable
 from datetime import datetime
 from itertools import batched
-from logging import ERROR
 from logging import INFO
 from logging import WARNING
 from pathlib import Path
 from shutil import copy2
+from traceback import format_tb
 from typing import Literal
 
 import structlog
@@ -34,7 +34,6 @@ from click import option
 from click import pass_context
 from click import Path as ClickPath
 from click import version_option
-from structlog.stdlib import BoundLogger
 
 from .__version__ import __version__
 from .convert import convert_async_queue
@@ -55,60 +54,45 @@ def handle_error(
     ctx: Context,
     database: FilesDB,
     instruction: ConvertInstructions[OriginalFile | MasterFile, ConvertedFile],
-    error: Exception | None,
-    logger: BoundLogger,
+    error: ExceptionManager | None,
 ):
     if error is None:
         return
-    elif isinstance(error, ConvertError):
-        error = Event.from_command(
+
+    if isinstance(error.exception, ConvertError):
+        event = Event.from_command(
             ctx,
             "error",
             instruction.file,
             {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
-            (error.process.stderr or error.process.stdout or None),
+            (error.exception.process.stderr or error.exception.process.stdout or None)
+            if error.exception.process
+            else "".join(format_tb(error.traceback)),
         )
-        database.log.insert(error)
-        error.log(
-            ERROR,
-            logger,
-            show_args=["uuid"],
-            tool=[instruction.tool, instruction.output],
-            error=error.msg,
-        )
-    elif error:
-        error = Event.from_command(
+        database.log.insert(event)
+    elif isinstance(error.exception, Exception):
+        event = Event.from_command(
             ctx,
             "error",
             instruction.file,
             {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
+            "".join(format_tb(error.traceback)),
         )
-        database.log.insert(error)
-        error.log(
-            ERROR,
-            logger,
-            show_args=["uuid"],
-            tool=[instruction.tool, instruction.output],
-            error=repr(error),
-        )
+        database.log.insert(event)
+    elif isinstance(error.exception, BaseException):
+        raise error.exception
 
 
 def handle_results(
-    ctx: Context,
     database: FilesDB,
     src_table: Table,
     out_table: Table,
     instruction: ConvertInstructions[OriginalFile | MasterFile, ConvertedFile],
     output_files: list[ConvertedFile],
-    error: Exception | None,
     set_processed: Callable[[OriginalFile | MasterFile], bool],
     commit_index: int,
     committer: Callable[[FilesDB, int], None],
-    logger: BoundLogger,
 ) -> int:
-    if error:
-        handle_error(ctx, database, instruction, error, logger)
-        return commit_index
     commit_index += 1
     for output_file in output_files:
         out_table.insert(output_file)
@@ -294,6 +278,8 @@ def cmd_digiarch(
             database.commit()
             Event.from_command(ctx, "compiling:end").log(INFO, logger)
 
+            output_dir.mkdir(parents=True, exist_ok=True)
+
             batch: tuple[OriginalFile | MasterFile, ...]
             commit_index: int = 0
             for batch in batched(
@@ -350,18 +336,16 @@ def cmd_digiarch(
                         verbose,
                         logger,
                     ):
+                        handle_error(ctx, database, instruction, error)
                         handle_results(
-                            ctx,
                             database,
                             src_table,
                             out_table,
                             instruction,
                             output_files,
-                            error,
                             set_processed,
                             commit_index,
                             committer,
-                            logger,
                         )
 
                 for instruction, output_files, error in convert_queue(
@@ -372,18 +356,16 @@ def cmd_digiarch(
                     verbose,
                     logger,
                 ):
+                    handle_error(ctx, database, instruction, error)
                     handle_results(
-                        ctx,
                         database,
                         src_table,
                         out_table,
                         instruction,
                         output_files,
-                        error,
                         set_processed,
                         commit_index,
                         committer,
-                        logger,
                     )
 
         end_program(ctx, database, exception, dry_run, logger)
