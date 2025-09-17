@@ -285,7 +285,7 @@ def digiarch(
             )
             database.execute(
                 f"""
-                insert into {to_process_table}
+                insert into {to_process_table.name}
                 select * from {src_table.name}
                 where {query[0] or "uuid is not null"}
                 """,
