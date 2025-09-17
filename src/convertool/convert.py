@@ -153,7 +153,7 @@ def master_file_converter(
 def file_queues[M: OriginalFile | MasterFile, O: ConvertedFile](
     instructions: list[ConvertInstructions[M, O]],
     threads: int,
-) -> tuple[list[ConvertInstructions[M, O]], list[ConvertInstructions[M, O]]]:
+) -> tuple[list[ConvertInstructions[M, O]], list[list[ConvertInstructions[M, O]]]]:
     """
     Create conversion queues.
 
@@ -162,15 +162,18 @@ def file_queues[M: OriginalFile | MasterFile, O: ConvertedFile](
     :return: synchronous queue, asynchronous queue
     """
     sync_queue: list[ConvertInstructions[M, O]] = []
-    async_queue: list[ConvertInstructions[M, O]] = []
+    async_queues: list[list[ConvertInstructions[M, O]]] = [[]]
 
     for inst in instructions:
-        if threads <= 1 or not inst.converter_cls.multithreading or len(async_queue) >= threads:
+        if threads <= 1 or not inst.converter_cls.multithreading:
             sync_queue.append(inst)
+        elif len(async_queues[-1]) < threads:
+            async_queues[-1].append(inst)
         else:
-            async_queue.append(inst)
+            async_queues.append([])
+            async_queues[-1].append(inst)
 
-    return sync_queue, async_queue
+    return sync_queue, async_queues
 
 
 def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | StatutoryFile](
