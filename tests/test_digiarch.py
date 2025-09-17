@@ -60,9 +60,11 @@ def test_digiarch_exception(avid_dir_copy: Path):
             [str(random_file.uuid)],
         ).fetchone()
         assert event is not None
-        assert event.data == {
+        assert isinstance(event.data, dict)
+        assert (event.data | {"converter": ""}) == {
             "tool": random_file.action_data.convert.tool,
             "output": random_file.action_data.convert.output,
+            "converter": "",
         }
         assert isinstance(event.reason, str)
         assert event.reason
