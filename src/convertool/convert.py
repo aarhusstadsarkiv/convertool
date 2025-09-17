@@ -13,6 +13,7 @@ from acacore.models.file import MasterFile
 from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
 from acacore.utils.click import context_commands
+from acacore.utils.helpers import ExceptionManager
 from click import Context
 from structlog.stdlib import BoundLogger
 
@@ -183,10 +184,10 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
     instructions: ConvertInstructions[M, O],
     verbose: bool,
     logger: BoundLogger,
-) -> tuple[ConvertInstructions[M, O], list[ConvertedFile], Exception | None]:
+) -> tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]:
     output_paths: list[Path] = []
 
-    try:
+    with ExceptionManager(BaseException) as exception:
         converter = instructions.converter_cls(
             file=instructions.file,
             database=database,
@@ -207,15 +208,17 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
             Event.from_command(context, "out", file).log(INFO, logger, name=file.name)
 
         return instructions, output_files, None
-    except ConvertError as exception:
+
+    if exception.exception is not None:
         for p in output_paths:
             p.unlink(missing_ok=True)
-        return instructions, [], exception
-    except Exception as exception:
-        for p in output_paths:
-            p.unlink(missing_ok=True)
-        logger.exception(exception.__class__.__name__, exc_info=exception)
-        return instructions, [], exception
+
+    if not isinstance(exception.exception, ConvertError) and isinstance(exception.exception, Exception):
+        logger.exception(exception.exception.__class__.__name__, exc_info=exception.exception)
+    elif not isinstance(exception.exception, ConvertError) and isinstance(exception.exception, BaseException):
+        raise exception.exception
+
+    return instructions, [], exception
 
 
 def convert_async_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | StatutoryFile](
@@ -226,7 +229,7 @@ def convert_async_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile
     threads: int,
     verbose: bool,
     logger: BoundLogger,
-) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], Exception | None]]:
+) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
     context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
     with Pool(threads) as pool:
         args = [(context_str, database, output_dir, inst, verbose, logger) for inst in instructions]
@@ -244,6 +247,6 @@ def convert_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Sta
     queue: list[ConvertInstructions[M, O]],
     verbose: bool,
     logger: BoundLogger,
-) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], Exception | None]]:
+) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
     context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
     return [convert(context_str, database, output_dir, inst, verbose, logger) for inst in queue]
