@@ -171,7 +171,7 @@ def app():
 @option("--backup/--no-backup", is_flag=True, default=False, help="Create a backup of the database at start.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
-def digiarch(
+def cmd_digiarch(
     ctx: Context,
     avid_dir: str,
     target: str,
@@ -520,7 +520,7 @@ def digiarch(
     help="Set a root for the given files to keep the relative paths in the output.",
 )
 @pass_context
-def standalone(
+def cmd_standalone(
     ctx: Context,
     tool: str,
     output: str,
