@@ -50,39 +50,6 @@ from .util import get_avid
 from .util import open_database
 
 
-def handle_error(
-    ctx: Context,
-    database: FilesDB,
-    instruction: ConvertInstructions[OriginalFile | MasterFile, ConvertedFile],
-    error: ExceptionManager | None,
-):
-    if error is None:
-        return
-
-    if isinstance(error.exception, ConvertError):
-        event = Event.from_command(
-            ctx,
-            "error",
-            instruction.file,
-            {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
-            (error.exception.process.stderr or error.exception.process.stdout or None)
-            if error.exception.process
-            else "".join(format_tb(error.traceback)),
-        )
-        database.log.insert(event)
-    elif isinstance(error.exception, Exception):
-        event = Event.from_command(
-            ctx,
-            "error",
-            instruction.file,
-            {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
-            "".join(format_tb(error.traceback)),
-        )
-        database.log.insert(event)
-    elif isinstance(error.exception, BaseException):
-        raise error.exception
-
-
 def handle_results(
     ctx: Context,
     database: FilesDB,
@@ -95,14 +62,39 @@ def handle_results(
     commit_index: int,
     committer: Callable[[FilesDB, int], None],
 ) -> int:
-    if error.exception is not None:
-        handle_error(ctx, database, instruction, error)
+    if isinstance(error.exception, ConvertError):
+        event = Event.from_command(
+            ctx,
+            "error",
+            instruction.file,
+            {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
+            (error.exception.process.stderr or error.exception.process.stdout or None)
+            if error.exception.process
+            else "".join(format_tb(error.traceback)),
+        )
+        database.log.insert(event)
         return commit_index
+    elif isinstance(error.exception, Exception):
+        event = Event.from_command(
+            ctx,
+            "error",
+            instruction.file,
+            {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
+            "".join(format_tb(error.traceback)),
+        )
+        database.log.insert(event)
+        return commit_index
+    elif isinstance(error.exception, BaseException):
+        raise error.exception
+
     commit_index += 1
+
     for output_file in output_files:
         out_table.insert(output_file)
+
     instruction.file.processed = set_processed(instruction.file)
     src_table.update(instruction.file)
+
     database.log.insert(
         Event.from_command(
             ctx,
@@ -116,7 +108,9 @@ def handle_results(
             },
         )
     )
+
     committer(database, commit_index)
+
     return commit_index
 
 
