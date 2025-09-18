@@ -62,7 +62,7 @@ def handle_results(
     commit_index: int,
     committer: Callable[[FilesDB, int], None],
 ) -> int:
-    if isinstance(error.exception, ConvertError):
+    if error and isinstance(error.exception, ConvertError):
         event = Event.from_command(
             ctx,
             "error",
@@ -74,7 +74,7 @@ def handle_results(
         )
         database.log.insert(event)
         return commit_index
-    elif isinstance(error.exception, Exception):
+    elif error and isinstance(error.exception, Exception):
         event = Event.from_command(
             ctx,
             "error",
@@ -84,7 +84,7 @@ def handle_results(
         )
         database.log.insert(event)
         return commit_index
-    elif isinstance(error.exception, BaseException):
+    elif error and isinstance(error.exception, BaseException):
         raise error.exception
 
     commit_index += 1
