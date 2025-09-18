@@ -90,10 +90,14 @@ def handle_results(
     out_table: Table,
     instruction: ConvertInstructions[OriginalFile | MasterFile, ConvertedFile],
     output_files: list[ConvertedFile],
+    error: ExceptionManager | None,
     set_processed: Callable[[OriginalFile | MasterFile], bool],
     commit_index: int,
     committer: Callable[[FilesDB, int], None],
 ) -> int:
+    if error.exception is not None:
+        handle_error(ctx, database, instruction, error)
+        return commit_index
     commit_index += 1
     for output_file in output_files:
         out_table.insert(output_file)
@@ -350,7 +354,6 @@ def cmd_digiarch(
                         verbose,
                         logger,
                     ):
-                        handle_error(ctx, database, instruction, error)
                         handle_results(
                             ctx,
                             database,
@@ -358,6 +361,7 @@ def cmd_digiarch(
                             out_table,
                             instruction,
                             output_files,
+                            error,
                             set_processed,
                             commit_index,
                             committer,
@@ -371,7 +375,6 @@ def cmd_digiarch(
                     verbose,
                     logger,
                 ):
-                    handle_error(ctx, database, instruction, error)
                     handle_results(
                         ctx,
                         database,
@@ -379,6 +382,7 @@ def cmd_digiarch(
                         out_table,
                         instruction,
                         output_files,
+                        error,
                         set_processed,
                         commit_index,
                         committer,
