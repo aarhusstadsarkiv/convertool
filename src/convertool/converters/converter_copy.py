@@ -9,6 +9,10 @@ class ConverterCopy(ConverterABC):
     tool_names: ClassVar[list[str]] = ["copy"]
     outputs: ClassVar[list[str]] = ["copy"]
 
+    @classmethod
+    def match_tool(cls, tool: str, output: str) -> bool:
+        return tool in cls.tool_names
+
     def output_puid(self, output: str) -> str | None:  # noqa: ARG002
         return self.file.puid
 
