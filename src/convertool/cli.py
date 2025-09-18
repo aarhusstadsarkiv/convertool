@@ -84,6 +84,7 @@ def handle_error(
 
 
 def handle_results(
+    ctx: Context,
     database: FilesDB,
     src_table: Table,
     out_table: Table,
@@ -98,6 +99,19 @@ def handle_results(
         out_table.insert(output_file)
     instruction.file.processed = set_processed(instruction.file)
     src_table.update(instruction.file)
+    database.log.insert(
+        Event.from_command(
+            ctx,
+            "converted",
+            instruction.file,
+            {
+                "tool": instruction.tool,
+                "output": instruction.output,
+                "converter": instruction.converter_cls.__name__,
+                "files": len(output_files),
+            },
+        )
+    )
     committer(database, commit_index)
     return commit_index
 
@@ -338,6 +352,7 @@ def cmd_digiarch(
                     ):
                         handle_error(ctx, database, instruction, error)
                         handle_results(
+                            ctx,
                             database,
                             src_table,
                             out_table,
@@ -358,6 +373,7 @@ def cmd_digiarch(
                 ):
                     handle_error(ctx, database, instruction, error)
                     handle_results(
+                        ctx,
                         database,
                         src_table,
                         out_table,
