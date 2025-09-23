@@ -202,7 +202,10 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         )
 
         output_paths = converter.convert(output_dir, instructions.output, keep_relative_path=True)
-        output_files = [instructions.output_cls.from_file(p, output_dir, instructions.file.uuid) for p in output_paths]
+        output_files = [
+            instructions.output_cls.from_file(p, output_dir, {"original_uuid": instructions.file.uuid, "sequence": n})
+            for n, p in enumerate(output_paths)
+        ]
 
         for file in output_files:
             Event.from_command(context, "out", file).log(INFO, logger, name=file.name)
