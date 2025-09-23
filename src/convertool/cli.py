@@ -16,7 +16,6 @@ from acacore.database import FilesDB
 from acacore.database.table import Table
 from acacore.database.upgrade import is_latest
 from acacore.models.event import Event
-from acacore.models.file import BaseFile
 from acacore.models.file import ConvertedFile
 from acacore.models.file import MasterFile
 from acacore.models.file import OriginalFile
@@ -542,7 +541,8 @@ def standalone(
 
     for file_path in map(Path, files):
         try:
-            file = BaseFile.from_file(file_path, root or file_path.parent)
+            # noinspection PyProtectedMember
+            file = converters.base._dummy_base_file(file_path, root or file_path.parent)
             converter = converter_cls(file, options=dict(options), capture_output=not verbose)
             converted_files = converter.convert(dest, output, keep_relative_path=root is not None)
             for converted_file in converted_files:
