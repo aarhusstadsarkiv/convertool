@@ -143,7 +143,7 @@ def convert_file(
     ctx: Context,
     avid: AVID,
     database: FilesDB,
-    file: BaseFile,
+    file: OriginalFile | MasterFile,
     file_type: Literal["original", "master"],
     dest_type: Literal["master", "access", "statutory"],
     tool: str,
@@ -194,7 +194,7 @@ def convert_file(
     else:
         raise ValueError(f"Unknown destination file type {dest_type!r}")
 
-    Event.from_command(ctx, f"run:{tool}.{output}", (file.uuid, file_type)).log(INFO, *loggers)
+    Event.from_command(ctx, f"run:{tool}.{output}", file).log(INFO, *loggers)
 
     if dry_run:
         return []
@@ -214,11 +214,11 @@ def convert_file(
     dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
     dest_files: list[ConvertedFile] = []
 
-    for dst in dest_paths:
-        dst_file = dst_cls.from_file(dst, avid.path, file.uuid)
+    for n, dst in enumerate(dest_paths):
+        dst_file = dst_cls.from_file(dst, avid.path, {"original_uuid": file.uuid, "sequence": n})
         dst_file.puid = converter.output_puid(output)
         dst_table.insert(dst_file, on_exists="replace")
-        Event.from_command(ctx, f"out:{tool}.{output}", (dst_file.uuid, dest_type)).log(INFO, *loggers, output=dst.name)
+        Event.from_command(ctx, f"out:{tool}.{output}", dst_file).log(INFO, *loggers, output=dst.name)
         dest_files.append(dst_file)
 
     return dest_files
@@ -409,7 +409,7 @@ def digiarch(
                         )
 
                     if isinstance(convert_error.exception, MissingDependency | UnsupportedPlatform):
-                        Event.from_command(ctx, "warning", (file.uuid, file_type)).log(
+                        Event.from_command(ctx, "warning", file).log(
                             WARNING,
                             logger,
                             error=repr(convert_error.exception),
@@ -419,7 +419,7 @@ def digiarch(
                         error = Event.from_command(
                             ctx,
                             "error",
-                            (file.uuid, file_type),
+                            file,
                             {"tool": tool, "output": output},
                             (convert_error.exception.process.stderr or convert_error.exception.process.stdout or None)
                             if convert_error.exception.process
@@ -438,7 +438,7 @@ def digiarch(
                         error = Event.from_command(
                             ctx,
                             "error",
-                            (file.uuid, file_type),
+                            file,
                             {"tool": tool, "output": output},
                             "".join(format_tb(convert_error.traceback)),
                         )
@@ -461,7 +461,7 @@ def digiarch(
                         Event.from_command(
                             ctx,
                             "converted",
-                            (file.uuid, file_type),
+                            file,
                             {"tool": tool, "output": output, "files": len(output_files)},
                         )
                     )
