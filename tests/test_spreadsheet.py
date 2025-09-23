@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
+from convertool.converters.base import dummy_base_file
 from convertool.converters.converter_spreadsheet import ConverterSpreadsheet
 
 
@@ -11,7 +11,7 @@ def test_spreadsheet_to_ods(test_files: dict[str, Path], output_dir: Path, siegf
     for path in [f for n, f in test_files.items() if n.startswith("spreadsheet.")]:
         print(path.name)
 
-        file = BaseFile.from_file(path, root=path.parent)
+        file = dummy_base_file(path, path.parent)
         converter = ConverterSpreadsheet(file)
 
         output_files = converter.convert(output_dir, "ods")
@@ -28,7 +28,7 @@ def test_spreadsheet_to_pdf(test_files: dict[str, Path], output_dir: Path, siegf
     for path in [f for n, f in test_files.items() if n.startswith("spreadsheet.")]:
         print(path.name)
 
-        file = BaseFile.from_file(path, root=path.parent)
+        file = dummy_base_file(path, path.parent)
         converter = ConverterSpreadsheet(file)
 
         output_files = converter.convert(output_dir, "pdf")
@@ -45,7 +45,7 @@ def test_spreadsheet_to_html(test_files: dict[str, Path], output_dir: Path, sieg
     for path in [f for n, f in test_files.items() if n.startswith("spreadsheet.")]:
         print(path.name)
 
-        file = BaseFile.from_file(path, root=path.parent)
+        file = dummy_base_file(path, path.parent)
         converter = ConverterSpreadsheet(file)
 
         output_files = converter.convert(output_dir, "html")

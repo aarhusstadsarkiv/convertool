@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
 from convertool.converters import ConverterMedCom
@@ -9,12 +8,13 @@ from convertool.converters import ConverterMedComToPDF
 from convertool.converters import ConverterXSL
 from convertool.converters import ConverterXSLToImage
 from convertool.converters import ConverterXSLToPDF
+from convertool.converters.base import dummy_base_file
 
 from .test_image import MIMETYPES
 
 
 def test_xml_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = BaseFile.from_file(test_files["medcom.xml"], root=test_files["medcom.xml"].parent)
+    file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = ConverterXSL(file)
 
     output_files = converter.convert(output_dir, "html")
@@ -25,7 +25,7 @@ def test_xml_to_html(test_files: dict[str, Path], reference_files: dict[str, Pat
 
 
 def test_xml_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["medcom.xml"], root=test_files["medcom.xml"].parent)
+    file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = ConverterXSLToPDF(file)
 
     output_files = converter.convert(output_dir, "pdf")
@@ -36,7 +36,7 @@ def test_xml_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 
 def test_xml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["medcom.xml"], root=test_files["medcom.xml"].parent)
+    file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = ConverterXSLToImage(file)
 
     for output in converter.outputs:
@@ -47,7 +47,7 @@ def test_xml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: 
 
 
 def test_medcom_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = BaseFile.from_file(test_files["medcom.xml"], root=test_files["medcom.xml"].parent)
+    file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = ConverterMedCom(file)
 
     output_files = converter.convert(output_dir, "html")
@@ -58,7 +58,7 @@ def test_medcom_to_html(test_files: dict[str, Path], reference_files: dict[str, 
 
 
 def test_medcom_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["medcom.xml"], root=test_files["medcom.xml"].parent)
+    file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = ConverterMedComToPDF(file)
 
     output_files = converter.convert(output_dir, "pdf")
@@ -69,7 +69,7 @@ def test_medcom_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried:
 
 
 def test_medcom_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["medcom.xml"], root=test_files["medcom.xml"].parent)
+    file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = ConverterMedComToImage(file)
 
     for output in converter.outputs:

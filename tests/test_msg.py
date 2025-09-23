@@ -1,18 +1,18 @@
 from pathlib import Path
 
-from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
 from convertool.converters import ConverterMSG
 from convertool.converters import ConverterMSGToImage
 from convertool.converters import ConverterMSGToPDF
+from convertool.converters.base import dummy_base_file
 
 from .test_image import MIMETYPES
 
 
 # noinspection DuplicatedCode
 def test_msg(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
-    file = BaseFile.from_file(test_files["message.msg"], root=test_files["message.msg"].parent)
+    file = dummy_base_file(test_files["message.msg"], test_files["message.msg"].parent)
     converter = ConverterMSG(file)
 
     for output in converter.outputs:
@@ -24,7 +24,7 @@ def test_msg(test_files: dict[str, Path], reference_files: dict[str, Path], outp
 
 
 def test_msg_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["message.msg"], root=test_files["message.msg"].parent)
+    file = dummy_base_file(test_files["message.msg"], test_files["message.msg"].parent)
     converter = ConverterMSGToPDF(file)
 
     output_files = converter.convert(output_dir, "pdf")
@@ -34,7 +34,7 @@ def test_msg_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 
 def test_msg_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["message.msg"], root=test_files["message.msg"].parent)
+    file = dummy_base_file(test_files["message.msg"], test_files["message.msg"].parent)
     converter = ConverterMSGToImage(file)
 
     for output in converter.outputs:
