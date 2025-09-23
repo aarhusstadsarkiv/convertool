@@ -56,7 +56,7 @@ def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
     return max([c.process_timeout or 0.0 for c in converters], default=0.0) or None
 
 
-def _dummy_base_file(path: Path, root: Path | None = None) -> BaseFile:
+def dummy_base_file(path: Path, root: Path | None = None) -> BaseFile:
     return BaseFile(
         checksum="",
         encoding=None,

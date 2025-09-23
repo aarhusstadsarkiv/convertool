@@ -4,11 +4,11 @@ from typing import ClassVar
 from convertool.util import TempDir
 
 from . import resources
-from .base import _dummy_base_file
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
 from .base import ConverterABC
+from .base import dummy_base_file
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
 
@@ -99,7 +99,7 @@ class ConverterXSLToPDF(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             html = ConverterXSL(self.file, self.database).convert(tmp_dir, "html", xsl=xsl)[0]
 
-            return ConverterHTML(_dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTML(dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
@@ -126,7 +126,7 @@ class ConverterXSLToImage(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             html = ConverterXSL(self.file, self.database).convert(tmp_dir, "html", xsl=xsl)[0]
 
-            return ConverterHTMLToImage(_dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTMLToImage(dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
@@ -146,7 +146,7 @@ class ConverterMedComToPDF(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             html = ConverterMedCom(self.file, self.database).convert(tmp_dir, "html")[0]
 
-            return ConverterHTML(_dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTML(dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
@@ -166,7 +166,7 @@ class ConverterMedComToImage(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             html = ConverterMedCom(self.file, self.database).convert(tmp_dir, "html")[0]
 
-            return ConverterHTMLToImage(_dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTMLToImage(dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
