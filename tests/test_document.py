@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from acacore.models.file import BaseFile
 from acacore.siegfried import Siegfried
 
+from convertool.converters.base import dummy_base_file
 from convertool.converters.converter_document import ConverterDocument
 from convertool.converters.converter_document import ConverterDocumentToImage
 
@@ -14,7 +14,7 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
     for path in [f for n, f in test_files.items() if n.startswith("document.")]:
         print(path.name)
 
-        file = BaseFile.from_file(path, root=path.parent)
+        file = dummy_base_file(path, path.parent)
         converter = ConverterDocument(file)
 
         output_files = converter.convert(output_dir, "odt")
@@ -31,7 +31,7 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
     for path in [f for n, f in test_files.items() if n.startswith("document.")]:
         print(path.name)
 
-        file = BaseFile.from_file(path, root=path.parent)
+        file = dummy_base_file(path, path.parent)
         converter = ConverterDocument(file)
 
         output_files = converter.convert(output_dir, "pdf")
@@ -48,7 +48,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
     for path in [f for n, f in test_files.items() if n.startswith("document.")]:
         print(path.name)
 
-        file = BaseFile.from_file(path, root=path.parent)
+        file = dummy_base_file(path, path.parent)
         converter = ConverterDocument(file)
 
         output_files = converter.convert(output_dir, "html")
@@ -61,7 +61,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
 
 
 def test_document_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = BaseFile.from_file(test_files["document.docx"], root=test_files["document.docx"].parent)
+    file = dummy_base_file(test_files["document.docx"], test_files["document.docx"].parent)
     converter = ConverterDocumentToImage(file)
 
     for output in converter.outputs:

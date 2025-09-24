@@ -4,11 +4,11 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
-from .base import _dummy_base_file
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
 from .base import ConverterABC
+from .base import dummy_base_file
 from .converter_image import ConverterImage
 from .exceptions import ConvertError
 
@@ -70,7 +70,7 @@ class ConverterMDIToPDF(ConverterABC):
                 self.file, self.database, self.file.root, capture_output=self.capture_output
             ).convert(tmp_dir, "tif", keep_relative_path=False)[0]
             pdfs: list[Path] = ConverterImage(
-                _dummy_base_file(tiff, tmp_dir),
+                dummy_base_file(tiff, tmp_dir),
                 None,
                 tmp_dir,
                 capture_output=self.capture_output,

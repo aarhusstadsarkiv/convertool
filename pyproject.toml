@@ -1,6 +1,6 @@
 [project]
 name = "convertool"
-version = "4.2.8"
+version = "4.3.0"
 description = ""
 authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
 requires-python = ">=3.12"
@@ -14,6 +14,7 @@ dependencies = [
     "chardet>=5.2.0,<6",
     "extract-msg>=0.53.0,<1",
     "sas7bdat>=2.2.3,<3",
+    "rich>=14.1.0,<15",
 ]
 
 [project.scripts]
@@ -28,7 +29,7 @@ dev = [
 ]
 
 [tool.uv.sources]
-acacore = { git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v5.3.0" }
+acacore = { git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v5.4.1" }
 
 [build-system]
 requires = ["hatchling"]

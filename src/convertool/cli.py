@@ -1,26 +1,25 @@
 from collections.abc import Callable
 from datetime import datetime
-from logging import ERROR
+from itertools import batched
 from logging import INFO
-from logging import Logger
 from logging import WARNING
 from pathlib import Path
 from shutil import copy2
-from sqlite3 import DatabaseError
 from traceback import format_tb
-from typing import Any
 from typing import Literal
 
+import structlog
 from acacore.__version__ import __version__ as __acacore_version__
 from acacore.database import FilesDB
 from acacore.database.table import Table
-from acacore.database.upgrade import is_latest
 from acacore.models.event import Event
-from acacore.models.file import BaseFile
+from acacore.models.file import AccessFile
 from acacore.models.file import ConvertedFile
 from acacore.models.file import MasterFile
 from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
+from acacore.models.reference_files import ActionData
+from acacore.models.reference_files import ConvertAction
 from acacore.utils.click import end_program
 from acacore.utils.click import param_callback_query
 from acacore.utils.click import start_program
@@ -32,196 +31,87 @@ from click import Context
 from click import group
 from click import IntRange
 from click import option
-from click import Parameter
 from click import pass_context
 from click import Path as ClickPath
 from click import version_option
-from click.exceptions import Exit
-from structlog.stdlib import BoundLogger
 
-from . import converters
 from .__version__ import __version__
+from .convert import convert_async_queue
+from .convert import convert_queue
+from .convert import ConvertInstructions
+from .convert import file_queues
+from .convert import master_file_converter
+from .convert import original_file_converter
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
-from .util import AVID
 from .util import ctx_params
 from .util import get_avid
 from .util import open_database
 
 
-def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | None:
-    for converter in (
-        converters.ConverterCopy,
-        converters.ConverterTemplate,
-        converters.ConverterSymphovert,
-        converters.ConverterGIS,
-        converters.ConverterHTML,
-        converters.ConverterHTMLToImage,
-        converters.ConverterCAD,
-        converters.ConverterTNEF,
-        converters.ConverterMDI,
-        converters.ConverterMDIToPDF,
-        converters.ConverterMedCom,
-        converters.ConverterMedComToImage,
-        converters.ConverterMedComToPDF,
-        converters.ConverterMSG,
-        converters.ConverterMSGToImage,
-        converters.ConverterMSGToPDF,
-        converters.ConverterMSExcel,
-        converters.ConverterMSPowerPoint,
-        converters.ConverterMSWord,
-        converters.ConverterDocument,
-        converters.ConverterDocumentToImage,
-        converters.ConverterPresentation,
-        converters.ConverterSpreadsheet,
-        converters.ConverterSAS,
-        converters.ConverterPDFToImage,
-        converters.ConverterPDFLargeToImage,
-        converters.ConverterTextToImage,
-        converters.ConverterImage,
-        converters.ConverterAudio,
-        converters.ConverterVideo,
-        converters.ConverterPDF,
-        converters.ConverterXSL,
-        converters.ConverterXSLToImage,
-        converters.ConverterXSLToPDF,
-        converters.ConverterZIPFile,
-    ):
-        if converter.match_tool(tool, output):
-            return converter
-
-    return None
-
-
-def root_callback(ctx: Context, param: Parameter, value: str):
-    if not (path := Path(value)).joinpath("_metadata", "files.db").is_file():
-        raise BadParameter(f"No _metadata/files.db present in {value!r}.", ctx, param)
-    return path
-
-
-def check_database_version(ctx: Context, param: Parameter, path: Path):
-    if not path.is_file():
-        return
-    with FilesDB(path, check_version=False) as db:
-        try:
-            is_latest(db.connection, raise_on_difference=True)
-        except DatabaseError as err:
-            raise BadParameter(err.args[0], ctx, param)
-
-
-def original_file_tool_output(file: OriginalFile) -> tuple[str, str, dict[str, Any] | None]:
-    if file.action == "convert" and not file.action_data.convert:
-        raise ValueError("Missing convert action data", file)
-    if file.action == "convert":
-        return file.action_data.convert.tool, file.action_data.convert.output, file.action_data.convert.options
-    elif file.action == "ignore" and not file.action_data.ignore:
-        raise ValueError("Missing ignore action data", file)
-    elif file.action == "ignore":
-        return "template", file.action_data.ignore.template, None
-    else:
-        raise ValueError(f"Unsupported action {file.action!r}", file)
-
-
-def master_file_tool_output(
-    file: MasterFile,
-    dest_type: Literal["access", "statutory"],
-) -> tuple[str, str, dict[str, Any] | None]:
-    if dest_type == "access" and not file.convert_access:
-        raise ValueError("Missing convert action data", file)
-    if dest_type == "access":
-        return file.convert_access.tool, file.convert_access.output, file.convert_access.options
-    elif dest_type == "statutory" and not file.convert_statutory:
-        raise ValueError("Missing convert action data", file)
-    elif dest_type == "statutory":
-        return file.convert_statutory.tool, file.convert_statutory.output, file.convert_statutory.options
-    else:
-        raise ValueError(f"Unsupported action {file.action!r}", file)
-
-
-def convert_file(
+def handle_results(
     ctx: Context,
-    avid: AVID,
     database: FilesDB,
-    file: BaseFile,
-    file_type: Literal["original", "master"],
-    dest_type: Literal["master", "access", "statutory"],
-    tool: str,
-    output: str,
-    options: dict[str, Any] | None,
-    *,
-    verbose: bool = False,
-    loggers: list[Logger | BoundLogger] | None = None,
-    dry_run: bool = False,
-    timeout: int | None = None,
-) -> list[ConvertedFile]:
-    loggers = loggers or []
-    root_dir: Path
-    output_dir: Path
-    dst_cls: type[ConvertedFile]
-    dst_table: Table[ConvertedFile]
+    src_table: Table,
+    out_table: Table,
+    instruction: ConvertInstructions[OriginalFile | MasterFile, ConvertedFile],
+    output_files: list[ConvertedFile],
+    error: ExceptionManager | None,
+    set_processed: Callable[[OriginalFile | MasterFile], bool],
+    commit_index: int,
+    committer: Callable[[FilesDB, int], None],
+) -> int:
+    if error and isinstance(error.exception, ConvertError):
+        event = Event.from_command(
+            ctx,
+            "error",
+            instruction.file,
+            {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
+            (error.exception.process.stderr or error.exception.process.stdout or None)
+            if error.exception.process
+            else "".join(format_tb(error.traceback)),
+        )
+        database.log.insert(event)
+        return commit_index
+    elif error and isinstance(error.exception, Exception):
+        event = Event.from_command(
+            ctx,
+            "error",
+            instruction.file,
+            {"tool": instruction.tool, "output": instruction.output, "converter": instruction.converter_cls.__name__},
+            "".join(format_tb(error.traceback)),
+        )
+        database.log.insert(event)
+        return commit_index
+    elif error and isinstance(error.exception, BaseException):
+        raise error.exception
 
-    if tool in converters.ConverterCopy.tool_names:
-        output = converters.ConverterCopy.outputs[0]
+    commit_index += 1
 
-    converter_cls = find_converter(tool, output)
+    for output_file in output_files:
+        out_table.insert(output_file)
 
-    if not converter_cls:
-        raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
+    instruction.file.processed = set_processed(instruction.file)
+    src_table.update(instruction.file)
 
-    if timeout is not None:
-        converter_cls.process_timeout = None if timeout == 0 else float(timeout)
-
-    if file_type == "original":
-        root_dir = avid.dirs.original_documents
-    elif file_type == "master":
-        root_dir = avid.dirs.master_documents
-    else:
-        raise ValueError(f"Unknown source file type {file_type!r}")
-
-    if dest_type == "master":
-        output_dir = avid.dirs.master_documents
-        dst_cls = MasterFile
-        dst_table = database.master_files
-    elif dest_type == "access":
-        output_dir = avid.dirs.access_documents
-        dst_cls = ConvertedFile
-        dst_table = database.access_files
-    elif dest_type == "statutory":
-        output_dir = avid.dirs.documents
-        dst_cls = StatutoryFile
-        dst_table = database.statutory_files
-    else:
-        raise ValueError(f"Unknown destination file type {dest_type!r}")
-
-    Event.from_command(ctx, f"run:{tool}.{output}", (file.uuid, file_type)).log(INFO, *loggers)
-
-    if dry_run:
-        return []
-
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    file_copy = file.model_copy(deep=True)
-    file_copy.relative_path = file.get_absolute_path(avid.path).relative_to(root_dir)
-    file_copy.root = root_dir
-    converter: converters.ConverterABC = converter_cls(
-        file_copy,
-        database,
-        avid.path,
-        options,
-        capture_output=not verbose,
+    database.log.insert(
+        Event.from_command(
+            ctx,
+            "converted",
+            instruction.file,
+            {
+                "tool": instruction.tool,
+                "output": instruction.output,
+                "converter": instruction.converter_cls.__name__,
+                "files": len(output_files),
+            },
+        )
     )
-    dest_paths: list[Path] = converter.convert(output_dir, output, keep_relative_path=True)
-    dest_files: list[ConvertedFile] = []
 
-    for dst in dest_paths:
-        dst_file = dst_cls.from_file(dst, avid.path, file.uuid)
-        dst_file.puid = converter.output_puid(output)
-        dst_table.insert(dst_file, on_exists="replace")
-        Event.from_command(ctx, f"out:{tool}.{output}", (dst_file.uuid, dest_type)).log(INFO, *loggers, output=dst.name)
-        dest_files.append(dst_file)
+    committer(database, commit_index)
 
-    return dest_files
+    return commit_index
 
 
 @group("convertool", no_args_is_help=True)
@@ -264,6 +154,7 @@ def app():
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
+@option("--threads", type=IntRange(min=1), default=4, help="Set number of threads for async conversion.")
 @option(
     "--commit",
     metavar="INTEGER",
@@ -276,7 +167,7 @@ def app():
 @option("--backup/--no-backup", is_flag=True, default=False, help="Create a backup of the database at start.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
 @pass_context
-def digiarch(
+def cmd_digiarch(
     ctx: Context,
     avid_dir: str,
     target: str,
@@ -284,6 +175,7 @@ def digiarch(
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
+    threads: int,
     commit: int,
     dry_run: bool,
     backup: bool,
@@ -318,6 +210,7 @@ def digiarch(
     same stem with the current date and time as suffix.
     """
     avid = get_avid(ctx, avid_dir, "avid_dir")
+    output_dir: Path
     file_type: Literal["original", "master"]
     dest_type: Literal["master", "access", "statutory"]
     file_type, _, dest_type = target.partition(":")
@@ -326,148 +219,168 @@ def digiarch(
         logger, _ = start_program(ctx, database, __version__, dry_run)
 
         if backup and not dry_run:
-            backup_path: Path = avid.database_path.with_stem(f"{avid.database_path.stem}-{datetime.now():%Y%m%d%H%M%S}")
+            backup_path: Path = avid.database_path.with_name(f"{datetime.now():%Y%m%d%H%M%S}-{avid.database_path.name}")
             Event.from_command(ctx, "backup:start").log(INFO, logger, name=backup_path.name)
             backup_path.unlink(missing_ok=True)
             copy2(avid.database_path, backup_path)
             Event.from_command(ctx, "backup:complete").log(INFO, logger, name=backup_path.name)
 
         src_table: Table[OriginalFile | MasterFile]
+        out_table: Table[ConvertedFile]
         is_processed: Callable[[OriginalFile | MasterFile], bool]
         src_query: str
         set_processed: Callable[[OriginalFile | MasterFile], bool | int]
-        committer: Callable[[FilesDB, int], None] | None
+        committer: Callable[[FilesDB, int], None]
 
         if commit <= 0:
-            committer = None
+            committer = lambda _, __: None  # noqa: E731
         elif commit == 1:
             committer = lambda _db, _: _db.commit()  # noqa: E731
         else:
             committer = lambda _db, _n: _db.commit() if _n % commit == 0 else None  # noqa: E731
 
-        if file_type == "original":
-            src_table = database.original_files
-            src_query = "action in ('convert', 'ignore')"
-            is_processed = lambda f: f.processed  # noqa: E731
-            set_processed = lambda _: True  # noqa: E731
-        elif file_type == "master" and dest_type == "access":
-            src_query = "convert_access is not null"
-            src_table = database.master_files
-            is_processed = lambda f: f.processed & 0b01  # noqa: E731
-            set_processed = lambda f: f.processed | 0b01  # noqa: E731
-        elif file_type == "master" and dest_type == "statutory":
-            src_query = "convert_statutory is not null"
-            src_table = database.master_files
-            is_processed = lambda f: f.processed & 0b10  # noqa: E731
-            set_processed = lambda f: f.processed | 0b10  # noqa: E731
-
-        if query[0]:  # noqa: SIM108
-            query = (f"({query[0]}) and ({src_query})", query[1])
-        else:
-            query = (src_query, [])
-
         with ExceptionManager(BaseException) as exception:
-            offset: int = 0
-            while files := src_table.select(
-                *query,
-                order_by=[("lower(relative_path)", "asc")],
-                limit=100,
-                offset=offset,
-            ).fetchall():
-                offset += len(files)
+            if file_type == "original" and dest_type == "master":
+                output_dir = avid.dirs.master_documents
+                src_table = database.original_files
+                out_table = database.master_files
+                src_query = "action in ('convert', 'ignore')"
+                is_processed = lambda f: f.processed  # noqa: E731
+                set_processed = lambda _: True  # noqa: E731
+            elif file_type == "master" and dest_type == "access":
+                output_dir = avid.dirs.access_documents
+                src_query = "convert_access is not null"
+                src_table = database.master_files
+                out_table = database.access_files
+                is_processed = lambda f: f.processed & 0b01  # noqa: E731
+                set_processed = lambda f: f.processed | 0b01  # noqa: E731
+            elif file_type == "master" and dest_type == "statutory":
+                output_dir = avid.dirs.documents
+                src_query = "convert_statutory is not null"
+                src_table = database.master_files
+                out_table = database.statutory_files
+                is_processed = lambda f: f.processed & 0b10  # noqa: E731
+                set_processed = lambda f: f.processed | 0b10  # noqa: E731
+            else:
+                raise ValueError(f"Unsupported file and destination combination: {file_type}:{dest_type}")
 
-                for file_index, file in enumerate(files, offset + 1):
-                    if is_processed(file):
-                        continue
+            if query[0]:  # noqa: SIM108
+                query = (f"({query[0]}) and ({src_query})", query[1])
+            else:
+                query = (src_query, [])
 
-                    if file_type == "original":
-                        tool, output, options = original_file_tool_output(file)
-                    elif file_type == "master":
-                        # noinspection PyTypeChecker
-                        tool, output, options = master_file_tool_output(file, dest_type)
+            Event.from_command(ctx, "compiling:start").log(INFO, logger)
+            to_process_table: Table[OriginalFile | MasterFile] = database.create_table(
+                src_table.model,
+                "_convertool",
+                [pk.name for pk in src_table.primary_keys],
+                {idx: [c.name for c in cs] for idx, cs in src_table.indices.items()},
+                ["root"],
+                temporary=True,
+                exist_ok=False,
+            )
+            database.execute(
+                f"""
+                insert into {to_process_table.name}
+                select {",".join(to_process_table.columns.keys())} from {src_table.name}
+                where {query[0] or "uuid is not null"}
+                """,
+                query[1],
+            )
+            database.commit()
+            Event.from_command(ctx, "compiling:end").log(INFO, logger)
 
-                    if tool_include and tool not in tool_include:
-                        continue
-                    if tool in tool_ignore:
-                        continue
+            output_dir.mkdir(parents=True, exist_ok=True)
 
-                    with ExceptionManager(MissingDependency, UnsupportedPlatform, ConvertError) as convert_error:
-                        output_files: list[ConvertedFile] = convert_file(
-                            ctx,
-                            avid,
-                            database,
-                            file,
-                            file_type,
-                            dest_type,
-                            tool,
-                            output,
-                            options,
-                            loggers=[logger],
-                            verbose=verbose,
-                            dry_run=dry_run,
-                            timeout=timeout,
-                        )
+            batch: tuple[OriginalFile | MasterFile, ...]
+            commit_index: int = 0
+            for batch in batched(
+                (f for f in to_process_table.select(order_by=[("lower(relative_path)", "asc")]) if not is_processed(f)),
+                threads * 2,
+            ):
+                instructions: list[
+                    ConvertInstructions[
+                        OriginalFile | MasterFile,
+                        MasterFile | AccessFile | StatutoryFile,
+                    ]
+                ] = []
 
-                    if isinstance(convert_error.exception, MissingDependency | UnsupportedPlatform):
-                        Event.from_command(ctx, "warning", (file.uuid, file_type)).log(
+                for file in batch:
+                    try:
+                        if isinstance(file, OriginalFile):
+                            instruction = original_file_converter(file)
+                        else:
+                            # noinspection PyTypeChecker
+                            # dest_type cannot be anything but "access" or "statutory" when file is a MasterFile
+                            instruction = master_file_converter(file, dest_type)
+                        if instruction.tool in tool_ignore:
+                            continue
+                        if tool_include and instruction.tool not in tool_include:
+                            continue
+                        if timeout is not None:
+                            instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
+                        instructions.append(instruction)
+                    except (ConvertError, UnsupportedPlatform, MissingDependency) as error:
+                        Event.from_command(ctx, f"warning:{error.__class__.__name__.lower()}", file).log(
                             WARNING,
                             logger,
-                            error=repr(convert_error.exception),
+                            error=error.args[0],
                         )
-                        continue
-                    if isinstance(convert_error.exception, ConvertError):
-                        error = Event.from_command(
-                            ctx,
-                            "error",
-                            (file.uuid, file_type),
-                            {"tool": tool, "output": output},
-                            (convert_error.exception.process.stderr or convert_error.exception.process.stdout or None)
-                            if convert_error.exception.process
-                            else "".join(format_tb(convert_error.traceback)),
-                        )
-                        database.log.insert(error)
-                        error.log(
-                            ERROR,
-                            logger,
-                            show_args=["uuid"],
-                            tool=[tool, output],
-                            error=convert_error.exception.msg,
-                        )
-                        continue
-                    if convert_error.exception:
-                        error = Event.from_command(
-                            ctx,
-                            "error",
-                            (file.uuid, file_type),
-                            {"tool": tool, "output": output},
-                            "".join(format_tb(convert_error.traceback)),
-                        )
-                        database.log.insert(error)
-                        error.log(
-                            ERROR,
-                            logger,
-                            show_args=["uuid"],
-                            tool=[tool, output],
-                            error=repr(convert_error.exception),
-                        )
-                        continue
 
-                    if dry_run:
-                        continue
-
-                    file.processed = set_processed(file)
-                    src_table.update(file)
-                    database.log.insert(
-                        Event.from_command(
-                            ctx,
-                            "converted",
-                            (file.uuid, file_type),
-                            {"tool": tool, "output": output, "files": len(output_files)},
+                if dry_run:
+                    for instruction in instructions:
+                        Event.from_command(ctx, "convert", instruction.file).log(
+                            INFO,
+                            logger,
+                            tool=[instruction.tool, instruction.output],
                         )
+                    continue
+
+                sync_queue, async_queues = file_queues(instructions, threads)
+
+                for async_queue in async_queues:
+                    for instruction, output_files, error in convert_async_queue(
+                        ctx,
+                        database,
+                        output_dir,
+                        async_queue,
+                        threads,
+                        verbose,
+                        logger,
+                    ):
+                        handle_results(
+                            ctx,
+                            database,
+                            src_table,
+                            out_table,
+                            instruction,
+                            output_files,
+                            error,
+                            set_processed,
+                            commit_index,
+                            committer,
+                        )
+
+                for instruction, output_files, error in convert_queue(
+                    ctx,
+                    database,
+                    output_dir,
+                    sync_queue,
+                    verbose,
+                    logger,
+                ):
+                    handle_results(
+                        ctx,
+                        database,
+                        src_table,
+                        out_table,
+                        instruction,
+                        output_files,
+                        error,
+                        set_processed,
+                        commit_index,
+                        committer,
                     )
-
-                    if not dry_run and committer:
-                        committer(database, file_index)
 
         end_program(ctx, database, exception, dry_run, logger)
 
@@ -477,7 +390,7 @@ def digiarch(
 @argument("output", nargs=1)
 @argument("destination", nargs=1, type=ClickPath(file_okay=False, writable=True, resolve_path=True))
 @argument(
-    "files",
+    "files_paths",
     metavar="FILE...",
     nargs=-1,
     type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
@@ -501,12 +414,12 @@ def digiarch(
     help="Set a root for the given files to keep the relative paths in the output.",
 )
 @pass_context
-def standalone(
+def cmd_standalone(
     ctx: Context,
     tool: str,
     output: str,
     destination: str,
-    files: tuple[str, ...],
+    files_paths: tuple[str, ...],
     options: tuple[tuple[str, str], ...],
     timeout: int | None,
     verbose: bool,
@@ -526,30 +439,64 @@ def standalone(
     Use the --verbose option to print the standard output from the converters. The output (standard or error) is always
     printed in case of an error.
     """
-    if root and any(not Path(f).is_relative_to(root) for f in files):
+    logger = structlog.stdlib.get_logger()
+
+    if root and any(not Path(f).is_relative_to(root) for f in files_paths):
         raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
-
-    converter_cls = find_converter(tool, output)
-
-    if not converter_cls:
-        raise BadParameter(f"cannot find converter for tool {tool} with output {output}.", ctx, ctx_params(ctx)["tool"])
-
-    if timeout is not None:
-        converter_cls.process_timeout = None if timeout == 0 else float(timeout)
 
     dest: Path = Path(destination)
     dest.mkdir(parents=True, exist_ok=True)
 
-    for file_path in map(Path, files):
+    # noinspection PyTypeChecker
+    try:
+        # noinspection PyTypeChecker
+        instructions = [
+            original_file_converter(
+                OriginalFile(
+                    checksum="",
+                    encoding=None,
+                    relative_path=p.relative_to(root) if root else Path(p.name),
+                    is_binary=False,
+                    size=p.stat().st_size,
+                    puid=None,
+                    signature=None,
+                    root=Path(root or p.parent),
+                    action="convert",
+                    action_data=ActionData(convert=ConvertAction(tool=tool, output=output, options=dict(options))),
+                    original_path=p,
+                )
+            )
+            for p_str in files_paths
+            if (p := Path(p_str)).is_file()
+        ]
+    except (MissingDependency, UnsupportedPlatform) as error:
+        logger.error(f"{error.__class__.__name__}: {' '.join(map(str, error.args))}")
+        return
+    except ConvertError as error:
+        logger.error(f"{error.__class__.__name__}: {error.msg}")
+        return
+
+    for instruction in instructions:
+        instruction.converter_cls.process_timeout = (
+            timeout
+            if timeout and instruction.converter_cls.process_timeout
+            else instruction.converter_cls.process_timeout
+        )
+        converter = instruction.converter_cls(
+            instruction.file,
+            None,
+            instruction.file.root,
+            instruction.options,
+            capture_output=not verbose,
+        )
+        # noinspection PyBroadException
         try:
-            file = BaseFile.from_file(file_path, root or file_path.parent)
-            converter = converter_cls(file, options=dict(options), capture_output=not verbose)
-            converted_files = converter.convert(dest, output, keep_relative_path=root is not None)
-            for converted_file in converted_files:
-                print(converted_file.relative_to(dest))
-        except (MissingDependency, UnsupportedPlatform) as err:
-            print(repr(err))
-            raise Exit(1)
-        except ConvertError as err:
-            print(err.msg)
-            raise Exit(1)
+            logger.info(f"<-- {instruction.file.relative_path}")
+            for file in converter.convert(dest, instruction.output):
+                logger.info(f"--> {file.relative_to(dest)}")
+        except KeyboardInterrupt:
+            raise
+        except ConvertError as error:
+            logger.error(error.msg)
+        except BaseException as error:
+            logger.exception(error.__class__.__name__)

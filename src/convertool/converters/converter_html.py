@@ -3,11 +3,11 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
-from .base import _dummy_base_file
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
 from .base import ConverterABC
+from .base import dummy_base_file
 from .converter_image import ConverterPDFToImage
 
 
@@ -56,7 +56,7 @@ class ConverterHTMLToImage(ConverterABC):
 
             pdf = pdfs[0]
 
-            return ConverterPDFToImage(_dummy_base_file(pdf, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterPDFToImage(dummy_base_file(pdf, tmp_dir), self.database, tmp_dir).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,
