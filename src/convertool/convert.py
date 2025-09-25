@@ -239,8 +239,8 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         Event.from_command(context, "error", instructions.file).log(
             ERROR,
             logger,
-            error=exception.exception.__class__.__name__,
             converter=f"{instructions.tool}:{instructions.output}",
+            error=exception.exception.__class__.__name__,
             **log_args,
         )
 
