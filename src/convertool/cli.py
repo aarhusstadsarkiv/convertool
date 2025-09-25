@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from datetime import datetime
 from itertools import batched
+from logging import ERROR
 from logging import INFO
 from logging import WARNING
 from pathlib import Path
@@ -321,9 +322,12 @@ def cmd_digiarch(
                             instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
                         instructions.append(instruction)
                     except (ConvertError, UnsupportedPlatform, MissingDependency) as error:
-                        Event.from_command(ctx, f"warning:{error.__class__.__name__.lower()}", file).log(
-                            WARNING,
+                        Event.from_command(ctx, f"error:{error.__class__.__name__.lower()}", file).log(
+                            ERROR,
                             logger,
+                            tool=f"{file.action_data.convert.tool}:{file.action_data.convert.output}"
+                            if file.action_data.convert
+                            else None,
                             error=error.args[0],
                         )
 
