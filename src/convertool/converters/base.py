@@ -30,7 +30,7 @@ def _test_dependency(*commands: str) -> str:
         if command_path := which(command):
             return command_path
 
-    raise MissingDependency(*commands)
+    raise MissingDependency(commands)
 
 
 @lru_cache
