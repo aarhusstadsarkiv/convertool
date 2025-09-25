@@ -327,8 +327,8 @@ def cmd_digiarch(
                         Event.from_command(ctx, "error", file).log(
                             ERROR,
                             logger,
+                            converter=error.tool_output,
                             error=error.__class__.__name__,
-                            tool=error.tool_output,
                             reason=" ".join(map(str, error.args)),
                         )
                     except UnsupportedPlatform as error:
