@@ -8,13 +8,13 @@ from acacore.models.file import BaseFile
 class MissingDependency(Exception):
     def __init__(self, dependencies: list[str] | tuple[str, ...], *args: Any) -> None:  # noqa: ANN401
         self.dependencies: list[str] = list(dependencies)
-        super().__init__(*args)
+        super().__init__(*dependencies, *args)
 
 
 class UnsupportedPlatform(Exception):
     def __init__(self, platform: str, *args: Any) -> None:  # noqa: ANN401
         self.platform: str = platform
-        super().__init__(*args)
+        super().__init__(platform, *args)
 
 
 class ConverterNotFound(Exception):
