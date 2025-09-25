@@ -5,10 +5,16 @@ from typing import Any
 from acacore.models.file import BaseFile
 
 
-class MissingDependency(Exception): ...
+class MissingDependency(Exception):
+    def __init__(self, dependencies: list[str] | tuple[str, ...], *args: Any):
+        self.dependencies: list[str] = list(dependencies)
+        super().__init__(*args)
 
 
-class UnsupportedPlatform(Exception): ...
+class UnsupportedPlatform(Exception):
+    def __init__(self, platform: str, *args: Any):
+        self.platform: str = platform
+        super().__init__(*args)
 
 
 class ConverterNotFound(Exception):
