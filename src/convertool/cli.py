@@ -3,7 +3,6 @@ from datetime import datetime
 from itertools import batched
 from logging import ERROR
 from logging import INFO
-from logging import WARNING
 from pathlib import Path
 from shutil import copy2
 from traceback import format_tb
