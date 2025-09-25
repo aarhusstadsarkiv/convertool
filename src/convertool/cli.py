@@ -307,6 +307,7 @@ def cmd_digiarch(
                 ] = []
 
                 for file in batch:
+                    instruction: ConvertInstructions | None = None
                     try:
                         if isinstance(file, OriginalFile):
                             instruction = original_file_converter(file)
@@ -318,6 +319,7 @@ def cmd_digiarch(
                             continue
                         if tool_include and instruction.tool not in tool_include:
                             continue
+                        instruction.converter_cls.test()
                         if timeout is not None:
                             instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
                         instructions.append(instruction)
@@ -334,6 +336,7 @@ def cmd_digiarch(
                             ERROR,
                             logger,
                             error=error.__class__.__name__,
+                            converter=f"{instruction.tool}:{instruction.output}",
                             platform=error.platform,
                             reason=" ".join(map(str, error.args)),
                         )
@@ -342,6 +345,7 @@ def cmd_digiarch(
                             ERROR,
                             logger,
                             error=error.__class__.__name__,
+                            converter=f"{instruction.tool}:{instruction.output}",
                             depedencies=error.dependencies,
                             reason=" ".join(map(str, error.args)),
                         )
