@@ -19,6 +19,7 @@ from click import Context
 from structlog.stdlib import BoundLogger
 
 from . import converters
+from .converters.exceptions import ConverterNotFound
 from .converters.exceptions import ConvertError
 
 
@@ -83,7 +84,7 @@ def original_file_converter(file: OriginalFile) -> ConvertInstructions[OriginalF
     :return: converter class, tool, output, options
     """
     if file.action == "convert" and not file.action_data.convert:
-        raise ConvertError(file, "Missing convert action data")
+        raise ConverterNotFound(None, None, "Missing convert action data")
     if file.action == "convert":
         tool, output, options = (
             file.action_data.convert.tool,
@@ -92,15 +93,15 @@ def original_file_converter(file: OriginalFile) -> ConvertInstructions[OriginalF
         )
         converter_cls = find_converter(tool, output)
     elif file.action == "ignore" and not file.action_data.ignore:
-        raise ConvertError(file, "Missing ignore action data")
+        raise ConverterNotFound(None, None, "Missing ignore action data")
     elif file.action == "ignore":
         tool, output, options = "template", file.action_data.ignore.template, None
         converter_cls = find_converter(tool, output)
     else:
-        raise ConvertError(file, f"Unsupported action {file.action!r}")
+        raise ValueError(f"Unsupported action {file.action!r}")
 
     if not converter_cls:
-        raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
+        raise ConverterNotFound(tool, output, f"No converter found for tool {tool!r} and output {output!r}")
 
     converter_cls.test_platforms()
     converter_cls.test_dependencies()
@@ -121,7 +122,7 @@ def master_file_converter(
     :return: converter class, tool, output, options
     """
     if dest_type == "access" and not file.convert_access:
-        raise ConvertError(file, "Missing convert action data")
+        raise ConverterNotFound(None, None, "Missing convert action data")
     if dest_type == "access":
         tool, output, options = (
             file.convert_access.tool,
@@ -131,7 +132,7 @@ def master_file_converter(
         converter_cls = find_converter(tool, output)
         output_cls = ConvertedFile
     elif dest_type == "statutory" and not file.convert_statutory:
-        raise ConvertError(file, "Missing convert action data")
+        raise ConverterNotFound(None, None, "Missing convert action data")
     elif dest_type == "statutory":
         tool, output, options = (
             file.convert_statutory.tool,
@@ -140,11 +141,9 @@ def master_file_converter(
         )
         converter_cls = find_converter(tool, output)
         output_cls = StatutoryFile
-    else:
-        raise ConvertError(file, f"Unsupported action {file.action!r}")
 
     if not converter_cls:
-        raise ConvertError(file, f"No converter found for tool {tool!r} and output {output!r}")
+        raise ConverterNotFound(tool, output, f"No converter found for tool {tool!r} and output {output!r}")
 
     converter_cls.test_platforms()
     converter_cls.test_dependencies()
