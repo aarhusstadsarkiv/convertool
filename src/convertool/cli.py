@@ -337,6 +337,8 @@ def cmd_digiarch(
 
                 for file in batch:
                     instruction: ConvertInstructions | None = None
+                    file.relative_path = file.get_absolute_path(avid.path).relative_to(src_dir)
+                    file.root = src_dir
                     try:
                         if isinstance(file, OriginalFile):
                             instruction = original_file_converter(file)
