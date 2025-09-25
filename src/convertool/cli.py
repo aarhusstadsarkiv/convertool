@@ -42,6 +42,7 @@ from .convert import ConvertInstructions
 from .convert import file_queues
 from .convert import master_file_converter
 from .convert import original_file_converter
+from .converters.exceptions import ConverterNotFound
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
@@ -320,14 +321,29 @@ def cmd_digiarch(
                         if timeout is not None:
                             instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
                         instructions.append(instruction)
-                    except (ConvertError, UnsupportedPlatform, MissingDependency) as error:
-                        Event.from_command(ctx, f"error:{error.__class__.__name__.lower()}", file).log(
+                    except ConverterNotFound as error:
+                        Event.from_command(ctx, "error", file).log(
                             ERROR,
                             logger,
-                            tool=f"{file.action_data.convert.tool}:{file.action_data.convert.output}"
-                            if file.action_data.convert
-                            else None,
-                            error=error.args[0],
+                            error=error.__class__.__name__,
+                            tool=error.tool_output,
+                            reason=" ".join(map(str, error.args)),
+                        )
+                    except UnsupportedPlatform as error:
+                        Event.from_command(ctx, "error", file).log(
+                            ERROR,
+                            logger,
+                            error=error.__class__.__name__,
+                            platform=error.platform,
+                            reason=" ".join(map(str, error.args)),
+                        )
+                    except MissingDependency as error:
+                        Event.from_command(ctx, "error", file).log(
+                            ERROR,
+                            logger,
+                            error=error.__class__.__name__,
+                            depedencies=error.dependencies,
+                            reason=" ".join(map(str, error.args)),
                         )
 
                 if dry_run:
