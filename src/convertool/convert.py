@@ -199,6 +199,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
             INFO,
             logger,
             converter=f"{instructions.tool}:{instructions.output}",
+            name=instructions.file.name,
         )
 
         output_paths = converter.convert(output_dir, instructions.output, keep_relative_path=True)
@@ -208,7 +209,13 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         ]
 
         for file in output_files:
-            Event.from_command(context, "out", file).log(INFO, logger, name=file.name)
+            Event.from_command(context, "out", file).log(
+                INFO,
+                logger,
+                converter=f"{instructions.tool}:{instructions.output}",
+                original=instructions.file.name,
+                name=file.name,
+            )
 
         return instructions, output_files, None
 
