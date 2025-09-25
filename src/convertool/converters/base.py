@@ -102,6 +102,18 @@ class ConverterABC(ABC):
 
     @classmethod
     @lru_cache
+    def test(cls):
+        """
+        Test dependencies and platforms.
+
+        :raise UnsupportedPlatform: If the platform is not supported.
+        :raise MissingDependency: If a dependency is missing.
+        """
+        cls.test_platforms()
+        cls.test_dependencies()
+
+    @classmethod
+    @lru_cache
     def test_platforms(cls):
         """
         Test whether the converter supports the current platform.
