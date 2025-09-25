@@ -228,7 +228,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         log_args: dict[str, Any] = {}
         if isinstance(exception.exception, ConvertTimeoutError):
             log_args["timeout"] = converter.process_timeout
-        if isinstance(exception.exception, OutputDirError | OutputTargetError):
+        elif isinstance(exception.exception, OutputDirError | OutputTargetError):
             log_args["reason"] = exception.exception.msg
         elif isinstance(exception.exception, ConvertError):
             if isinstance(exception.exception.msg, BaseException):
