@@ -179,6 +179,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
     database: FilesDB | None,
     output_dir: Path,
     root_dir: Path,
+    relative_root_dir: Path,
     instructions: ConvertInstructions[M, O],
     verbose: bool,
     logger: BoundLogger,
@@ -187,11 +188,13 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
 
     with ExceptionManager(BaseException) as exception:
         converter = instructions.converter_cls(
-            file=instructions.file,
+            file=instructions.file.model_copy(deep=True),
             database=database,
             options=instructions.options,
             capture_output=not verbose,
         )
+        converter.file.relative_path = converter.file.get_absolute_path(root_dir).relative_to(relative_root_dir)
+        converter.file.root = relative_root_dir
 
         Event.from_command(context, "run", instructions.file).log(
             INFO,
@@ -253,6 +256,7 @@ def convert_async_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile
     database: FilesDB | None,
     output_dir: Path,
     root_dir: Path,
+    relative_root_dir: Path,
     instructions: list[ConvertInstructions[M, O]],
     threads: int,
     verbose: bool,
@@ -260,7 +264,10 @@ def convert_async_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile
 ) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
     context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
     with Pool(threads) as pool:
-        args = [(context_str, database, output_dir, root_dir, inst, verbose, logger) for inst in instructions]
+        args = [
+            (context_str, database, output_dir, root_dir, relative_root_dir, inst, verbose, logger)
+            for inst in instructions
+        ]
         results = pool.starmap(convert, args)
         pool.close()
         pool.join()
@@ -273,9 +280,22 @@ def convert_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Sta
     database: FilesDB | None,
     output_dir: Path,
     root_dir: Path,
+    relative_root_dir: Path,
     queue: list[ConvertInstructions[M, O]],
     verbose: bool,
     logger: BoundLogger,
 ) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
     context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
-    return [convert(context_str, database, output_dir, root_dir, inst, verbose, logger) for inst in queue]
+    return [
+        convert(
+            context_str,
+            database,
+            output_dir,
+            root_dir,
+            relative_root_dir,
+            inst,
+            verbose,
+            logger,
+        )
+        for inst in queue
+    ]
