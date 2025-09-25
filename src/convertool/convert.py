@@ -226,7 +226,10 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         log_args: dict[str, Any] = {}
         if isinstance(exception.exception, ConvertError):
             log_args["error"] = exception.exception.__class__.__name__
-            log_args["msg"] = exception.exception.msg or ""
+            if isinstance(exception.exception.msg, BaseException):
+                log_args["exc_info"] = exception.exception.msg
+            elif exception.exception.msg:
+                log_args["msg"] = ""
             if verbose and exception.exception.process:
                 log_args["stderr"] = exception.exception.process.stderr or exception.exception.process.stderr or ""
         elif isinstance(exception.exception, Exception):
