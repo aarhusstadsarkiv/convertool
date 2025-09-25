@@ -335,8 +335,8 @@ def cmd_digiarch(
                         Event.from_command(ctx, "error", file).log(
                             ERROR,
                             logger,
-                            error=error.__class__.__name__,
                             converter=f"{instruction.tool}:{instruction.output}",
+                            error=error.__class__.__name__,
                             platform=error.platform,
                             reason=" ".join(map(str, error.args)),
                         )
@@ -344,8 +344,8 @@ def cmd_digiarch(
                         Event.from_command(ctx, "error", file).log(
                             ERROR,
                             logger,
-                            error=error.__class__.__name__,
                             converter=f"{instruction.tool}:{instruction.output}",
+                            error=error.__class__.__name__,
                             depedencies=error.dependencies,
                             reason=" ".join(map(str, error.args)),
                         )
