@@ -21,6 +21,9 @@ from structlog.stdlib import BoundLogger
 from . import converters
 from .converters.exceptions import ConverterNotFound
 from .converters.exceptions import ConvertError
+from .converters.exceptions import ConvertTimeoutError
+from .converters.exceptions import OutputDirError
+from .converters.exceptions import OutputTargetError
 
 
 class ConvertInstructions[M: OriginalFile | MasterFile, O: ConvertedFile](NamedTuple):
@@ -223,8 +226,11 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         for p in output_paths:
             p.unlink(missing_ok=True)
         log_args: dict[str, Any] = {}
-        if isinstance(exception.exception, ConvertError):
-            log_args["error"] = exception.exception.__class__.__name__
+        if isinstance(exception.exception, ConvertTimeoutError):
+            log_args["timeout"] = converter.process_timeout
+        if isinstance(exception.exception, OutputDirError | OutputTargetError):
+            log_args["reason"] = exception.exception.msg
+        elif isinstance(exception.exception, ConvertError):
             if isinstance(exception.exception.msg, BaseException):
                 log_args["exc_info"] = exception.exception.msg
             elif exception.exception.msg:
@@ -232,7 +238,6 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
             if verbose and exception.exception.process:
                 log_args["stderr"] = exception.exception.process.stderr or exception.exception.process.stderr or ""
         elif isinstance(exception.exception, Exception):
-            log_args["error"] = exception.exception.__class__.__name__
             log_args["msg"] = " ".join(map(str, exception.exception.args)) or ""
             log_args["exc_info"] = exception.exception
         elif isinstance(exception.exception, BaseException):
@@ -240,6 +245,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         Event.from_command(context, "error", instructions.file).log(
             ERROR,
             logger,
+            error=exception.exception.__class__.__name__,
             converter=f"{instructions.tool}:{instructions.output}",
             **log_args,
         )
