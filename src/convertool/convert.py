@@ -106,9 +106,6 @@ def original_file_converter(file: OriginalFile) -> ConvertInstructions[OriginalF
     if not converter_cls:
         raise ConverterNotFound(tool, output, f"No converter found for tool {tool!r} and output {output!r}")
 
-    converter_cls.test_platforms()
-    converter_cls.test_dependencies()
-
     # noinspection PyTypeChecker
     return ConvertInstructions(file, "original", "master", converter_cls, tool, output, options, MasterFile)
 
@@ -147,9 +144,6 @@ def master_file_converter(
 
     if not converter_cls:
         raise ConverterNotFound(tool, output, f"No converter found for tool {tool!r} and output {output!r}")
-
-    converter_cls.test_platforms()
-    converter_cls.test_dependencies()
 
     return ConvertInstructions(file, "master", dest_type, converter_cls, tool, output, options, output_cls)
 
