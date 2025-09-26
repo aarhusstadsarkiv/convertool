@@ -15,7 +15,7 @@ class ConverterDocument(ConverterABC):
     tool_names: ClassVar[list[str]] = ["document"]
     outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
     process_timeout: ClassVar[float] = 60.0
-    dependencies: ClassVar[dict[str, list[str]]] = {"libreoffice": ["libreoffice"]}
+    dependencies: ClassVar[dict[str, list[str]]] = {"libreoffice": ["libreoffice", "soffice"]}
 
     def output_puid(self, output: str) -> str | None:
         if output == "html":

@@ -1,13 +1,31 @@
 from subprocess import CalledProcessError
 from subprocess import TimeoutExpired
+from typing import Any
 
 from acacore.models.file import BaseFile
 
 
-class MissingDependency(Exception): ...
+class MissingDependency(Exception):
+    def __init__(self, dependencies: list[str] | tuple[str, ...], *args: Any) -> None:  # noqa: ANN401
+        self.dependencies: list[str] = list(dependencies)
+        super().__init__(*dependencies, *args)
 
 
-class UnsupportedPlatform(Exception): ...
+class UnsupportedPlatform(Exception):
+    def __init__(self, platform: str, *args: Any) -> None:  # noqa: ANN401
+        self.platform: str = platform
+        super().__init__(platform, *args)
+
+
+class ConverterNotFound(Exception):
+    def __init__(self, tool: str | None, output: str | None, *args: Any) -> None:  # noqa: ANN401
+        self.tool: str | None = tool
+        self.output: str | None = output
+        super().__init__(*args)
+
+    @property
+    def tool_output(self) -> str | None:
+        return f"{self.tool}:{self.output}" if self.tool or self.output else None
 
 
 class BadOption(Exception): ...

@@ -30,7 +30,7 @@ def _test_dependency(*commands: str) -> str:
         if command_path := which(command):
             return command_path
 
-    raise MissingDependency(*commands)
+    raise MissingDependency(commands)
 
 
 @lru_cache
@@ -99,6 +99,18 @@ class ConverterABC(ABC):
     @classmethod
     def match_tool(cls, tool: str, output: str) -> bool:
         return tool in cls.tool_names and output in cls.outputs
+
+    @classmethod
+    @lru_cache
+    def test(cls):
+        """
+        Test dependencies and platforms.
+
+        :raise UnsupportedPlatform: If the platform is not supported.
+        :raise MissingDependency: If a dependency is missing.
+        """
+        cls.test_platforms()
+        cls.test_dependencies()
 
     @classmethod
     @lru_cache

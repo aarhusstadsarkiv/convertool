@@ -23,7 +23,7 @@ def test_digiarch_original_master(avid_dir_copy: Path):
         rm_tree(avid.dirs.access_documents)
         rm_tree(avid.dirs.documents)
 
-    app.main(["digiarch", str(avid.path), "original:master"], standalone_mode=False)
+    app.main(["digiarch", str(avid.path), "original:master", "--verbose"], standalone_mode=False)
 
     with FilesDB(avid.database_path) as db:
         for file in db.original_files.select():
@@ -83,7 +83,7 @@ def test_digiarch_master_access(avid_dir_copy: Path):
         rm_tree(avid.dirs.access_documents)
         rm_tree(avid.dirs.documents)
 
-    app.main(["digiarch", str(avid.path), "master:access"], standalone_mode=False)
+    app.main(["digiarch", str(avid.path), "master:access", "--verbose"], standalone_mode=False)
 
     with FilesDB(avid.database_path) as db:
         for file in db.master_files.select():
@@ -120,7 +120,7 @@ def test_digiarch_master_statutory(avid_dir_copy: Path):
         rm_tree(avid.dirs.access_documents)
         rm_tree(avid.dirs.documents)
 
-    app.main(["digiarch", str(avid.path), "master:statutory"], standalone_mode=False)
+    app.main(["digiarch", str(avid.path), "master:statutory", "--verbose"], standalone_mode=False)
 
     with FilesDB(avid.database_path) as db:
         for file in db.master_files.select():

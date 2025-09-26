@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from datetime import datetime
 from itertools import batched
+from logging import ERROR
 from logging import INFO
-from logging import WARNING
 from pathlib import Path
 from shutil import copy2
 from traceback import format_tb
@@ -42,9 +42,11 @@ from .convert import ConvertInstructions
 from .convert import file_queues
 from .convert import master_file_converter
 from .convert import original_file_converter
+from .converters.exceptions import ConverterNotFound
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
+from .util import AVID
 from .util import ctx_params
 from .util import get_avid
 from .util import open_database
@@ -114,6 +116,80 @@ def handle_results(
     return commit_index
 
 
+def compile_convert_targets(
+    avid: AVID,
+    database: FilesDB,
+    target: Literal["original:master", "master:access", "master:statutory"],
+    query: tuple[str | None, list[str]],
+) -> tuple[
+    Table[OriginalFile | MasterFile],
+    Table[ConvertedFile],
+    Table[OriginalFile | MasterFile],
+    Callable[[OriginalFile | MasterFile], bool],
+    Callable[[OriginalFile | MasterFile], bool | int],
+    Path,
+    Path,
+]:
+    src_table: Table[OriginalFile | MasterFile]
+    out_table: Table[ConvertedFile]
+    is_processed: Callable[[OriginalFile | MasterFile], bool]
+    src_query: str
+    set_processed: Callable[[OriginalFile | MasterFile], bool | int]
+
+    if target == "original:master":
+        src_table = database.original_files
+        src_query = "action in ('convert', 'ignore')"
+        src_dir = avid.dirs.original_documents
+        out_table = database.master_files
+        out_dir = avid.dirs.master_documents
+        is_processed = lambda f: f.processed  # noqa: E731
+        set_processed = lambda _: True  # noqa: E731
+    elif target == "master:access":
+        src_table = database.master_files
+        src_query = "convert_access is not null"
+        src_dir = avid.dirs.master_documents
+        out_table = database.access_files
+        out_dir = avid.dirs.access_documents
+        is_processed = lambda f: f.processed & 0b01  # noqa: E731
+        set_processed = lambda f: f.processed | 0b01  # noqa: E731
+    elif target == "master:statutory":
+        src_table = database.master_files
+        src_query = "convert_statutory is not null"
+        src_dir = avid.dirs.master_documents
+        out_table = database.statutory_files
+        out_dir = avid.dirs.documents
+        is_processed = lambda f: f.processed & 0b10  # noqa: E731
+        set_processed = lambda f: f.processed | 0b10  # noqa: E731
+    else:
+        raise ValueError(f"Unsupported file and destination combination: {target}")
+
+    if query[0]:  # noqa: SIM108
+        query = (f"({query[0]}) and ({src_query})", query[1])
+    else:
+        query = (src_query, [])
+
+    to_process_table: Table[OriginalFile | MasterFile] = database.create_table(
+        src_table.model,
+        "_convertool",
+        [pk.name for pk in src_table.primary_keys],
+        {idx: [c.name for c in cs] for idx, cs in src_table.indices.items()},
+        ["root"],
+        temporary=True,
+        exist_ok=False,
+    )
+    database.execute(
+        f"""
+                insert into {to_process_table.name}
+                select {",".join(to_process_table.columns.keys())} from {src_table.name}
+                where {query[0] or "uuid is not null"}
+                """,
+        query[1],
+    )
+    database.commit()
+
+    return src_table, out_table, to_process_table, is_processed, set_processed, out_dir, src_dir
+
+
 @group("convertool", no_args_is_help=True)
 @version_option(__version__, message=f"%(prog)s, version %(version)s\nacacore, version {__acacore_version__}")
 def app():
@@ -170,7 +246,7 @@ def app():
 def cmd_digiarch(
     ctx: Context,
     avid_dir: str,
-    target: str,
+    target: Literal["original:master", "master:access", "master:statutory"],
     query: tuple[str | None, list[str]],
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
@@ -210,10 +286,7 @@ def cmd_digiarch(
     same stem with the current date and time as suffix.
     """
     avid = get_avid(ctx, avid_dir, "avid_dir")
-    output_dir: Path
-    file_type: Literal["original", "master"]
-    dest_type: Literal["master", "access", "statutory"]
-    file_type, _, dest_type = target.partition(":")
+    committer: Callable[[FilesDB, int], None]
 
     with open_database(ctx, avid, "avid_dir") as database:
         logger, _ = start_program(ctx, database, __version__, dry_run)
@@ -225,72 +298,29 @@ def cmd_digiarch(
             copy2(avid.database_path, backup_path)
             Event.from_command(ctx, "backup:complete").log(INFO, logger, name=backup_path.name)
 
-        src_table: Table[OriginalFile | MasterFile]
-        out_table: Table[ConvertedFile]
-        is_processed: Callable[[OriginalFile | MasterFile], bool]
-        src_query: str
-        set_processed: Callable[[OriginalFile | MasterFile], bool | int]
-        committer: Callable[[FilesDB, int], None]
-
-        if commit <= 0:
-            committer = lambda _, __: None  # noqa: E731
-        elif commit == 1:
-            committer = lambda _db, _: _db.commit()  # noqa: E731
-        else:
-            committer = lambda _db, _n: _db.commit() if _n % commit == 0 else None  # noqa: E731
-
         with ExceptionManager(BaseException) as exception:
-            if file_type == "original" and dest_type == "master":
-                output_dir = avid.dirs.master_documents
-                src_table = database.original_files
-                out_table = database.master_files
-                src_query = "action in ('convert', 'ignore')"
-                is_processed = lambda f: f.processed  # noqa: E731
-                set_processed = lambda _: True  # noqa: E731
-            elif file_type == "master" and dest_type == "access":
-                output_dir = avid.dirs.access_documents
-                src_query = "convert_access is not null"
-                src_table = database.master_files
-                out_table = database.access_files
-                is_processed = lambda f: f.processed & 0b01  # noqa: E731
-                set_processed = lambda f: f.processed | 0b01  # noqa: E731
-            elif file_type == "master" and dest_type == "statutory":
-                output_dir = avid.dirs.documents
-                src_query = "convert_statutory is not null"
-                src_table = database.master_files
-                out_table = database.statutory_files
-                is_processed = lambda f: f.processed & 0b10  # noqa: E731
-                set_processed = lambda f: f.processed | 0b10  # noqa: E731
-            else:
-                raise ValueError(f"Unsupported file and destination combination: {file_type}:{dest_type}")
-
-            if query[0]:  # noqa: SIM108
-                query = (f"({query[0]}) and ({src_query})", query[1])
-            else:
-                query = (src_query, [])
-
             Event.from_command(ctx, "compiling:start").log(INFO, logger)
-            to_process_table: Table[OriginalFile | MasterFile] = database.create_table(
-                src_table.model,
-                "_convertool",
-                [pk.name for pk in src_table.primary_keys],
-                {idx: [c.name for c in cs] for idx, cs in src_table.indices.items()},
-                ["root"],
-                temporary=True,
-                exist_ok=False,
-            )
-            database.execute(
-                f"""
-                insert into {to_process_table.name}
-                select {",".join(to_process_table.columns.keys())} from {src_table.name}
-                where {query[0] or "uuid is not null"}
-                """,
-                query[1],
-            )
-            database.commit()
-            Event.from_command(ctx, "compiling:end").log(INFO, logger)
+
+            if commit <= 0:
+                committer = lambda _, __: None  # noqa: E731
+            elif commit == 1:
+                committer = lambda _db, _: _db.commit()  # noqa: E731
+            else:
+                committer = lambda _db, _n: _db.commit() if _n % commit == 0 else None  # noqa: E731
+
+            (
+                src_table,
+                out_table,
+                to_process_table,
+                is_processed,
+                set_processed,
+                output_dir,
+                src_dir,
+            ) = compile_convert_targets(avid, database, target, query)
 
             output_dir.mkdir(parents=True, exist_ok=True)
+
+            Event.from_command(ctx, "compiling:end").log(INFO, logger)
 
             batch: tuple[OriginalFile | MasterFile, ...]
             commit_index: int = 0
@@ -306,25 +336,47 @@ def cmd_digiarch(
                 ] = []
 
                 for file in batch:
+                    instruction: ConvertInstructions | None = None
                     try:
                         if isinstance(file, OriginalFile):
                             instruction = original_file_converter(file)
                         else:
                             # noinspection PyTypeChecker
                             # dest_type cannot be anything but "access" or "statutory" when file is a MasterFile
-                            instruction = master_file_converter(file, dest_type)
+                            instruction = master_file_converter(file, target.split(":")[1])
                         if instruction.tool in tool_ignore:
                             continue
                         if tool_include and instruction.tool not in tool_include:
                             continue
+                        instruction.converter_cls.test()
                         if timeout is not None:
                             instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
                         instructions.append(instruction)
-                    except (ConvertError, UnsupportedPlatform, MissingDependency) as error:
-                        Event.from_command(ctx, f"warning:{error.__class__.__name__.lower()}", file).log(
-                            WARNING,
+                    except ConverterNotFound as error:
+                        Event.from_command(ctx, "error", file).log(
+                            ERROR,
                             logger,
-                            error=error.args[0],
+                            converter=error.tool_output,
+                            error=error.__class__.__name__,
+                            reason=" ".join(map(str, error.args)),
+                        )
+                    except UnsupportedPlatform as error:
+                        Event.from_command(ctx, "error", file).log(
+                            ERROR,
+                            logger,
+                            converter=f"{instruction.tool}:{instruction.output}",
+                            error=error.__class__.__name__,
+                            platform=error.platform,
+                            reason=" ".join(map(str, error.args)),
+                        )
+                    except MissingDependency as error:
+                        Event.from_command(ctx, "error", file).log(
+                            ERROR,
+                            logger,
+                            converter=f"{instruction.tool}:{instruction.output}",
+                            error=error.__class__.__name__,
+                            depedencies=error.dependencies,
+                            reason=" ".join(map(str, error.args)),
                         )
 
                 if dry_run:
@@ -343,6 +395,8 @@ def cmd_digiarch(
                         ctx,
                         database,
                         output_dir,
+                        avid.path,
+                        src_dir,
                         async_queue,
                         threads,
                         verbose,
@@ -365,6 +419,8 @@ def cmd_digiarch(
                     ctx,
                     database,
                     output_dir,
+                    avid.path,
+                    src_dir,
                     sync_queue,
                     verbose,
                     logger,
