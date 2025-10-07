@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 from functools import lru_cache
 from functools import reduce
+from hashlib import md5
 from os import PathLike
 from pathlib import Path
 from shutil import which
@@ -85,6 +86,7 @@ class ConverterABC(ABC):
         options: dict[str, Any] | None = None,
         *,
         capture_output: bool = True,
+        hashed_putput_name: bool = True,
     ) -> None:
         self.test_platforms()
         self.test_dependencies()
@@ -93,6 +95,7 @@ class ConverterABC(ABC):
         self.file.root = self.file.root or root
         self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
+        self.hashed_putput_name: bool = hashed_putput_name
 
         self.test_options()
 
@@ -205,9 +208,16 @@ class ConverterABC(ABC):
             suffix(es).
         :return: The path to the putput file.
         """
+        name: str = (
+            (md5(str(self.file.relative_path).encode("utf-8")).hexdigest() + self.file.suffixes)
+            if self.hashed_putput_name
+            else self.file.name
+        )
+        if not output:
+            return output_dir.joinpath(name)
         if append:
-            return output_dir / (self.file.name + f".{output}")
-        return output_dir / (self.file.name.removesuffix(self.file.suffixes) + f".{output}")
+            return output_dir.joinpath(f"{name}.{output}")
+        return output_dir.joinpath(f"{name.removesuffix(self.file.suffixes)}.{output}")
 
     # noinspection PyMethodMayBeStatic
     def output_puid(self, output: str) -> str | None:  # noqa: ARG002
