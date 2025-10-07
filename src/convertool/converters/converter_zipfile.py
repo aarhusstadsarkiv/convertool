@@ -6,7 +6,6 @@ from convertool.util import TempDir
 
 from .base import _hashed_file_name
 from .base import ConverterABC
-from .base import dummy_base_file
 from .exceptions import BadOption
 from .exceptions import ConvertError
 
@@ -23,7 +22,7 @@ class ConverterZIPFile(ConverterABC):
         if "path" not in self.options:
             raise BadOption(self.file, "Missing 'path' option.")
 
-    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
+    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
         if self.hashed_putput_name:
             return output_dir.joinpath(_hashed_file_name(self.file.get_absolute_path() / self.options["path"]))
         return output_dir.joinpath(Path(self.options["path"]).name)
