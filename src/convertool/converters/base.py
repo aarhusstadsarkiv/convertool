@@ -57,6 +57,10 @@ def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
     return max([c.process_timeout or 0.0 for c in converters], default=0.0) or None
 
 
+def _hashed_file_name(path: str | PathLike[str]) -> str:
+    return md5(str(path).encode("utf-8")).hexdigest() + dummy_base_file(path).suffixes
+
+
 def dummy_base_file(path: str | PathLike[str], root: str | PathLike[str] | None = None) -> BaseFile:
     return BaseFile(
         checksum="",
@@ -208,11 +212,7 @@ class ConverterABC(ABC):
             suffix(es).
         :return: The path to the putput file.
         """
-        name: str = (
-            (md5(str(self.file.relative_path).encode("utf-8")).hexdigest() + self.file.suffixes)
-            if self.hashed_putput_name
-            else self.file.name
-        )
+        name: str = _hashed_file_name(self.file.relative_path) if self.hashed_putput_name else self.file.name
         if not output:
             return output_dir.joinpath(name)
         if append:
