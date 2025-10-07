@@ -239,6 +239,13 @@ def app():
     show_default=True,
     help="Number of files edited per commit.",
 )
+@option(
+    "--hashed-names/--no-hashed-names",
+    is_flag=True,
+    default=True,
+    show_default=True,
+    help="Use hashed names instead of filenames.",
+)
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
 @option("--backup/--no-backup", is_flag=True, default=False, help="Create a backup of the database at start.")
 @option("--verbose", is_flag=True, default=False, help="Show all outputs from converters.")
@@ -253,6 +260,7 @@ def cmd_digiarch(
     timeout: int | None,
     threads: int,
     commit: int,
+    hashed_names: bool,
     dry_run: bool,
     backup: bool,
     verbose: bool,
@@ -268,6 +276,9 @@ def cmd_digiarch(
 
     The QUERY argument allows to restrict which files will be converted. For details on its usage see the
     "digiarch edit" command.
+
+    The default behaviour is to used MD5 checksums as output names based on the relative path of the source file to avoid collisions.
+    To use the original names with new suffixes, use the --no-hashed-names option.
 
     To restrict the tools that should be used for conversion, use the --tool-ignore and --tool-include options.
     The former will skip files whose tools are in the list, the second will skip files whose tools are not in the list.
@@ -400,6 +411,7 @@ def cmd_digiarch(
                         async_queue,
                         threads,
                         verbose,
+                        hashed_names,
                         logger,
                     ):
                         handle_results(
@@ -423,6 +435,7 @@ def cmd_digiarch(
                     src_dir,
                     sync_queue,
                     verbose,
+                    hashed_names,
                     logger,
                 ):
                     handle_results(

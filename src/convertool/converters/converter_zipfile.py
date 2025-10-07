@@ -4,6 +4,7 @@ from zipfile import ZipFile
 
 from convertool.util import TempDir
 
+from .base import _hashed_file_name
 from .base import ConverterABC
 from .exceptions import BadOption
 from .exceptions import ConvertError
@@ -21,9 +22,14 @@ class ConverterZIPFile(ConverterABC):
         if "path" not in self.options:
             raise BadOption(self.file, "Missing 'path' option.")
 
+    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
+        if self.hashed_putput_name:
+            return output_dir.joinpath(_hashed_file_name(self.file.get_absolute_path() / self.options["path"]))
+        return output_dir.joinpath(Path(self.options["path"]).name)
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, Path(self.options["path"]).suffix.lstrip("."))
+        dest_file: Path = self.output_file(dest_dir, "")
 
         with TempDir(self.file.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:

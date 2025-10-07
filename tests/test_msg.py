@@ -13,7 +13,7 @@ from .test_image import MIMETYPES
 # noinspection DuplicatedCode
 def test_msg(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["message.msg"], test_files["message.msg"].parent)
-    converter = ConverterMSG(file)
+    converter = ConverterMSG(file, hashed_putput_name=False)
 
     for output in converter.outputs:
         print(output)
@@ -25,7 +25,7 @@ def test_msg(test_files: dict[str, Path], reference_files: dict[str, Path], outp
 
 def test_msg_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["message.msg"], test_files["message.msg"].parent)
-    converter = ConverterMSGToPDF(file)
+    converter = ConverterMSGToPDF(file, hashed_putput_name=False)
 
     output_files = converter.convert(output_dir, "pdf")
     assert len(output_files) == 1
@@ -35,7 +35,7 @@ def test_msg_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 def test_msg_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["message.msg"], test_files["message.msg"].parent)
-    converter = ConverterMSGToImage(file)
+    converter = ConverterMSGToImage(file, hashed_putput_name=False)
 
     for output in converter.outputs:
         print(output)

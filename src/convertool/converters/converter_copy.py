@@ -17,7 +17,7 @@ class ConverterCopy(ConverterABC):
         return self.file.puid
 
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
-        return output_dir / self.file.name
+        return super().output_file(output_dir, "")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path, mkdir=True)

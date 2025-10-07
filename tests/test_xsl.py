@@ -15,7 +15,7 @@ from .test_image import MIMETYPES
 
 def test_xml_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterXSL(file)
+    converter = ConverterXSL(file, hashed_putput_name=False)
 
     output_files = converter.convert(output_dir, "html")
     assert len(output_files) == 1
@@ -48,7 +48,7 @@ def test_xml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: 
 
 def test_medcom_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterMedCom(file)
+    converter = ConverterMedCom(file, hashed_putput_name=False)
 
     output_files = converter.convert(output_dir, "html")
     assert len(output_files) == 1

@@ -26,7 +26,7 @@ def test_template(test_files: dict[str, Path], reference_files: dict[str, Path],
         action_data=ActionData(),
         root=output_dir,
     )
-    converter = ConverterTemplate(file)
+    converter = ConverterTemplate(file, hashed_putput_name=False)
     templates: list[TTemplateType] = [
         t for t in TemplateTypeEnum if t in ConverterTemplate.outputs and t not in ["duplicate", "extracted-archive"]
     ]
