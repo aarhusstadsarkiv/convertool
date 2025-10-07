@@ -7,7 +7,7 @@ from convertool.converters.base import dummy_base_file
 # noinspection DuplicatedCode
 def test_gis_to_gml(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["gis.tab"], test_files["gis.tab"].parent)
-    converter = ConverterGIS(file)
+    converter = ConverterGIS(file, hashed_putput_name=False)
 
     output_files = converter.convert(output_dir, "gml")
     assert len(output_files) == 2

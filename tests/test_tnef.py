@@ -7,7 +7,7 @@ from convertool.converters.converter_tnef import ConverterTNEF
 # noinspection DuplicatedCode
 def test_tnef(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["winmail.dat"], test_files["winmail.dat"].parent)
-    converter = ConverterTNEF(file)
+    converter = ConverterTNEF(file, hashed_putput_name=False)
 
     for output in converter.outputs:
         print(output)
