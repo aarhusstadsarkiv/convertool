@@ -20,4 +20,8 @@ def test_audio(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfri
         for output, mimetypes in MIMETYPES.items():
             output_files = converter.convert(output_dir, output)
             assert len(output_files) == 1
-            assert siegfried.identify(output_files[0]).files[0].best_match().mime in mimetypes
+            sf_match = siegfried.identify(output_files[0]).files[0].best_match()
+            assert sf_match is not None
+            assert sf_match.mime in mimetypes
+            output_puid = converter.output_puid(output)
+            assert output_puid is None or sf_match.id == converter.output_puid(output)
