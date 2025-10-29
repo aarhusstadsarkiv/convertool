@@ -364,6 +364,10 @@ def cmd_digiarch(
                             instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
                         instructions.append(instruction)
                     except ConverterNotFound as error:
+                        if error.tool in tool_ignore:
+                            continue
+                        if tool_include and error.tool not in tool_include:
+                            continue
                         Event.from_command(ctx, "error", file).log(
                             ERROR,
                             logger,
