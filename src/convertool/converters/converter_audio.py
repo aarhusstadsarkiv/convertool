@@ -11,6 +11,7 @@ class ConverterAudio(ConverterABC):
     outputs: ClassVar[list[str]] = [
         "mp3",
         "wav",
+        "flac",
     ]
     process_timeout: ClassVar[float] = 1800
     dependencies: ClassVar[dict[str, list[str]]] = {"ffmpeg": ["ffmpeg"]}
