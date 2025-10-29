@@ -19,6 +19,10 @@ class ConverterAudio(ConverterABC):
     def output_puid(self, output: str) -> str | None:
         if output == "mp3":
             return "fmt/134"
+        if output == "wav":
+            return "fmt/141"
+        if output == "flac":
+            return "fmt/279"
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
