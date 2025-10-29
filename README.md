@@ -93,6 +93,7 @@ Options:
 |--------------|--------------------|--------------------------------------------------------------------------------|-----------|
 | audio        | mp3                | Convert audio/video to MP3                                                     | .mp3      |
 | audio        | wav                | Convert audio/video to WAV                                                     | .wav      |
+| audio        | flac               | Convert audio/video to FLAC                                                    | .flac     |
 | cad          | dxf                | Convert CAD file (DWG, DXF, etc.) to DXF                                       | .dxf      |
 | cad          | pdf                | Convert CAD file (DWG, DXF, etc.) to PDF                                       | .pdf      |
 | cad          | svg                | Convert CAD file (DWG, DXF, etc.) to SVG                                       | .svg      |

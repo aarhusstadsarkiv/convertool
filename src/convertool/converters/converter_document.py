@@ -22,8 +22,10 @@ class ConverterDocument(ConverterABC):
             return "fmt/471"
         return None
 
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def output_filter(self, output: str) -> str:  # noqa: ARG002
+    # noinspection PyMethodMayBeStatic
+    def output_filter(self, output: str) -> str:
+        if output == "pdf":
+            return 'writer_pdf_Export:{"SelectPdfVersion":3}'
         return ""
 
     # noinspection DuplicatedCode
@@ -42,6 +44,7 @@ class ConverterDocument(ConverterABC):
                 f"{output}{output_filter}" if output_filter else output,
                 "--outdir",
                 tmp_dir,
+                f"-env:UserInstallation={tmp_dir.joinpath('_libreoffice').as_uri()}",
                 self.file.get_absolute_path(),
             )
             dest_dir.mkdir(parents=True, exist_ok=True)

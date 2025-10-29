@@ -36,6 +36,7 @@ class ConverterSpreadsheet(ConverterABC):
                 "--convert-to",
                 f"{output}{output_filter}" if output_filter else output,
                 "--outdir",
+                f"-env:UserInstallation={tmp_dir.joinpath('_libreoffice').as_uri()}",
                 tmp_dir,
                 self.file.get_absolute_path(),
             )
