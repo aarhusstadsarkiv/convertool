@@ -4,7 +4,7 @@ import pytest
 
 from convertool.converters import ConverterSymphovert
 from convertool.converters.base import dummy_base_file
-from convertool.converters.exceptions import ConvertError
+from convertool.converters.exceptions import MissingDependency
 
 
 # noinspection DuplicatedCode
@@ -19,6 +19,6 @@ def test_symphovert(test_files: dict[str, Path], output_dir: Path):
         assert len(output_files) == 1
         assert output_files[0] == expected_file
 
-    with pytest.raises(ConvertError, match="not found"):
+    with pytest.raises(MissingDependency):
         output_dir.joinpath(file.name).with_suffix(".odt").unlink(missing_ok=True)
         ConverterSymphovert(file).convert(output_dir, "odt")
