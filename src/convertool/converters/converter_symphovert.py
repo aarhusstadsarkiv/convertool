@@ -3,13 +3,18 @@ from subprocess import run as run_process
 from time import sleep
 from typing import ClassVar
 
-import pyautogui
 import pyperclip
 
 from convertool.util import TempDir
 
 from .base import ConverterABC
 from .exceptions import ConvertError
+from .exceptions import MissingDependency
+
+try:
+    import pyautogui
+except ImportError:
+    pyautogui = None
 
 
 def copypaste(string: str):
@@ -24,12 +29,21 @@ class ConverterSymphovert(ConverterABC):
     dependencies: ClassVar[dict[str, list[str]]] = {"symphony": ["symphony"]}
     outputs: ClassVar[list[str]] = ["odt", "ods", "odp"]
 
+    @classmethod
+    def test_dependencies(cls):
+        if pyautogui is None:
+            raise MissingDependency(["pyautogui"])
+        super().test_dependencies()
+
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
         if append:
             return output_dir / (self.file.name + f".{output}")
         return output_dir / self.file.relative_path.with_suffix(f".{output}").name
 
     def convert_file(self, src: Path, dst: Path):
+        if pyautogui is None:
+            raise MissingDependency(["pyautogui"])
+
         pyautogui.PAUSE = 1
         pyautogui.FAILSAFE = False
 
