@@ -1,6 +1,6 @@
 [project]
 name = "convertool"
-version = "4.4.3"
+version = "4.5.0"
 description = ""
 authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
 requires-python = ">=3.12"
@@ -15,6 +15,8 @@ dependencies = [
     "extract-msg>=0.53.0,<1",
     "sas7bdat>=2.2.3,<3",
     "rich>=14.1.0,<15",
+    "pyautogui>=0.9.54",
+    "pyperclip>=1.11.0",
 ]
 
 [project.scripts]
