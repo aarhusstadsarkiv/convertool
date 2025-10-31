@@ -13,7 +13,7 @@ from .exceptions import MissingDependency
 
 try:
     import pyautogui
-except ImportError:
+except (ImportError, KeyError):
     pyautogui = None
 
 
