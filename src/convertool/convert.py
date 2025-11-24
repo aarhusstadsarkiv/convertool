@@ -51,6 +51,7 @@ def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | No
         converters.ConverterMedComToImage,
         converters.ConverterMedComToPDF,
         converters.ConverterMDI,
+        converters.ConverterMDIToPDF,
         converters.ConverterMSG,
         converters.ConverterMSGToImage,
         converters.ConverterMSGToPDF,
