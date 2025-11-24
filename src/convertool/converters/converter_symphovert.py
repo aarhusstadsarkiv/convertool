@@ -11,9 +11,10 @@ from .base import ConverterABC
 from .exceptions import ConvertError
 from .exceptions import MissingDependency
 
+# noinspection PyBroadException
 try:
     import pyautogui
-except (ImportError, KeyError):
+except:
     pyautogui = None
 
 
