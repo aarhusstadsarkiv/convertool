@@ -129,6 +129,8 @@ Options:
 | pdf          | jpg                | Convert PDF to JPEG images (one per page)                                      | .jpg      |
 | pdf          | png                | Convert PDF to PNG images (one per page)                                       | .png      |
 | pdf          | tiff               | Convert PDF to TIFF image (multipage)                                          | .tiff     |
+| mdi          | tiff               | Convert MDI to TIFF image (multipage)                                          | .tiff     |
+| mdi          | pdf                | Convert MDI to PDF                                                             | .pdf      |
 | presentation | odp                | Convert a presentation file (PowerPoint, LibreOffice, etc.) to ODP             | .odp      |
 | presentation | html               | Convert a presentation file (PowerPoint, LibreOffice, etc.) to HTML            | .html     |
 | presentation | pdf                | Convert a presentation file (PowerPoint, LibreOffice, etc.) to PDF             | .pdf      |
@@ -193,6 +195,7 @@ Options:
 | html         |         | chromium, convert    |
 | image        |         | convert              |
 | medcom       |         | xmlstarlet, chromium |
+| mdi          | Windows | mdi2tif              |
 | msg          |         | convert              |
 | msexcel      | Windows | docto                |
 | mspowerpoint | Windows | docto                |
