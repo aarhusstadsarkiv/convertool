@@ -175,6 +175,8 @@ class ConverterTextToImage(ConverterImage):
             args.extend(("-compress", "LZW"))
 
         with TempDir(output_dir) as tmp_dir:
+            tmp_text_file = tmp_dir.joinpath(f"{dest_file.name}.txt")
+            tmp_text_file.write_text(text, encoding="utf-8")
             self.run_process(
                 self.dependencies["imagemagick"][0],
                 "-depth",
@@ -191,7 +193,7 @@ class ConverterTextToImage(ConverterImage):
                 "20",
                 "-annotate",
                 "+5+45",
-                text,
+                f"@{tmp_text_file.name}",
                 dest_file.name,
                 cwd=tmp_dir,
             )
