@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
+from .base import _hashed_file_name
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
@@ -35,6 +36,7 @@ class ConverterDocument(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
         output_filter = f":{output_filter}" if output_filter else ""
+        output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
@@ -48,7 +50,16 @@ class ConverterDocument(ConverterABC):
                 self.file.get_absolute_path(),
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
-            return [f.replace(dest_dir / f.name) for f in tmp_dir.iterdir() if f.is_file()]
+
+            for f in tmp_dir.iterdir():
+                if not f.is_file():
+                    continue
+                if self.hashed_putput_name:
+                    output_files.append(f.replace(dest_dir / _hashed_file_name(f.name)))
+                else:
+                    output_files.append(f.replace(dest_dir / f.name))
+
+        return output_files
 
 
 class ConverterDocumentToImage(ConverterABC):
