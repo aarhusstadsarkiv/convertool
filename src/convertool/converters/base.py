@@ -90,7 +90,7 @@ class ConverterABC(ABC):
         options: dict[str, Any] | None = None,
         *,
         capture_output: bool = True,
-        hashed_putput_name: bool = True,
+        hashed_output_name: bool = True,
     ) -> None:
         self.test_platforms()
         self.test_dependencies()
@@ -99,7 +99,7 @@ class ConverterABC(ABC):
         self.file.root = self.file.root or root
         self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
-        self.hashed_putput_name: bool = hashed_putput_name
+        self.hashed_output_name: bool = hashed_output_name
 
         self.test_options()
 
@@ -212,7 +212,7 @@ class ConverterABC(ABC):
             suffix(es).
         :return: The path to the putput file.
         """
-        name: str = _hashed_file_name(self.file.relative_path) if self.hashed_putput_name else self.file.name
+        name: str = _hashed_file_name(self.file.relative_path) if self.hashed_output_name else self.file.name
         if not output:
             return output_dir.joinpath(name)
         if append:

@@ -23,7 +23,7 @@ class ConverterZIPFile(ConverterABC):
             raise BadOption(self.file, "Missing 'path' option.")
 
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
-        if self.hashed_putput_name:
+        if self.hashed_output_name:
             return output_dir.joinpath(_hashed_file_name(self.file.get_absolute_path() / self.options["path"]))
         return output_dir.joinpath(Path(self.options["path"]).name)
 

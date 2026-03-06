@@ -12,7 +12,7 @@ def test_spreadsheet_to_ods(test_files: dict[str, Path], output_dir: Path, siegf
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterSpreadsheet(file, hashed_putput_name=False)
+        converter = ConverterSpreadsheet(file, hashed_output_name=False)
 
         output_files = converter.convert(output_dir, "ods")
         expected_output_file = file.relative_path.with_suffix(".ods")
@@ -29,7 +29,7 @@ def test_spreadsheet_to_pdf(test_files: dict[str, Path], output_dir: Path, siegf
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterSpreadsheet(file, hashed_putput_name=False)
+        converter = ConverterSpreadsheet(file, hashed_output_name=False)
 
         output_files = converter.convert(output_dir, "pdf")
         expected_output_file = file.relative_path.with_suffix(".pdf")
@@ -46,7 +46,7 @@ def test_spreadsheet_to_html(test_files: dict[str, Path], output_dir: Path, sieg
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterSpreadsheet(file, hashed_putput_name=False)
+        converter = ConverterSpreadsheet(file, hashed_output_name=False)
 
         output_files = converter.convert(output_dir, "html")
         expected_output_file = file.relative_path.with_suffix(".html")
