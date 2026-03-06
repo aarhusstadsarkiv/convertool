@@ -1,6 +1,6 @@
 [project]
 name = "convertool"
-version = "4.5.4"
+version = "4.5.5"
 description = ""
 authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
 requires-python = ">=3.12"
@@ -9,12 +9,11 @@ dependencies = [
     "acacore",
     "tnefparse>=1.4.0,<2",
     "striprtf>=0.0.28,<1",
-    "beautifulsoup4>=4.12.3,<5",
-    "lxml>=6.0.0,<7",
-    "chardet>=5.2.0,<6",
-    "extract-msg>=0.53.0,<1",
+    "beautifulsoup4>=4.13.5,<5",
+    "lxml>=6.0.2,<7",
+    "extract-msg>=0.55.0,<1",
     "sas7bdat>=2.2.3,<3",
-    "rich>=14.1.0,<15",
+    "rich>=14.3.3,<15",
     "pyautogui>=0.9.54",
     "pyperclip>=1.11.0",
 ]
@@ -24,9 +23,9 @@ convertool = "convertool.cli:app"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.9.3,<1",
-    "pytest>=8.3.4,<9",
-    "coverage>=7.6.10,<8",
+    "ruff>=0.15.5,<1",
+    "pytest>=9.0.2,<10",
+    "coverage>=7.13.4,<8",
     "types-click>=7.1.8,<8",
 ]
 

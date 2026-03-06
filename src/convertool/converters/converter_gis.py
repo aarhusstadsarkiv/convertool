@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from convertool.converters import ConverterABC
+from convertool.converters.base import _hashed_file_name
 from convertool.util import TempDir
 
 
@@ -16,6 +17,7 @@ class ConverterGIS(ConverterABC):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
+        output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
@@ -29,4 +31,12 @@ class ConverterGIS(ConverterABC):
                 cwd=tmp_dir,
             )
 
-            return [f.replace(dest_dir / f.name) for f in tmp_dir.iterdir() if f.is_file()]
+            for f in tmp_dir.iterdir():
+                if not f.is_file():
+                    continue
+                if self.hashed_output_name:
+                    output_files.append(f.replace(dest_dir / _hashed_file_name(f.name)))
+                else:
+                    output_files.append(f.replace(dest_dir / f.name))
+
+        return output_files
