@@ -24,7 +24,7 @@ RUN apt update && apt install -y libproj-dev gdal-bin
 
 # Install Imagemagick
 RUN apt update && apt install -y imagemagick
-COPY config/imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
+COPY config/imagemagick_policy.xml /etc/ImageMagick-7/policy.xml
 
 # Install vipps
 RUN apt update && apt install -y libvips-tools
