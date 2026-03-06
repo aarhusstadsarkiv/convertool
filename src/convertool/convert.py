@@ -195,7 +195,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
             database=database,
             options=instructions.options,
             capture_output=not verbose,
-            hashed_putput_name=hashed_output_name,
+            hashed_output_name=hashed_output_name,
         )
         converter.file.relative_path = converter.file.get_absolute_path(root_dir).relative_to(relative_root_dir)
         converter.file.root = relative_root_dir
