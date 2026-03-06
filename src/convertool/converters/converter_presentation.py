@@ -47,7 +47,7 @@ class ConverterPresentation(ConverterABC):
             for f in tmp_dir.iterdir():
                 if not f.is_file():
                     continue
-                if self.hashed_putput_name:
+                if self.hashed_output_name:
                     output_files.append(f.replace(dest_dir / _hashed_file_name(f.name)))
                 else:
                     output_files.append(f.replace(dest_dir / f.name))
