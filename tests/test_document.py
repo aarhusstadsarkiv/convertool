@@ -22,7 +22,7 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
         expected_output_file = _hashed_file_name(file.relative_path.with_suffix(".odt"))
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
-        sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
+        sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
         assert sf_match is not None
         assert sf_match.mime == "application/vnd.oasis.opendocument.text"
 
@@ -39,7 +39,7 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
         expected_output_file = _hashed_file_name(file.relative_path.with_suffix(".pdf"))
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
-        sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
+        sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
         assert sf_match is not None
         assert sf_match.mime == "application/pdf"
 
@@ -56,7 +56,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         expected_output_file = _hashed_file_name(file.relative_path.with_suffix(".html"))
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
-        sf_match = siegfried.identify(output_dir / expected_output_file.name).files[0].best_match()
+        sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
         assert sf_match is not None
         assert sf_match.mime == "text/html"
 
