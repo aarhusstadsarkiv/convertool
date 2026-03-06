@@ -14,7 +14,8 @@ from .exceptions import MissingDependency
 # noinspection PyBroadException
 try:
     import pyautogui
-except:
+# Bare except because there are other errors than ImportError that can be raised when importing pyautogui depending on the system
+except:  # noqa: E722
     pyautogui = None
 
 
