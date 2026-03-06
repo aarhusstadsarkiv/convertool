@@ -15,7 +15,7 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file)
+        converter = ConverterDocument(file, hashed_putput_name=False)
 
         output_files = converter.convert(output_dir, "odt")
         expected_output_file = file.relative_path.with_suffix(".odt")
@@ -32,7 +32,7 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file)
+        converter = ConverterDocument(file, hashed_putput_name=False)
 
         output_files = converter.convert(output_dir, "pdf")
         expected_output_file = file.relative_path.with_suffix(".pdf")
@@ -49,7 +49,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file)
+        converter = ConverterDocument(file, hashed_putput_name=False)
 
         output_files = converter.convert(output_dir, "html")
         expected_output_file = file.relative_path.with_suffix(".html")
