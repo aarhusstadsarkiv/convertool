@@ -23,6 +23,7 @@ from .converter_msoffice import ConverterMSWord
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
+from .converter_sas import ConverterSASSpreadsheet
 from .converter_spreadsheet import ConverterSpreadsheet
 from .converter_symphovert import ConverterSymphovert
 from .converter_templates import ConverterTemplate
@@ -63,6 +64,7 @@ __all__ = [
     "ConverterPDFToImage",
     "ConverterPresentation",
     "ConverterSAS",
+    "ConverterSASSpreadsheet",
     "ConverterSpreadsheet",
     "ConverterSymphovert",
     "ConverterTNEF",
