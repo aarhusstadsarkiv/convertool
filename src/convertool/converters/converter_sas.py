@@ -71,7 +71,7 @@ class ConverterSASSpreadsheet(ConverterABC):
             self.database,
             self.file.root,
             capture_output=self.capture_output,
-            hashed_output_name=self.hashed_output_name,
+            hashed_output_name=False,
         )
 
         with TempDir(output_dir) as tmp_dir:
