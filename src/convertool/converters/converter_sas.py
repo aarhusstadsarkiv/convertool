@@ -7,7 +7,12 @@ from sas7bdat import SAS7BDAT
 from convertool.util import get_encoding
 from convertool.util import TempDir
 
+from .base import _shared_dependencies
+from .base import _shared_platforms
+from .base import _shared_process_timeout
 from .base import ConverterABC
+from .base import dummy_base_file
+from .converter_spreadsheet import ConverterSpreadsheet
 
 
 class ConverterSAS(ConverterABC):
@@ -48,3 +53,38 @@ class ConverterSAS(ConverterABC):
             tmp_file.replace(dest_file)
 
         return [dest_file]
+
+
+class ConverterSASSpreadsheet(ConverterABC):
+    tool_names: ClassVar[list[str]] = ConverterSAS.tool_names
+    outputs: ClassVar[list[str]] = ConverterSpreadsheet.outputs
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterSAS, ConverterSpreadsheet)
+    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterSAS, ConverterSpreadsheet)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterSAS, ConverterSpreadsheet)
+
+    def output_puid(self, output: str) -> str | None:
+        return ConverterSpreadsheet(self.file, self.database, self.file.root).output_puid(output)
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        sas_converter = ConverterSAS(
+            self.file,
+            self.database,
+            self.file.root,
+            capture_output=self.capture_output,
+            hashed_output_name=False,
+        )
+
+        with TempDir(output_dir) as tmp_dir:
+            tmp_file: Path = sas_converter.convert(tmp_dir, "csv", keep_relative_path=keep_relative_path)[0]
+
+            return ConverterSpreadsheet(
+                dummy_base_file(tmp_file, tmp_dir),
+                self.database,
+                tmp_dir,
+                capture_output=self.capture_output,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(
+                output_dir,
+                output,
+                keep_relative_path=keep_relative_path,
+            )
