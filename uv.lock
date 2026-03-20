@@ -4,8 +4,8 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "acacore"
-version = "5.4.6"
-source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.4.6#fc6ff71e21b4ca148a99d96a3290a27b256ea500" }
+version = "5.4.7"
+source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.4.7#c671d68a3d84065aee52a733a86cccf2771e9190" }
 dependencies = [
     { name = "chardet" },
     { name = "click" },
@@ -149,7 +149,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.4.6" },
+    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.4.7" },
     { name = "beautifulsoup4", specifier = ">=4.13.5,<5" },
     { name = "extract-msg", specifier = ">=0.55.0,<1" },
     { name = "lxml", specifier = ">=6.0.2,<7" },
