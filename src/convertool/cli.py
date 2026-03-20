@@ -150,7 +150,7 @@ def compile_convert_targets(
         src_dir = avid.dirs.master_documents
         out_table = database.access_files
         out_dir = avid.dirs.access_documents
-        is_processed = lambda f: f.processed & 0b01  # noqa: E731
+        is_processed = lambda f: bool(f.processed & 0b01)  # noqa: E731
         set_processed = lambda f: f.processed | 0b01  # noqa: E731
     elif target == "master:statutory":
         src_table = database.master_files
@@ -158,7 +158,7 @@ def compile_convert_targets(
         src_dir = avid.dirs.master_documents
         out_table = database.statutory_files
         out_dir = avid.dirs.documents
-        is_processed = lambda f: f.processed & 0b10  # noqa: E731
+        is_processed = lambda f: bool(f.processed & 0b10)  # noqa: E731
         set_processed = lambda f: f.processed | 0b10  # noqa: E731
     else:
         raise ValueError(f"Unsupported file and destination combination: {target}")
