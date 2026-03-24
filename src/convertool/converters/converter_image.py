@@ -146,7 +146,7 @@ class ConverterPDFLargeToImage(ConverterImage):
                 "LZW",
                 "-depth",
                 "16",
-                "-define", 
+                "-define",
                 "tiff:ignore-tags=32934",
                 f"{tmp_dir.name}-*.jpg",
                 dest_file.name,
