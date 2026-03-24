@@ -19,7 +19,9 @@ class ConverterSpreadsheet(ConverterABC):
         return None
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def output_filter(self, output: str) -> str:  # noqa: ARG002
+    def output_filter(self, output: str) -> str:
+        if output == "pdf":
+            return 'impress_pdf_Export:{"SelectPdfVersion":3}'
         return ""
 
     # noinspection DuplicatedCode
