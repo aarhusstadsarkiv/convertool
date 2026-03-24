@@ -59,7 +59,7 @@ class ConverterImage(ConverterABC):
             filename = filename.with_name(filename.name + "[0]")
             args.extend(("-background", "none", "-flatten"))
         if output == "tif":
-            args.extend(("-compress", "LZW", "-depth", "16", "-coalesce"))
+            args.extend(("-compress", "LZW", "-depth", "16", "-coalesce", "-define", "tiff:ignore-tags=32934"))
         if output == "pdf":
             args.extend(("-coalesce",))
 
@@ -87,7 +87,7 @@ class ConverterPDFToImage(ConverterImage):
         args: list[str] = []
 
         if output in ("tif", "tiff"):
-            args = ["-compress", "LZW", "-depth", "16"]
+            args = ["-compress", "LZW", "-depth", "16", "-define", "tiff:ignore-tags=32934"]
 
         density, _ = self.image_dpi(self.file.get_absolute_path())
         density *= 2
@@ -146,6 +146,8 @@ class ConverterPDFLargeToImage(ConverterImage):
                 "LZW",
                 "-depth",
                 "16",
+                "-define", 
+                "tiff:ignore-tags=32934",
                 f"{tmp_dir.name}-*.jpg",
                 dest_file.name,
                 cwd=tmp_dir,
