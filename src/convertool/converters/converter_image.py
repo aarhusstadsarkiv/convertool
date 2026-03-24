@@ -59,9 +59,7 @@ class ConverterImage(ConverterABC):
             filename = filename.with_name(filename.name + "[0]")
             args.extend(("-background", "none", "-flatten"))
         if output == "tif":
-            args.extend(("-compress", "LZW", "-depth", "16", "-coalesce", "-define", "tiff:ignore-tags=32934"))
-        if output == "pdf":
-            args.extend(("-coalesce",))
+          args.extend(("-compress", "LZW", "-depth", "16", "-define", "tiff:ignore-tags=32934"))
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
