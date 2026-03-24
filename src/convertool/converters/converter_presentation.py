@@ -28,7 +28,6 @@ class ConverterPresentation(ConverterABC):
         output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
-        output_filter = f":{output_filter}" if output_filter else ""
         output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
@@ -36,7 +35,7 @@ class ConverterPresentation(ConverterABC):
                 self.dependencies["libreoffice"][0],
                 "--headless",
                 "--convert-to",
-                f"{output}{output_filter}" if output_filter else output,
+                f"{output}:{output_filter}" if output_filter else output,
                 "--outdir",
                 f"-env:UserInstallation={tmp_dir.joinpath('_libreoffice').as_uri()}",
                 tmp_dir,
