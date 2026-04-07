@@ -11,7 +11,6 @@ from .converter_html import ConverterHTMLToImage
 from .converter_image import ConverterImage
 from .converter_image import ConverterPDFLargeToImage
 from .converter_image import ConverterPDFToImage
-from .converter_image import ConverterTextToImage
 from .converter_mdi import ConverterMDI
 from .converter_mdi import ConverterMDIToPDF
 from .converter_msg import ConverterMSG
@@ -27,6 +26,8 @@ from .converter_sas import ConverterSASSpreadsheet
 from .converter_spreadsheet import ConverterSpreadsheet
 from .converter_symphovert import ConverterSymphovert
 from .converter_templates import ConverterTemplate
+from .converter_text import ConverterText
+from .converter_text import ConverterTextToImage
 from .converter_tnef import ConverterTNEF
 from .converter_video import ConverterVideo
 from .converter_xsl import ConverterMedCom
@@ -69,6 +70,7 @@ __all__ = [
     "ConverterSymphovert",
     "ConverterTNEF",
     "ConverterTemplate",
+    "ConverterText",
     "ConverterTextToImage",
     "ConverterVideo",
     "ConverterXSL",
