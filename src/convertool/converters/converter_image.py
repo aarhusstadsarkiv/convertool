@@ -4,6 +4,7 @@ from typing import ClassVar
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .exceptions import BadOption
 
 
 class ConverterImage(ConverterABC):
@@ -160,11 +161,17 @@ class ConverterTextToImage(ConverterImage):
         "text-to-image",
     ]
 
+    def test_options(self):
+        if self.options.get("stripnull") not in (None, True, False):
+            raise BadOption(f"Invalid value {self.options.get('stripnull')!r} for 'stripnull' option")
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
         text: str = self.file.get_absolute_path().read_text((self.file.encoding or {}).get("encoding")).strip()
+        if self.options.get("stripnull"):
+            text = text.encode().translate(None, bytes([0])).decode()
         width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
         height: int = max(600, (text.count("\n") + 1) * 25)
         args: list[str] = []
