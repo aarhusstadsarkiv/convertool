@@ -115,6 +115,13 @@ Options:
 | image        | pdf                | Convert image to PDF                                                           | .pdf      |
 | image        | png                | Convert image to PNG                                                           | .png      |
 | image        | tiff               | Convert image to TIFF                                                          | .tiff     |
+| ipynb        | html               | Convert Jupyter notebook to HTML                                               | .html     |
+| ipynb        | pdf                | Convert Jupyter notebook to PDF                                                | .pdf      |
+| ipynb        | jp2                | Convert Jupyter notebook to JPEG2000                                           | .jp2      |
+| ipynb        | jpg                | Convert Jupyter notebook to JPEG                                               | .jpg      |
+| ipynb        | pdf                | Convert Jupyter notebook to PDF                                                | .pdf      |
+| ipynb        | png                | Convert Jupyter notebook to PNG                                                | .png      |
+| ipynb        | tiff               | Convert Jupyter notebook to TIFF                                               | .tiff     |
 | msg          | html               | Convert an MSG file to HTML                                                    | .html     |
 | msg          | txt                | Convert an MSG file to TXT                                                     | .txt      |
 | msg          | pdf                | Convert an MSG file to TXT                                                     | .pdf      |
@@ -147,6 +154,7 @@ Options:
 | mspowerpoint | odp                | Convert a presentation file with Microsoft PowerPoint to ODP                   | .odp      |
 | sas          | csv                | Convert a sas7bdat file to CSV                                                 | .csv      |
 | sas          | tsv                | Convert a sas7bdat file to TSV                                                 | .tsv      |
+| text         | txt                | Convert text file txt with UTF-8 encoding and x-fmt/111 as PUID                | .txt      |
 | text         | jp2                | Convert text file to a JPEG2000 image                                          | .jp2      |
 | text         | jpg                | Convert text file to a JPEG image                                              | .jpg      |
 | text         | png                | Convert text file to a PNG image                                               | .png      |
