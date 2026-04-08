@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from acacore.siegfried import Siegfried
-from converters import ConverterIPYNBToHTML
-from converters import ConverterIPYNBToImage
-from converters import ConverterIPYNBToPDF
 
+from convertool.converters import ConverterIPYNBToHTML
+from convertool.converters import ConverterIPYNBToImage
+from convertool.converters import ConverterIPYNBToPDF
 from convertool.converters.base import dummy_base_file
 
 from .test_image import MIMETYPES
