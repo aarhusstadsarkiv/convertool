@@ -31,6 +31,7 @@ class ConverterText(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             tmp_file = tmp_dir.joinpath(dest_file.name)
             tmp_file.write_text(text, encoding="utf-8")
+            dest_dir.mkdir(parents=True, exist_ok=True)
             return [tmp_file.replace(dest_file)]
 
 
