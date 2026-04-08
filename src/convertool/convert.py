@@ -66,6 +66,7 @@ def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | No
         converters.ConverterSASSpreadsheet,
         converters.ConverterPDFToImage,
         converters.ConverterPDFLargeToImage,
+        converters.ConverterText,
         converters.ConverterTextToImage,
         converters.ConverterImage,
         converters.ConverterAudio,
