@@ -241,12 +241,24 @@ class ConverterMSGToImage(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            if not (htmls := ConverterMSG(self.file, self.database, self.file.root).convert(tmp_dir, "html")):
+            if not (
+                htmls := ConverterMSG(
+                    self.file,
+                    self.database,
+                    self.file.root,
+                    hashed_output_name=self.hashed_output_name,
+                ).convert(tmp_dir, "html")
+            ):
                 return []
 
             html = htmls[0]
 
-            return ConverterHTMLToImage(dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTMLToImage(
+                dummy_base_file(html, tmp_dir),
+                self.database,
+                tmp_dir,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,

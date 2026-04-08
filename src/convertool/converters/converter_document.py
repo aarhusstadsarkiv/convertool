@@ -72,12 +72,24 @@ class ConverterDocumentToImage(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            if not (pdfs := ConverterDocument(self.file, self.database, self.file.root).convert(tmp_dir, "pdf")):
+            if not (
+                pdfs := ConverterDocument(
+                    self.file,
+                    self.database,
+                    self.file.root,
+                    hashed_output_name=self.hashed_output_name,
+                ).convert(tmp_dir, "pdf")
+            ):
                 return []
 
             pdf = pdfs[0]
 
-            return ConverterPDFToImage(dummy_base_file(pdf, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterPDFToImage(
+                dummy_base_file(pdf, tmp_dir),
+                self.database,
+                tmp_dir,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,

@@ -67,13 +67,18 @@ class ConverterMDIToPDF(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             tiff: Path = ConverterMDI(
-                self.file, self.database, self.file.root, capture_output=self.capture_output
+                self.file,
+                self.database,
+                self.file.root,
+                capture_output=self.capture_output,
+                hashed_output_name=self.hashed_output_name,
             ).convert(tmp_dir, "tif", keep_relative_path=False)[0]
             pdfs: list[Path] = ConverterImage(
                 dummy_base_file(tiff, tmp_dir),
                 None,
                 tmp_dir,
                 capture_output=self.capture_output,
+                hashed_output_name=self.hashed_output_name,
             ).convert(tmp_dir, output, keep_relative_path=False)
 
             if pdfs:
