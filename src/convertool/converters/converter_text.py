@@ -9,6 +9,7 @@ from .exceptions import BadOption
 
 
 class ConverterText(ConverterABC):
+    tool_names: ClassVar[list[str]] = ["text"]
     outputs: ClassVar[list[str]] = ["txt"]
 
     def test_options(self):
