@@ -1,3 +1,4 @@
+from os import chdir
 from pathlib import Path
 from typing import ClassVar
 
@@ -32,7 +33,13 @@ class ConverterIPYNBToHTML(ConverterABC):
         with self.file.get_absolute_path().open(encoding=(self.file.encoding or {}).get("encoding")) as f:
             notebook = nbformat.reads(f.read(), as_version=nbformat.NO_CONVERT)
 
-        body, _ = HTMLExporter(template_name="classic", embed_images=True).from_notebook_node(notebook)
+        cwd = Path.cwd()
+
+        try:
+            chdir(self.file.get_absolute_path().parent)
+            body, _ = HTMLExporter(template_name="classic", embed_images=True).from_notebook_node(notebook)
+        finally:
+            chdir(cwd)
 
         with TempDir(output_dir) as tmp_dir:
             tmp_file = tmp_dir.joinpath(dest_file.name)
