@@ -23,9 +23,9 @@ convertool = "convertool.cli:app"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.5,<1",
-    "pytest>=9.0.2,<10",
-    "coverage>=7.13.4,<8",
+    "ruff>=0.15.9,<1",
+    "pytest>=9.0.3,<10",
+    "coverage>=7.13.5,<8",
     "types-click>=7.1.8,<8",
 ]
 
