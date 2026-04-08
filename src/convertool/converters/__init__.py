@@ -19,6 +19,9 @@ from .converter_msg import ConverterMSGToPDF
 from .converter_msoffice import ConverterMSExcel
 from .converter_msoffice import ConverterMSPowerPoint
 from .converter_msoffice import ConverterMSWord
+from .converter_notebook import ConverterIPYNBToHTML
+from .converter_notebook import ConverterIPYNBToImage
+from .converter_notebook import ConverterIPYNBToPDF
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
@@ -48,6 +51,9 @@ __all__ = [
     "ConverterGIS",
     "ConverterHTML",
     "ConverterHTMLToImage",
+    "ConverterIPYNBToHTML",
+    "ConverterIPYNBToImage",
+    "ConverterIPYNBToPDF",
     "ConverterImage",
     "ConverterMDI",
     "ConverterMDIToPDF",
