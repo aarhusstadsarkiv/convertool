@@ -124,9 +124,18 @@ class ConverterXSLToImage(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            html = ConverterXSL(self.file, self.database).convert(tmp_dir, "html", xsl=xsl)[0]
+            html = ConverterXSL(
+                self.file,
+                self.database,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(tmp_dir, "html", xsl=xsl)[0]
 
-            return ConverterHTMLToImage(dummy_base_file(html, tmp_dir), self.database, tmp_dir).convert(
+            return ConverterHTMLToImage(
+                dummy_base_file(html, tmp_dir),
+                self.database,
+                tmp_dir,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(
                 output_dir,
                 output,
                 keep_relative_path=keep_relative_path,

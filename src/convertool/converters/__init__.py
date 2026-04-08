@@ -11,7 +11,6 @@ from .converter_html import ConverterHTMLToImage
 from .converter_image import ConverterImage
 from .converter_image import ConverterPDFLargeToImage
 from .converter_image import ConverterPDFToImage
-from .converter_image import ConverterTextToImage
 from .converter_mdi import ConverterMDI
 from .converter_mdi import ConverterMDIToPDF
 from .converter_msg import ConverterMSG
@@ -20,6 +19,9 @@ from .converter_msg import ConverterMSGToPDF
 from .converter_msoffice import ConverterMSExcel
 from .converter_msoffice import ConverterMSPowerPoint
 from .converter_msoffice import ConverterMSWord
+from .converter_notebook import ConverterIPYNBToHTML
+from .converter_notebook import ConverterIPYNBToImage
+from .converter_notebook import ConverterIPYNBToPDF
 from .converter_pdf import ConverterPDF
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
@@ -27,6 +29,8 @@ from .converter_sas import ConverterSASSpreadsheet
 from .converter_spreadsheet import ConverterSpreadsheet
 from .converter_symphovert import ConverterSymphovert
 from .converter_templates import ConverterTemplate
+from .converter_text import ConverterText
+from .converter_text import ConverterTextToImage
 from .converter_tnef import ConverterTNEF
 from .converter_video import ConverterVideo
 from .converter_xsl import ConverterMedCom
@@ -47,6 +51,9 @@ __all__ = [
     "ConverterGIS",
     "ConverterHTML",
     "ConverterHTMLToImage",
+    "ConverterIPYNBToHTML",
+    "ConverterIPYNBToImage",
+    "ConverterIPYNBToPDF",
     "ConverterImage",
     "ConverterMDI",
     "ConverterMDIToPDF",
@@ -69,6 +76,7 @@ __all__ = [
     "ConverterSymphovert",
     "ConverterTNEF",
     "ConverterTemplate",
+    "ConverterText",
     "ConverterTextToImage",
     "ConverterVideo",
     "ConverterXSL",

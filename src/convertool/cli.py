@@ -558,9 +558,10 @@ def cmd_standalone(
         converter = instruction.converter_cls(
             instruction.file,
             None,
-            instruction.file.root,
+            Path(instruction.file.root) if instruction.file.root else None,
             instruction.options,
             capture_output=not verbose,
+            hashed_output_name=False,
         )
         # noinspection PyBroadException
         try:
