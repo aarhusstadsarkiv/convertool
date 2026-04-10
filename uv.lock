@@ -8,8 +8,8 @@ resolution-markers = [
 
 [[package]]
 name = "acacore"
-version = "5.4.11"
-source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.4.11#a445b03f308db54b946d48e74bb97e1f6c6265fa" }
+version = "5.5.0"
+source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.0#5cf528430196b5269d894da12fb12707ea6f1906" }
 dependencies = [
     { name = "chardet" },
     { name = "click" },
@@ -172,7 +172,7 @@ wheels = [
 
 [[package]]
 name = "convertool"
-version = "4.5.12"
+version = "4.5.13"
 source = { editable = "." }
 dependencies = [
     { name = "acacore" },
@@ -199,7 +199,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.4.11" },
+    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.0" },
     { name = "beautifulsoup4", specifier = ">=4.13.5,<5" },
     { name = "extract-msg", specifier = ">=0.55.0,<1" },
     { name = "lxml", specifier = ">=6.0.2,<7" },
