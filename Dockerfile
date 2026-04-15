@@ -26,6 +26,9 @@ RUN apt update && apt install -y libproj-dev gdal-bin
 RUN apt update && apt install -y imagemagick
 COPY config/imagemagick_policy.xml /etc/ImageMagick-7/policy.xml
 
+# Install poppler
+RUN apt update && apt install -y poppler-utils
+
 # Install vipps
 RUN apt update && apt install -y libvips-tools
 
