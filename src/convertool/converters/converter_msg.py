@@ -211,7 +211,7 @@ class ConverterMSGToPDF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
     outputs: ClassVar[list[str]] = ["pdf"]
     platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterPDFToImage)
-    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterMSG, ConverterPDFToImage)
+    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterMSG, ConverterPDFToImage)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterPDFToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
@@ -234,7 +234,7 @@ class ConverterMSGToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
     outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
     platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterHTMLToImage)
-    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterMSG, ConverterHTMLToImage)
+    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterMSG, ConverterHTMLToImage)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterHTMLToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
