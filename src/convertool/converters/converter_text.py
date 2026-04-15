@@ -53,6 +53,8 @@ class ConverterTextToImage(ConverterABC):
     def test_options(self):
         if self.options.get("stripnull") not in (None, True, False):
             raise BadOption(f"Invalid value {self.options.get('stripnull')!r} for 'stripnull' option")
+        if self.options.get("render") not in (None, True, False):
+            raise BadOption(f"Invalid value {self.options.get('render')!r} for 'render' option")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -65,6 +67,8 @@ class ConverterTextToImage(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             tmp_text_dir = self.output_dir(tmp_dir, keep_relative_path=keep_relative_path)
             tmp_text_file = tmp_text_dir.joinpath(self.file.name)
+            if self.options.get("render") is False:
+                tmp_text_file = tmp_text_file.with_suffix(".txt")
             tmp_text_file.parent.mkdir(parents=True, exist_ok=True)
             tmp_text_file.write_text(text, encoding="utf-8")
 
