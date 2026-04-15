@@ -22,7 +22,6 @@ from .converter_notebook import ConverterIPYNBToImage
 from .converter_notebook import ConverterIPYNBToPDF
 from .converter_pdf import ConverterPDF
 from .converter_pdf import ConverterPDFToImage
-from .converter_pdf import ConverterPDFToJPEG2000
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
 from .converter_sas import ConverterSASSpreadsheet
@@ -68,7 +67,6 @@ __all__ = [
     "ConverterMedComToPDF",
     "ConverterPDF",
     "ConverterPDFToImage",
-    "ConverterPDFToJPEG2000",
     "ConverterPresentation",
     "ConverterSAS",
     "ConverterSASSpreadsheet",
