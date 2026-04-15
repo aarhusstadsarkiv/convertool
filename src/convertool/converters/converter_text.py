@@ -105,7 +105,10 @@ class ConverterTextToImage(ConverterABC):
                 dest_file.name,
                 cwd=tmp_dir,
             )
+
+            tmp_text_file.unlink(missing_ok=True)
             dest_dir.mkdir(parents=True, exist_ok=True)
-            tmp_dir.joinpath(dest_file.name).replace(dest_file)
+
+            return [f.replace(dest_dir.joinpath(f.name)) for f in sorted(tmp_dir.iterdir()) if f.is_file()]
 
         return [dest_file]
