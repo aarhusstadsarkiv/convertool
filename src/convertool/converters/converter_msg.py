@@ -25,7 +25,6 @@ from .base import _shared_process_timeout
 from .base import ConverterABC
 from .base import dummy_base_file
 from .converter_html import ConverterHTML
-from .converter_html import ConverterHTMLToImage
 from .converter_pdf import ConverterPDFToImage
 from .exceptions import ConvertError
 
@@ -244,29 +243,29 @@ class ConverterMSGToPDF(ConverterABC):
 
 class ConverterMSGToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = ["msg"]
-    outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterHTMLToImage)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterMSG, ConverterHTMLToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterHTMLToImage)
+    outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
+    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterPDFToImage)
+    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterMSG, ConverterPDFToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterPDFToImage)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
             if not (
-                htmls := ConverterMSG(
+                pdfs := ConverterMSGToPDF(
                     self.file,
                     self.database,
                     self.file.root,
                     hashed_output_name=self.hashed_output_name,
-                ).convert(tmp_dir, "html")
+                ).convert(tmp_dir, "pdf")
             ):
                 return []
 
-            html = htmls[0]
+            pdf = pdfs[0]
 
-            return ConverterHTMLToImage(
-                dummy_base_file(html, tmp_dir),
+            return ConverterPDFToImage(
+                dummy_base_file(pdf, tmp_dir),
                 self.database,
                 tmp_dir,
                 hashed_output_name=self.hashed_output_name,
