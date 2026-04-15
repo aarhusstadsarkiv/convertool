@@ -4,7 +4,7 @@ from acacore.siegfried import Siegfried
 
 from convertool.converters.base import dummy_base_file
 from convertool.converters.converter_image import ConverterImage
-from convertool.converters.converter_image import ConverterPDFToImage
+from convertool.converters.converter_pdf import ConverterPDFToImage
 
 MIMETYPES = {
     "jpg": "image/jpeg",

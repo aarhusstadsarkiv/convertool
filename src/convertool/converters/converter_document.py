@@ -9,7 +9,7 @@ from .base import _shared_platforms
 from .base import _shared_process_timeout
 from .base import ConverterABC
 from .base import dummy_base_file
-from .converter_image import ConverterPDFToImage
+from .converter_pdf import ConverterPDFToImage
 
 
 class ConverterDocument(ConverterABC):

@@ -9,8 +9,6 @@ from .converter_gis import ConverterGIS
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
 from .converter_image import ConverterImage
-from .converter_image import ConverterPDFLargeToImage
-from .converter_image import ConverterPDFToImage
 from .converter_mdi import ConverterMDI
 from .converter_mdi import ConverterMDIToPDF
 from .converter_msg import ConverterMSG
@@ -23,6 +21,8 @@ from .converter_notebook import ConverterIPYNBToHTML
 from .converter_notebook import ConverterIPYNBToImage
 from .converter_notebook import ConverterIPYNBToPDF
 from .converter_pdf import ConverterPDF
+from .converter_pdf import ConverterPDFToImage
+from .converter_pdf import ConverterPDFToJPEG2000
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
 from .converter_sas import ConverterSASSpreadsheet
@@ -67,8 +67,8 @@ __all__ = [
     "ConverterMedComToImage",
     "ConverterMedComToPDF",
     "ConverterPDF",
-    "ConverterPDFLargeToImage",
     "ConverterPDFToImage",
+    "ConverterPDFToJPEG2000",
     "ConverterPresentation",
     "ConverterSAS",
     "ConverterSASSpreadsheet",

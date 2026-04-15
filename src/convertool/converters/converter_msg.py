@@ -26,7 +26,7 @@ from .base import ConverterABC
 from .base import dummy_base_file
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
-from .converter_image import ConverterPDFToImage
+from .converter_pdf import ConverterPDFToImage
 from .exceptions import ConvertError
 
 
