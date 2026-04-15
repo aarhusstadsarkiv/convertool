@@ -4,6 +4,7 @@ from typing import ClassVar
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .converter_image import ConverterImage
 
 
 class ConverterPDF(ConverterABC):
@@ -41,3 +42,12 @@ class ConverterPDF(ConverterABC):
             tmp_dir.joinpath(dest_file.name).replace(dest_file)
 
         return [dest_file]
+
+
+class ConverterPDFToImage(ConverterImage):
+    tool_names: ClassVar[list[str]] = ["pdf"]
+    outputs: ClassVar[list[str]] = ConverterImage.outputs
+    dependencies: ClassVar[dict[str, list[str]] | None] = ConverterImage.dependencies
+    platforms: ClassVar[list[str] | None] = ConverterImage.platforms
+    process_timeout: ClassVar[float | None] = ConverterImage.process_timeout
+    multithreading: ClassVar[bool] = ConverterImage.multithreading

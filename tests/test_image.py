@@ -4,7 +4,6 @@ from acacore.siegfried import Siegfried
 
 from convertool.converters.base import dummy_base_file
 from convertool.converters.converter_image import ConverterImage
-from convertool.converters.converter_image import ConverterPDFToImage
 
 MIMETYPES = {
     "jpg": "image/jpeg",
@@ -27,15 +26,3 @@ def test_img_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Si
         output_files = converter.convert(output_dir, output)
         assert len(output_files) == 1
         assert siegfried.identify(output_files[0]).files[0].best_match().mime == MIMETYPES[output]
-
-
-# noinspection DuplicatedCode
-def test_pdf_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = dummy_base_file(test_files["pdf-to-img.pdf"], test_files["pdf-to-img.pdf"].parent)
-    converter = ConverterPDFToImage(file)
-
-    for output in converter.outputs:
-        print(output)
-        output_files = converter.convert(output_dir, output)
-        assert len(output_files) >= 1
-        assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)

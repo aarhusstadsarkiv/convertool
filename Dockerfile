@@ -14,10 +14,13 @@ RUN apt update && apt install -y \
     libc6-x32 \
     libxtst6
 
+# Setup .local/bin
+RUN mkdir -p /root/.local/bin
+ENV PATH="/root/.local/bin:$PATH"
+
 # Install uv
 ENV UV_NO_MODIFY_PATH=1
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
 
 # Install GDAL
 RUN apt update && apt install -y libproj-dev gdal-bin
@@ -25,6 +28,12 @@ RUN apt update && apt install -y libproj-dev gdal-bin
 # Install Imagemagick
 RUN apt update && apt install -y imagemagick
 COPY config/imagemagick_policy.xml /etc/ImageMagick-7/policy.xml
+
+# Install nconvert
+RUN curl -L -o nconvert.tgz 'https://download.xnview.com/NConvert-linux64.tgz'
+RUN tar zxvf nconvert.tgz
+RUN mv NConvert/* /root/.local/bin
+RUN rm -rf nconvert.tgz NConvert/
 
 # Install vipps
 RUN apt update && apt install -y libvips-tools

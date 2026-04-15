@@ -59,7 +59,7 @@ class ConverterSASSpreadsheet(ConverterABC):
     tool_names: ClassVar[list[str]] = ConverterSAS.tool_names
     outputs: ClassVar[list[str]] = ConverterSpreadsheet.outputs
     platforms: ClassVar[list[str]] = _shared_platforms(ConverterSAS, ConverterSpreadsheet)
-    dependencies: ClassVar[list[str] | None] = _shared_dependencies(ConverterSAS, ConverterSpreadsheet)
+    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterSAS, ConverterSpreadsheet)
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterSAS, ConverterSpreadsheet)
 
     def output_puid(self, output: str) -> str | None:

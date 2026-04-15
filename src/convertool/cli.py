@@ -1,6 +1,8 @@
 from collections.abc import Callable
 from datetime import datetime
 from itertools import batched
+from json import JSONDecodeError
+from json import loads
 from logging import ERROR
 from logging import INFO
 from pathlib import Path
@@ -504,8 +506,8 @@ def cmd_standalone(
     The converted FILEs will be placed in the DESTINATION directory. To maintain the relative paths of the files, use
     the --root option to set their common parent directory.
 
-    To pass options to the given converter tool, use the --option option with a KEY and VALUE. Values can only be
-    strings.
+    To pass options to the given converter tool, use the --option option with a KEY and VALUE. VALUE must be in JSON
+    format.
 
     Use the --timeout option to override the converters' timeout, set to 0 to disable timeouts altogether.
 
@@ -516,6 +518,11 @@ def cmd_standalone(
 
     if root and any(not Path(f).is_relative_to(root) for f in files_paths):
         raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
+
+    try:
+        options_dict = {k: loads(v) for k, v in options}
+    except JSONDecodeError:
+        raise BadParameter("invalid JSON", ctx, ctx_params(ctx)["options"])
 
     dest: Path = Path(destination)
     dest.mkdir(parents=True, exist_ok=True)
@@ -535,7 +542,7 @@ def cmd_standalone(
                     signature=None,
                     root=Path(root or p.parent),
                     action="convert",
-                    action_data=ActionData(convert=ConvertAction(tool=tool, output=output, options=dict(options))),
+                    action_data=ActionData(convert=ConvertAction(tool=tool, output=output, options=options_dict)),
                     original_path=p,
                 )
             )
