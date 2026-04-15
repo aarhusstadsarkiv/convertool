@@ -4,7 +4,6 @@ from typing import ClassVar
 from convertool.util import TempDir
 
 from .base import ConverterABC
-from .converter_image import ConverterImage
 from .exceptions import BadOption
 
 
@@ -36,11 +35,28 @@ class ConverterText(ConverterABC):
             return [tmp_file.replace(dest_file)]
 
 
-class ConverterTextToImage(ConverterImage):
+class ConverterTextToImage(ConverterABC):
     tool_names: ClassVar[list[str]] = [
         "text",
         "text-to-image",
     ]
+    outputs: ClassVar[list[str]] = [
+        "jpg",
+        "jpeg",
+        "jp2",
+        "png",
+        "tif",
+        "tiff",
+    ]
+    process_timeout: ClassVar[float] = 180.0
+    dependencies: ClassVar[dict[str, list[str]]] = {"imagemagick": ["magick", "convert"], "pandoc": ["pandoc"]}
+
+    def output(self, output: str) -> str:
+        if output == "jpeg":
+            output = "jpg"
+        elif output == "tiff":
+            output = "tif"
+        return super().output(output)
 
     def test_options(self):
         if self.options.get("stripnull") not in (None, True, False):
