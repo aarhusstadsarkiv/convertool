@@ -3,7 +3,12 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
+from . import ConverterDocument
+from . import ConverterPDFToImage
+from .base import _shared_dependencies
+from .base import _shared_process_timeout
 from .base import ConverterABC
+from .base import dummy_base_file
 from .exceptions import BadOption
 
 
@@ -40,73 +45,46 @@ class ConverterTextToImage(ConverterABC):
         "text",
         "text-to-image",
     ]
-    outputs: ClassVar[list[str]] = [
-        "jpg",
-        "jpeg",
-        "jp2",
-        "png",
-        "tif",
-        "tiff",
-    ]
-    process_timeout: ClassVar[float] = 180.0
-    dependencies: ClassVar[dict[str, list[str]]] = {"imagemagick": ["magick", "convert"]}
-
-    def output(self, output: str) -> str:
-        if output == "jpeg":
-            output = "jpg"
-        elif output == "tiff":
-            output = "tif"
-        return super().output(output)
+    outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterDocument, ConverterPDFToImage)
+    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterDocument, ConverterPDFToImage)
+    multithreading: ClassVar[bool] = ConverterDocument.multithreading and ConverterPDFToImage.multithreading
 
     def test_options(self):
         if self.options.get("stripnull") not in (None, True, False):
             raise BadOption(f"Invalid value {self.options.get('stripnull')!r} for 'stripnull' option")
-        if font := self.options.get("font"):
-            if not isinstance(font, str):
-                raise BadOption(f"Invalid value {font!r} for 'font' option")
-            if not Path(font).is_file():
-                raise BadOption(f"File {font!r} not found for 'font' option")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+
         text: str = self.file.get_absolute_path().read_text((self.file.encoding or {}).get("encoding")).strip()
+
         if self.options.get("stripnull"):
             text = text.encode().translate(None, bytes([0])).decode()
-        width: int = max(800, *(len(line.rstrip()) for line in text.splitlines()), 0)
-        args: list[str] = []
-
-        if output == "tif":
-            args.extend(("-compress", "LZW"))
-
-        if font := self.options.get("font"):
-            args.extend(("-font", str(font)))
 
         with TempDir(output_dir) as tmp_dir:
-            tmp_text_file = tmp_dir.joinpath(f"{dest_file.name}.txt")
+            tmp_text_dir = self.output_dir(tmp_dir, keep_relative_path=keep_relative_path)
+            tmp_text_file = tmp_text_dir.joinpath(self.file.name)
+            tmp_text_file.parent.mkdir(parents=True, exist_ok=True)
             tmp_text_file.write_text(text, encoding="utf-8")
-            self.run_process(
-                self.dependencies["imagemagick"][0],
-                "-background",
-                "white",
-                "-fill",
-                "black",
-                "-page",
-                "A4",
-                "-density",
-                200,
-                "-units",
-                "PixelsPerInch",
-                "-pointsize",
-                int((width * 2) / 200),
-                *args,
-                f"text:{tmp_text_file.name}",
-                dest_file.name,
-                cwd=tmp_dir,
-            )
+
+            if not (
+                pdfs := ConverterDocument(
+                    dummy_base_file(tmp_text_file, tmp_dir),
+                    self.database,
+                    tmp_dir,
+                    hashed_output_name=self.hashed_output_name,
+                ).convert(tmp_dir, "pdf")
+            ):
+                return []
 
             tmp_text_file.unlink(missing_ok=True)
-            dest_dir.mkdir(parents=True, exist_ok=True)
 
-            return [f.replace(dest_dir.joinpath(f.name)) for f in sorted(tmp_dir.iterdir()) if f.is_file()]
+            pdf = pdfs[0]
+
+            return ConverterPDFToImage(
+                dummy_base_file(pdf, tmp_dir),
+                self.database,
+                tmp_dir,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(output_dir, output, keep_relative_path=keep_relative_path)
