@@ -61,6 +61,11 @@ class ConverterTextToImage(ConverterABC):
     def test_options(self):
         if self.options.get("stripnull") not in (None, True, False):
             raise BadOption(f"Invalid value {self.options.get('stripnull')!r} for 'stripnull' option")
+        if font := self.options.get("font"):
+            if not isinstance(font, str):
+                raise BadOption(f"Invalid value {font!r} for 'font' option")
+            if not Path(font).is_file():
+                raise BadOption(f"File {font!r} not found for 'font' option")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
@@ -69,33 +74,34 @@ class ConverterTextToImage(ConverterABC):
         text: str = self.file.get_absolute_path().read_text((self.file.encoding or {}).get("encoding")).strip()
         if self.options.get("stripnull"):
             text = text.encode().translate(None, bytes([0])).decode()
-        width: int = max(800, *(len(line) * 10 for line in text.splitlines()), 0)
-        height: int = max(600, (text.count("\n") + 1) * 25)
+        width: int = max(800, *(len(line.rstrip()) for line in text.splitlines()), 0)
         args: list[str] = []
 
         if output == "tif":
             args.extend(("-compress", "LZW"))
+
+        if font := self.options.get("font"):
+            args.extend(("-font", str(font)))
 
         with TempDir(output_dir) as tmp_dir:
             tmp_text_file = tmp_dir.joinpath(f"{dest_file.name}.txt")
             tmp_text_file.write_text(text, encoding="utf-8")
             self.run_process(
                 self.dependencies["imagemagick"][0],
-                "-depth",
-                "1",
+                "-background",
+                "white",
+                "-fill",
+                "black",
+                "-page",
+                "A4",
                 "-density",
                 200,
-                *args,
-                "-size",
-                f"{width}x{height}",
-                "xc:black",
-                "-fill",
-                "white",
+                "-units",
+                "PixelsPerInch",
                 "-pointsize",
-                "20",
-                "-annotate",
-                "+5+45",
-                f"@{tmp_text_file.name}",
+                int((width * 2) / 200),
+                *args,
+                f"text:{tmp_text_file.name}",
                 dest_file.name,
                 cwd=tmp_dir,
             )
