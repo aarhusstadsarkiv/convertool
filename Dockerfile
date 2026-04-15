@@ -29,6 +29,12 @@ RUN apt update && apt install -y libproj-dev gdal-bin
 RUN apt update && apt install -y imagemagick
 COPY config/imagemagick_policy.xml /etc/ImageMagick-7/policy.xml
 
+# Install nconvert
+RUN curl -L -o nconvert.tgz 'https://download.xnview.com/NConvert-linux64.tgz'
+RUN tar zxvf nconvert.tgz
+RUN mv NConvert/* /root/.local/bin
+RUN rm -rf nconvert.tgz NConvert/
+
 # Install poppler
 RUN apt update && apt install -y poppler-utils
 
