@@ -35,9 +35,6 @@ RUN tar zxvf nconvert.tgz
 RUN mv NConvert/* /root/.local/bin
 RUN rm -rf nconvert.tgz NConvert/
 
-# Install poppler
-RUN apt update && apt install -y poppler-utils
-
 # Install vipps
 RUN apt update && apt install -y libvips-tools
 
