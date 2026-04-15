@@ -49,7 +49,7 @@ class ConverterTextToImage(ConverterABC):
         "tiff",
     ]
     process_timeout: ClassVar[float] = 180.0
-    dependencies: ClassVar[dict[str, list[str]]] = {"imagemagick": ["magick", "convert"], "pandoc": ["pandoc"]}
+    dependencies: ClassVar[dict[str, list[str]]] = {"imagemagick": ["magick", "convert"]}
 
     def output(self, output: str) -> str:
         if output == "jpeg":
