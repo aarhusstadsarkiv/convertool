@@ -1,61 +1,17 @@
 FROM python:3.13-trixie AS base
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Install base dependencies
-RUN apt update && apt install -y \
-    vim \
-    curl \
-    wget \
-    git \
-    cmake \
-    apt-transport-https \
-    ca-certificates \
-    libc6-i386 \
-    libc6-x32 \
-    libxtst6
-
-# Setup .local/bin
-RUN mkdir -p /root/.local/bin
 ENV PATH="/root/.local/bin:$PATH"
 
 # Install uv
 ENV UV_NO_MODIFY_PATH=1
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install GDAL
-RUN apt update && apt install -y libproj-dev gdal-bin
-
-# Install Imagemagick
-RUN apt update && apt install -y imagemagick
-COPY config/imagemagick_policy.xml /etc/ImageMagick-7/policy.xml
-
-# Install nconvert
-RUN curl -L -o nconvert.tgz 'https://download.xnview.com/NConvert-linux64.tgz'
-RUN tar zxvf nconvert.tgz
-RUN mv NConvert/* /root/.local/bin
-RUN rm -rf nconvert.tgz NConvert/
-
-# Install vipps
-RUN apt update && apt install -y libvips-tools
-
-# Install LibreOffice
-RUN curl -o libreoffice.tar.gz 'https://downloadarchive.documentfoundation.org/libreoffice/old/24.8.7.2/deb/x86_64/LibreOffice_24.8.7.2_Linux_x86-64_deb.tar.gz'
-RUN tar zxvf libreoffice.tar.gz
-RUN dpkg -i LibreOffice_24.8.7.2_Linux_x86-64_deb/DEBS/*.deb
-RUN ln -s /opt/libreoffice24.8/program/soffice /usr/bin/libreoffice
-
-# Install GhostScript
-RUN apt update && apt install -y ghostscript
-
-# Install ffmpeg
-RUN apt update && apt install -y ffmpeg
-
-# Install xmlstarlet
-RUN apt update && apt install -y xmlstarlet
-
-# Install chrome
+# Run installer script
 WORKDIR /root
-RUN apt update && apt install -y chromium
+COPY installers.sh installers.sh
+RUN sh installers.sh
+RUN rm installers.sh
 
 
 FROM base AS prod
