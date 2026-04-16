@@ -8,6 +8,7 @@ from convertool.util import file_suffixes
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .exceptions import BadOption
 from .exceptions import ConvertError
 
 
@@ -17,6 +18,10 @@ class ConverterGIS(ConverterABC):
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
+
+    def test_options(self):
+        if (iformat := self.options.get("input_format")) is not None and not isinstance(iformat, str):
+            raise BadOption(f"Invalid value {iformat!r} for 'input_format' option")
 
     def assemble(self, tmp_dir: Path) -> list[Path]:
         files: list[Path] = []
@@ -48,6 +53,9 @@ class ConverterGIS(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
         args: list[str] = []
+
+        if iformat := self.options.get("input_format"):
+            args.extend(("-if", str(iformat)))
 
         if output == "gml":
             args.extend(("-of", "GML", "-dsco", "FORMAT=GML3"))
