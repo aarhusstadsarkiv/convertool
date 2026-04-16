@@ -51,17 +51,18 @@ class ConverterGIS(ConverterABC):
         with TempDir(output_dir) as tmp_dir:
             self.assemble(tmp_dir)
 
-            self.run_process(
-                self.dependencies["ogr2ogr"][0],
-                "-of",
-                "GML",
-                "-dsco",
-                "FORMAT=GML3",
-                dest_file.name,
-                tmp_dir.joinpath(self.file.name),
-                cwd=tmp_dir,
-            )
+            with TempDir(tmp_dir) as tmp_outdir:
+                self.run_process(
+                    self.dependencies["ogr2ogr"][0],
+                    "-of",
+                    "GML",
+                    "-dsco",
+                    "FORMAT=GML3",
+                    dest_file.name,
+                    tmp_dir.joinpath(self.file.name),
+                    cwd=tmp_outdir,
+                )
 
-            dest_dir.mkdir(parents=True, exist_ok=True)
+                dest_dir.mkdir(parents=True, exist_ok=True)
 
-            return [f.replace(dest_dir / f.name) for f in tmp_dir.iterdir()]
+                return [f.replace(dest_dir / f.name) for f in tmp_outdir.iterdir()]
