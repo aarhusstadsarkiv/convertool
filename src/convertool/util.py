@@ -9,6 +9,7 @@ from tempfile import TemporaryDirectory
 
 import chardet
 from acacore.database import FilesDB
+from acacore.utils.functions import is_valid_suffix
 from click import BadParameter
 from click import Context
 from click import Parameter
@@ -76,6 +77,16 @@ class AVID:
     @property
     def database_path(self):
         return self.metadata_dir / "avid.db"
+
+
+def file_suffixes(path: Path) -> str:
+    suffixes: list[str] = []
+    for suffix in path.suffixes[::-1]:
+        if is_valid_suffix(suffix):
+            suffixes.insert(0, suffix)
+        else:
+            break
+    return "".join(suffixes)
 
 
 def ctx_params(ctx: Context) -> dict[str, Parameter]:
