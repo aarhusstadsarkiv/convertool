@@ -48,10 +48,10 @@ class ConverterGIS(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
-        with TempDir(output_dir) as tmp_dir:
-            self.assemble(tmp_dir)
+        with TempDir(output_dir) as tmp_filesdir:
+            self.assemble(tmp_filesdir)
 
-            with TempDir(tmp_dir) as tmp_outdir:
+            with TempDir(output_dir) as tmp_outdir:
                 self.run_process(
                     self.dependencies["ogr2ogr"][0],
                     "-of",
@@ -59,7 +59,7 @@ class ConverterGIS(ConverterABC):
                     "-dsco",
                     "FORMAT=GML3",
                     dest_file.name,
-                    tmp_dir.joinpath(self.file.name),
+                    tmp_filesdir.joinpath(self.file.name),
                     cwd=tmp_outdir,
                 )
 
