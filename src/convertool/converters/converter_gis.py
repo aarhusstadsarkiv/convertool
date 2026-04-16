@@ -56,18 +56,20 @@ class ConverterGIS(ConverterABC):
         elif output == "geojson":
             args.extend(("-of", "GeoJSON"))
 
-        with TempDir(output_dir) as tmp_filesdir:
+        with (
+            TempDir(output_dir) as tmp_filesdir,
+            TempDir(output_dir) as tmp_outdir,
+        ):
             self.assemble(tmp_filesdir)
 
-            with TempDir(output_dir) as tmp_outdir:
-                self.run_process(
-                    self.dependencies["ogr2ogr"][0],
-                    *args,
-                    dest_file.name,
-                    tmp_filesdir.joinpath(self.file.name),
-                    cwd=tmp_outdir,
-                )
+            self.run_process(
+                self.dependencies["ogr2ogr"][0],
+                *args,
+                dest_file.name,
+                tmp_filesdir.joinpath(self.file.name),
+                cwd=tmp_outdir,
+            )
 
-                dest_dir.mkdir(parents=True, exist_ok=True)
+            dest_dir.mkdir(parents=True, exist_ok=True)
 
-                return [f.replace(dest_dir / f.name) for f in tmp_outdir.iterdir()]
+            return [f.replace(dest_dir / f.name) for f in tmp_outdir.iterdir()]
