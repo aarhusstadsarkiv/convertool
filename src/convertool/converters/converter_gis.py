@@ -8,15 +8,20 @@ from convertool.util import file_suffixes
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .exceptions import BadOption
 from .exceptions import ConvertError
 
 
 class ConverterGIS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["gis"]
-    outputs: ClassVar[list[str]] = ["gml"]
+    outputs: ClassVar[list[str]] = ["gml", "shp", "geojson"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
+
+    def test_options(self):
+        if (iformat := self.options.get("input_format")) is not None and not isinstance(iformat, str):
+            raise BadOption(f"Invalid value {iformat!r} for 'input_format' option")
 
     def assemble(self, tmp_dir: Path) -> list[Path]:
         files: list[Path] = []
@@ -47,22 +52,32 @@ class ConverterGIS(ConverterABC):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
+        args: list[str] = []
 
-        with TempDir(output_dir) as tmp_filesdir:
+        if iformat := self.options.get("input_format"):
+            args.extend(("-if", str(iformat)))
+
+        if output == "gml":
+            args.extend(("-of", "GML", "-dsco", "FORMAT=GML3"))
+        elif output == "shp":
+            args.extend(("-of", "ESRI Shapefile"))
+        elif output == "geojson":
+            args.extend(("-of", "GeoJSON"))
+
+        with (
+            TempDir(output_dir) as tmp_filesdir,
+            TempDir(output_dir) as tmp_outdir,
+        ):
             self.assemble(tmp_filesdir)
 
-            with TempDir(output_dir) as tmp_outdir:
-                self.run_process(
-                    self.dependencies["ogr2ogr"][0],
-                    "-of",
-                    "GML",
-                    "-dsco",
-                    "FORMAT=GML3",
-                    dest_file.name,
-                    tmp_filesdir.joinpath(self.file.name),
-                    cwd=tmp_outdir,
-                )
+            self.run_process(
+                self.dependencies["ogr2ogr"][0],
+                *args,
+                dest_file.name,
+                tmp_filesdir.joinpath(self.file.name),
+                cwd=tmp_outdir,
+            )
 
-                dest_dir.mkdir(parents=True, exist_ok=True)
+            dest_dir.mkdir(parents=True, exist_ok=True)
 
-                return [f.replace(dest_dir / f.name) for f in tmp_outdir.iterdir()]
+            return [f.replace(dest_dir / f.name) for f in tmp_outdir.iterdir()]
