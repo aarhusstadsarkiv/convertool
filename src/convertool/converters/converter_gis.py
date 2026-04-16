@@ -3,8 +3,8 @@ from shutil import copy2
 from typing import ClassVar
 
 from acacore.models.file import OriginalFile
-from util import file_suffixes
 
+from convertool.util import file_suffixes
 from convertool.util import TempDir
 
 from .base import ConverterABC
