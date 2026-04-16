@@ -13,7 +13,7 @@ from .exceptions import ConvertError
 
 class ConverterGIS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["gis"]
-    outputs: ClassVar[list[str]] = ["gml", "geojson"]
+    outputs: ClassVar[list[str]] = ["gml", "shp", "geojson"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
@@ -51,6 +51,8 @@ class ConverterGIS(ConverterABC):
 
         if output == "gml":
             args.extend(("-of", "GML", "-dsco", "FORMAT=GML3"))
+        elif output == "shp":
+            args.extend(("-of", "ESRI Shapefile"))
         elif output == "geojson":
             args.extend(("-of", "GeoJSON"))
 
