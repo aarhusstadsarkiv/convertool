@@ -13,7 +13,7 @@ from .exceptions import ConvertError
 
 class ConverterGIS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["gis"]
-    outputs: ClassVar[list[str]] = ["gml"]
+    outputs: ClassVar[list[str]] = ["gml", "geojson"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
@@ -47,6 +47,12 @@ class ConverterGIS(ConverterABC):
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
+        args: list[str] = []
+
+        if output == "gml":
+            args.extend(("-of", "GML", "-dsco", "FORMAT=GML3"))
+        elif output == "geojson":
+            args.extend(("-of", "GeoJSON"))
 
         with TempDir(output_dir) as tmp_filesdir:
             self.assemble(tmp_filesdir)
@@ -54,10 +60,7 @@ class ConverterGIS(ConverterABC):
             with TempDir(output_dir) as tmp_outdir:
                 self.run_process(
                     self.dependencies["ogr2ogr"][0],
-                    "-of",
-                    "GML",
-                    "-dsco",
-                    "FORMAT=GML3",
+                    *args,
                     dest_file.name,
                     tmp_filesdir.joinpath(self.file.name),
                     cwd=tmp_outdir,
