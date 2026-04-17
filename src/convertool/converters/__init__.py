@@ -5,6 +5,9 @@ from .converter_cad import ConverterCAD
 from .converter_copy import ConverterCopy
 from .converter_document import ConverterDocument
 from .converter_document import ConverterDocumentToImage
+from .converter_eml import ConverterEML
+from .converter_eml import ConverterEMLToImage
+from .converter_eml import ConverterEMLToPDF
 from .converter_gis import ConverterGIS
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
@@ -47,6 +50,9 @@ __all__ = [
     "ConverterCopy",
     "ConverterDocument",
     "ConverterDocumentToImage",
+    "ConverterEML",
+    "ConverterEMLToImage",
+    "ConverterEMLToPDF",
     "ConverterGIS",
     "ConverterHTML",
     "ConverterHTMLToImage",

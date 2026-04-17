@@ -1,0 +1,31 @@
+---
+To: Alf <alf@melmac.local>
+Subject: UnitTest Subject München,
+From: mlemos <alf@test.org>
+Reply-To: McTest <test@unit.org>
+Sender: test@sender.org
+X-Mailer: UnitTest
+MIME-Version: 1.0
+Message-ID: <20050430192829.0489.mlemos@acm.org>
+Date: Sat, 30 Apr 2005 19:28:29 -0300
+Attachments: 
+  - attachment.txt
+---
+
+Testing Email
+
+
+
+
+
+
+Testing eml file
+
+Hello Alf,
+https://www.unittest.de/test
+
+
+
+
+Here is an image embedded in a message as a separate part:
+Thank you,

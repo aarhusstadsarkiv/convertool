@@ -148,14 +148,20 @@ def msg_html_body(msg: MessageBase) -> str:
         p.string = "No readable content available."
         html.select_one("body").append(p)
 
-    for attachment in msg.attachments:
-        if not (cid := getattr(attachment, "cid", None)):
-            continue
-        if attachment.data is None or not isinstance(attachment.data, bytes):
-            continue
-        data_b64: str = b64encode(attachment.data or b"").decode()
-        for tag in html.select(f'[src="cid:{cid}"]'):
-            tag.attrs["src"] = f"data:{attachment.mimetype or ''};base64,{data_b64}"
+    cids: dict[str, tuple[str, bytes]] = {
+        f"cid:{cid}": (a.mimetype or "", a.data)
+        for a in msg.attachments
+        if (cid := getattr(a, "cid", None)) and isinstance(a.data, bytes)
+    }
+
+    if cids:
+        for tag in html.select("*"):
+            for attr, value in tag.attrs.items():
+                if not isinstance(value, str):
+                    continue
+                if attachment := cids.get(value):
+                    data_b64: str = b64encode(attachment[1]).decode()
+                    tag.attrs[attr] = f"data:{attachment[0]};base64,{data_b64}"
 
     return html.decode_contents()
 
