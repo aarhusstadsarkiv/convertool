@@ -7,6 +7,7 @@ from .converter_document import ConverterDocument
 from .converter_document import ConverterDocumentToImage
 from .converter_eml import ConverterEML
 from .converter_eml import ConverterEMLToImage
+from .converter_eml import ConverterEMLToPDF
 from .converter_gis import ConverterGIS
 from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
@@ -51,6 +52,7 @@ __all__ = [
     "ConverterDocumentToImage",
     "ConverterEML",
     "ConverterEMLToImage",
+    "ConverterEMLToPDF",
     "ConverterGIS",
     "ConverterHTML",
     "ConverterHTMLToImage",
