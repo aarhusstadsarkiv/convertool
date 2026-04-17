@@ -132,6 +132,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cli-formatter"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/72/112d6e1961d039c15ce2c4cfe56c4f9fcdb2095e7e455094caca7c748d05/cli-formatter-1.2.0.tar.gz", hash = "sha256:5698b64740c72fda2ec6c12d732271fab78c8c8b65bed8a17db33125b1027da9", size = 4527, upload-time = "2020-05-21T17:01:30.637Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/ad/f8823398add76eef32fb037ed4185bec3d76a48b2f88927d84083f62ab29/cli_formatter-1.2.0-py3-none-any.whl", hash = "sha256:84c253f7997ec7c4fc4c1de36cc9c7e33e0ea5af342bc824dea2b5edfac60952", size = 6572, upload-time = "2020-05-21T17:01:29.499Z" },
+]
+
+[[package]]
 name = "click"
 version = "8.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -177,6 +186,7 @@ source = { editable = "." }
 dependencies = [
     { name = "acacore" },
     { name = "beautifulsoup4" },
+    { name = "eml-analyzer" },
     { name = "extract-msg" },
     { name = "lxml" },
     { name = "nbconvert" },
@@ -201,6 +211,7 @@ dev = [
 requires-dist = [
     { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.0" },
     { name = "beautifulsoup4", specifier = ">=4.13.5,<5" },
+    { name = "eml-analyzer", specifier = ">=3.0.1" },
     { name = "extract-msg", specifier = ">=0.55.0,<1" },
     { name = "lxml", specifier = ">=6.0.2,<7" },
     { name = "nbconvert", specifier = ">=7.17.1" },
@@ -364,6 +375,18 @@ version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/2f/633031205333bee5f9f93761af8268746aa75f38754823aabb8570eb245b/ebcdic-1.1.1-py2.py3-none-any.whl", hash = "sha256:33b4cb729bc2d0bf46cc1847b0e5946897cb8d3f53520c5b9aa5fa98d7e735f1", size = 128537, upload-time = "2019-08-09T00:54:35.544Z" },
+]
+
+[[package]]
+name = "eml-analyzer"
+version = "3.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cli-formatter" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/e9/ed5216efbbbb14e95b49df5164f0bc6fce06ad69f68603891f07aa9e2c77/eml-analyzer-3.0.1.tar.gz", hash = "sha256:d1cc4406458769304ead92da72b7919123b3c03686f6916f352f98f19a79272f", size = 12667, upload-time = "2023-08-04T20:30:43.526Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/af/b1876fece30a68ab5e2e3856d5a1a09d7f97cff2d0876f7e87cea344e931/eml_analyzer-3.0.1-py3-none-any.whl", hash = "sha256:47130c5dcc4d8851cddbca2acfaeb060b74ee0500a122f39b18f1ea709663549", size = 14973, upload-time = "2023-08-04T20:30:41.907Z" },
 ]
 
 [[package]]
