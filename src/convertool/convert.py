@@ -43,6 +43,7 @@ def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | No
         converters.ConverterTemplate,
         converters.ConverterSymphovert,
         converters.ConverterEML,
+        converters.ConverterEMLToImage,
         converters.ConverterGIS,
         converters.ConverterHTML,
         converters.ConverterHTMLToImage,

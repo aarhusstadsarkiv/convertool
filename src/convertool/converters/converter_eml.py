@@ -5,7 +5,14 @@ from bs4 import BeautifulSoup
 from eml_analyzer.library.parser import Attachment
 from eml_analyzer.library.parser import ParsedEmail
 
+from convertool.util import TempDir
+
+from .base import _shared_dependencies
+from .base import _shared_platforms
+from .base import _shared_process_timeout
 from .base import ConverterABC
+from .base import dummy_base_file
+from .converter_html import ConverterHTMLToImage
 from .converter_msg import html_to_text
 from .converter_msg import text_to_html
 from .exceptions import OutputTargetError
@@ -150,3 +157,34 @@ class ConverterEML(ConverterABC):
         dest_file.write_text(body, "utf-8")
 
         return [dest_file]
+
+
+class ConverterEMLToImage(ConverterABC):
+    tool_names: ClassVar[list[str]] = ConverterEML.tool_names
+    outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
+    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterEML, ConverterHTMLToImage)
+    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterEML, ConverterHTMLToImage)
+    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterEML, ConverterHTMLToImage)
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+
+        with TempDir(output_dir) as tmp_dir:
+            if not (
+                htmls := ConverterEML(
+                    self.file,
+                    self.database,
+                    self.file.root,
+                    hashed_output_name=self.hashed_output_name,
+                ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
+            ):
+                return []
+
+            html = htmls[0]
+
+            return ConverterHTMLToImage(
+                dummy_base_file(html, tmp_dir),
+                self.database,
+                tmp_dir,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(output_dir, output, keep_relative_path=keep_relative_path)
