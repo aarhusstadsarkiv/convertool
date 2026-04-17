@@ -18,7 +18,8 @@ def eml_front_matter(eml: ParsedEmail, attachments: list[tuple[str | None, Attac
             "Attachments",
             sorted(
                 a.filename or f"attachment-{n:02}"
-                for n, a in enumerate([a for _, a in attachments if a.content_disposition == "attachment"], 1)
+                for n, [_, a] in enumerate(attachments, 1)
+                if a.content_disposition == "attachment"
             ),
         ),
     ]
