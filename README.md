@@ -104,6 +104,13 @@ Options:
 | document     | jpg                | Convert a document file (Word, LibreOffice, etc.) to JPEG                      | .jpg      |
 | document     | png                | Convert a document file (Word, LibreOffice, etc.) to PNG                       | .png      |
 | document     | tiff               | Convert a document file (Word, LibreOffice, etc.) to TIFF                      | .tiff     |
+| eml          | html               | Convert an EML file to HTML                                                    | .html     |
+| eml          | txt                | Convert an EML file to TXT                                                     | .txt      |
+| eml          | pdf                | Convert an EML file to TXT                                                     | .pdf      |
+| eml          | jp2                | Convert an EML file to JPEG2000                                                | .jp2      |
+| eml          | jpg                | Convert an EML file to JPEG                                                    | .jpg      |
+| eml          | png                | Convert an EML file to PNG                                                     | .png      |
+| eml          | tiff               | Convert an EML file to TIFF                                                    | .tiff     |
 | gis          | gml                | Convert GIS file with its auxiliaries to GMLv3                                 | .gml      |
 | html         | pdf                | Convert HTML to PDF                                                            | .pdf      |
 | html         | jp2                | Convert HTML to JPEG2000 images (one per page)                                 | .jp2      |
