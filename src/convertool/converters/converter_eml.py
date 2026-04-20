@@ -20,8 +20,14 @@ from .exceptions import OutputTargetError
 
 
 def eml_front_matter(eml: ParsedEmail, attachments: list[tuple[str | None, Attachment]]) -> str:
+    headers: dict[str, str] = {k.lower(): str(v) for k, v in eml.get_header()}
     header: list[tuple[str, str | list[str]]] = [
-        *((name, str(value)) for name, value in eml.get_header() if name.lower() != "content-type"),
+        ("From", headers.get("from", "")),
+        ("To", headers.get("to", "")),
+        ("CC", headers.get("cc", "")),
+        ("BCC", headers.get("bcc", "")),
+        ("Date", headers.get("date", "")),
+        ("Subject", headers.get("subject", "")),
         (
             "Attachments",
             sorted(
