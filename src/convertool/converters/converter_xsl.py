@@ -57,7 +57,7 @@ class ConverterXSL(ConverterABC):
             )
 
         dest_dir.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(stdout)
+        dest_file.write_text(stdout, encoding="utf-8")
 
         return [dest_file]
 
@@ -88,7 +88,7 @@ class ConverterMedCom(ConverterABC):
         stdout, _ = self.run_process(self.dependencies["xmlstarlet"][0], "tr", xsl, self.file.get_absolute_path())
 
         dest_dir.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(stdout)
+        dest_file.write_text(stdout, encoding="utf-8")
 
         return [dest_file]
 
