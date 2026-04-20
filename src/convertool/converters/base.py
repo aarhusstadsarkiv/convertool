@@ -14,6 +14,7 @@ from typing import ClassVar
 
 from acacore.database import FilesDB
 from acacore.models.file import BaseFile
+from chardet import DetectionDict
 
 from convertool.util import run_process
 
@@ -226,6 +227,16 @@ class ConverterABC(ABC):
 
         :param output: The output value.
         :return: A PUID if available, else ``None``.
+        """
+        return None
+
+    # noinspection PyMethodMayBeStatic
+    def output_encoding(self, output: str) -> DetectionDict | None:  # noqa: ARG002
+        """
+        Get the encoding of a given output, if available.
+
+        :param output: The output value.
+        :return: A ``chardet.DetectionDict`` if available, else ``None``.
         """
         return None
 
