@@ -6,6 +6,7 @@ from xml.sax.saxutils import escape
 
 from bs4 import BeautifulSoup
 from chardet import detect as detect_encoding
+from chardet import DetectionDict
 from striprtf.striprtf import rtf_to_text
 from tnefparse import properties as tnefprops
 from tnefparse import TNEF
@@ -149,13 +150,20 @@ def tnef_to_html(tnef: TNEF, headers: TNEFHeaders):
 
 class ConverterTNEF(ConverterABC):
     tool_names: ClassVar[list[str]] = ["tnef"]
-    outputs: ClassVar[list[[str]]] = ["html", "txt"]
+    outputs: ClassVar[list[str]] = ["html", "txt"]
 
     def output_puid(self, output: str) -> str | None:
         if output == "txt":
             return "x-fmt/111"
         if output == "html":
             return "fmt/471"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "txt":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/plain")
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

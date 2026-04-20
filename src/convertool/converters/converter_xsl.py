@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import ClassVar
 
+from chardet import DetectionDict
+
 from convertool.util import TempDir
 
 from . import resources
@@ -18,6 +20,13 @@ class ConverterXSL(ConverterABC):
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
+        if output == "xml":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="application/xml")
+        return None
 
     def convert(
         self,
@@ -62,6 +71,11 @@ class ConverterMedCom(ConverterABC):
     def output_puid(self, output: str) -> str | None:
         if output == "html":
             return "fmt/471"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

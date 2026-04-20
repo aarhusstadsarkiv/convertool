@@ -2,6 +2,7 @@ import csv
 from pathlib import Path
 from typing import ClassVar
 
+from chardet import DetectionDict
 from sas7bdat import SAS7BDAT
 
 from convertool.util import get_encoding
@@ -24,6 +25,13 @@ class ConverterSAS(ConverterABC):
             return "x-fmt/18"
         if output == "tsv":
             return "x-fmt/13"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "csv":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/csv")
+        if output == "tsv":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type=None)
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from acacore.models.file import OriginalFile
 from acacore.models.reference_files import TemplateTypeEnum
+from chardet import DetectionDict
 
 from .base import ConverterABC
 from .exceptions import ConvertError
@@ -16,6 +17,11 @@ class ConverterTemplate(ConverterABC):
         if output == "temporary-file":
             return None
         return "x-fmt/111"
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "temporary-file":
+            return None
+        return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/plain")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
