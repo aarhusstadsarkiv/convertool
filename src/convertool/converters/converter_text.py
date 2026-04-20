@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import ClassVar
 
+from chardet import DetectionDict
+
 from convertool.util import TempDir
 
 from . import ConverterDocument
@@ -23,6 +25,11 @@ class ConverterText(ConverterABC):
     def output_puid(self, output: str) -> str | None:
         if output == "txt":
             return "x-fmt/111"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "txt":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/plain")
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

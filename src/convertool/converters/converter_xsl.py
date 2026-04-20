@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import ClassVar
 
+from chardet import DetectionDict
+
 from convertool.util import TempDir
 
 from . import resources
@@ -18,6 +20,13 @@ class ConverterXSL(ConverterABC):
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
+        if output == "xml":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="application/xml")
+        return None
 
     def convert(
         self,
@@ -48,7 +57,7 @@ class ConverterXSL(ConverterABC):
             )
 
         dest_dir.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(stdout)
+        dest_file.write_text(stdout, encoding="utf-8")
 
         return [dest_file]
 
@@ -64,6 +73,11 @@ class ConverterMedCom(ConverterABC):
             return "fmt/471"
         return None
 
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
@@ -74,7 +88,7 @@ class ConverterMedCom(ConverterABC):
         stdout, _ = self.run_process(self.dependencies["xmlstarlet"][0], "tr", xsl, self.file.get_absolute_path())
 
         dest_dir.mkdir(parents=True, exist_ok=True)
-        dest_file.write_text(stdout)
+        dest_file.write_text(stdout, encoding="utf-8")
 
         return [dest_file]
 

@@ -2,6 +2,8 @@ from pathlib import Path
 from shutil import copy2
 from typing import ClassVar
 
+from chardet import DetectionDict
+
 from .base import ConverterABC
 
 
@@ -15,6 +17,9 @@ class ConverterCopy(ConverterABC):
 
     def output_puid(self, output: str) -> str | None:  # noqa: ARG002
         return self.file.puid
+
+    def output_encoding(self, output: str) -> DetectionDict | None:  # noqa: ARG002
+        return self.file.encoding
 
     def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:  # noqa: ARG002
         return super().output_file(output_dir, "")

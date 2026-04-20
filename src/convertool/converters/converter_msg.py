@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from acacore.models.file import BaseFile
 from bs4 import BeautifulSoup
 from chardet import detect as detect_encoding
+from chardet import DetectionDict
 from extract_msg import Message
 from extract_msg import MSGFile
 from extract_msg import openMsg
@@ -188,6 +189,13 @@ class ConverterMSG(ConverterABC):
             return "x-fmt/111"
         if output == "html":
             return "fmt/471"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "txt":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/plain")
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

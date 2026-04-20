@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import ClassVar
 
 import nbformat
+from chardet import DetectionDict
 from nbconvert import HTMLExporter
 
 from convertool.util import TempDir
@@ -23,6 +24,11 @@ class ConverterIPYNBToHTML(ConverterABC):
     def output_puid(self, output: str) -> str | None:
         if output == "html":
             return "fmt/471"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:

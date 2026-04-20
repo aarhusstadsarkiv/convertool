@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from bs4 import BeautifulSoup
+from chardet import DetectionDict
 from eml_analyzer.library.parser import Attachment
 from eml_analyzer.library.parser import ParsedEmail
 
@@ -20,8 +21,14 @@ from .exceptions import OutputTargetError
 
 
 def eml_front_matter(eml: ParsedEmail, attachments: list[tuple[str | None, Attachment]]) -> str:
+    headers: dict[str, str] = {k.lower(): str(v) for k, v in eml.get_header()}
     header: list[tuple[str, str | list[str]]] = [
-        *((name, str(value)) for name, value in eml.get_header() if name.lower() != "content-type"),
+        ("From", headers.get("from", "")),
+        ("To", headers.get("to", "")),
+        ("CC", headers.get("cc", "")),
+        ("BCC", headers.get("bcc", "")),
+        ("Date", headers.get("date", "")),
+        ("Subject", headers.get("subject", "")),
         (
             "Attachments",
             sorted(
@@ -135,6 +142,13 @@ def eml_plain_body(eml: ParsedEmail) -> str:
 class ConverterEML(ConverterABC):
     tool_names: ClassVar[list[str]] = ["eml"]
     outputs: ClassVar[list[str]] = ["html", "txt"]
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "txt":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/plain")
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
+        return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
