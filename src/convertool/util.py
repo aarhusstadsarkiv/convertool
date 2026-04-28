@@ -148,7 +148,7 @@ def run_process(
         )
         return process.stdout or "", process.stderr or ""
     except FileNotFoundError:
-        raise CalledProcessError(127, str(args[0]), "", f"Command not found {args[0]}")
+        raise CalledProcessError(127, command, "", f"Command not found {command}")
 
 
 def get_encoding(path: Path, bof_length: int = 2048) -> str | None:
