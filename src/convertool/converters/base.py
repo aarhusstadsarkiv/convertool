@@ -90,6 +90,7 @@ class ConverterABC(ABC):
         root: Path | None = None,
         options: dict[str, Any] | None = None,
         *,
+        timeout: int | None = None,
         capture_output: bool = True,
         hashed_output_name: bool = True,
     ) -> None:
@@ -101,6 +102,7 @@ class ConverterABC(ABC):
         self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
         self.hashed_output_name: bool = hashed_output_name
+        self.timeout: int | None = timeout
 
         self.test_options()
 
@@ -174,7 +176,9 @@ class ConverterABC(ABC):
                 *args,
                 cwd=cwd,
                 capture_output=self.capture_output,
-                timeout=self.process_timeout,
+                timeout=self.process_timeout
+                if self.timeout is None or self.process_timeout is None
+                else (self.timeout or None),
             )
         except TimeoutExpired as err:
             raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s", err)
