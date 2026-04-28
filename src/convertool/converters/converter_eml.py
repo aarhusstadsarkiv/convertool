@@ -190,6 +190,7 @@ class ConverterEMLToPDF(ConverterABC):
                     self.file,
                     self.database,
                     self.file.root,
+                    timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
             ):
@@ -201,6 +202,7 @@ class ConverterEMLToPDF(ConverterABC):
                 dummy_base_file(html, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(output_dir, output, keep_relative_path=keep_relative_path)
 
@@ -221,6 +223,7 @@ class ConverterEMLToImage(ConverterABC):
                     self.file,
                     self.database,
                     self.file.root,
+                    timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
             ):
@@ -232,5 +235,6 @@ class ConverterEMLToImage(ConverterABC):
                 dummy_base_file(html, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(output_dir, output, keep_relative_path=keep_relative_path)

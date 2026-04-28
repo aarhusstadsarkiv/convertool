@@ -84,6 +84,7 @@ class ConverterTextToImage(ConverterABC):
                     dummy_base_file(tmp_text_file, tmp_dir),
                     self.database,
                     tmp_dir,
+                    timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "pdf")
             ):
@@ -97,5 +98,6 @@ class ConverterTextToImage(ConverterABC):
                 dummy_base_file(pdf, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(output_dir, output, keep_relative_path=keep_relative_path)
