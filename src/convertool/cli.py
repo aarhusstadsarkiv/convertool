@@ -362,8 +362,6 @@ def cmd_digiarch(
                         if tool_include and instruction.tool not in tool_include:
                             continue
                         instruction.converter_cls.test()
-                        if timeout is not None:
-                            instruction.converter_cls.process_timeout = None if timeout == 0 else float(timeout)
                         instructions.append(instruction)
                     except ConverterNotFound as error:
                         if error.tool in tool_ignore:
@@ -419,6 +417,7 @@ def cmd_digiarch(
                         verbose,
                         hashed_names,
                         logger,
+                        timeout,
                     ):
                         handle_results(
                             ctx,
@@ -443,6 +442,7 @@ def cmd_digiarch(
                     verbose,
                     hashed_names,
                     logger,
+                    timeout,
                 ):
                     handle_results(
                         ctx,
