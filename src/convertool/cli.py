@@ -557,16 +557,12 @@ def cmd_standalone(
         return
 
     for instruction in instructions:
-        instruction.converter_cls.process_timeout = (
-            timeout
-            if timeout and instruction.converter_cls.process_timeout
-            else instruction.converter_cls.process_timeout
-        )
         converter = instruction.converter_cls(
             instruction.file,
             None,
             Path(instruction.file.root) if instruction.file.root else None,
             instruction.options,
+            timeout=timeout,
             capture_output=not verbose,
             hashed_output_name=False,
         )
