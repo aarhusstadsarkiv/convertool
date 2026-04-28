@@ -150,20 +150,32 @@ class ConverterABC(ABC):
         :raise BadOption: If the given options are invalid.
         """
 
-    def run_process(self, *args: str | int | PathLike, cwd: str | PathLike | None = None) -> tuple[str, str]:
+    def run_process(
+        self,
+        command: str,
+        *args: str | int | PathLike,
+        cwd: str | PathLike | None = None,
+    ) -> tuple[str, str]:
         """
         Run process and capture output.
 
         If a ``CalledProcessError`` is raised, it is converted to ``ConvertError``.
 
-        :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
+        :param command: The command to run.
+        :param args: The arguments for the given command. Non-string arguments are cast to string.
         :param cwd: Optionally, the working directory to use.
         :raise ConvertError: If the process exists with a non-zero code.
         :raise ConvertTimeoutError: If the process times out.
         :return: A tuple with the captured stdout and stderr outputs in string format.
         """
         try:
-            return run_process(*args, cwd=cwd, capture_output=self.capture_output, timeout=self.process_timeout)
+            return run_process(
+                command,
+                *args,
+                cwd=cwd,
+                capture_output=self.capture_output,
+                timeout=self.process_timeout,
+            )
         except TimeoutExpired as err:
             raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s", err)
         except CalledProcessError as err:

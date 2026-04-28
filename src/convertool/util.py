@@ -113,6 +113,7 @@ def open_database(ctx: Context, avid: AVID, param_name: str) -> FilesDB:
 
 
 def run_process(
+    command: str,
     *args: str | int | PathLike,
     cwd: str | PathLike | None = None,
     env: bool = True,
@@ -124,7 +125,8 @@ def run_process(
 
     If the command is not found, a ``CalledProcessError`` exception is raised instead of ``FileNotFoundError``.
 
-    :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
+    :param command: The command to run.
+    :param args: The arguments for the given command. Non-string arguments are cast to string.
     :param cwd: Optionally, the working directory to use.
     :param env: If ``True`` to use the system's env command (if available).
     :param capture_output: Whether to capture the output of ``subprocess.run``. Default: ``True``.
@@ -136,7 +138,7 @@ def run_process(
     try:
         env_args = [ENV] if env and ENV else []
         process: CompletedProcess[str] = run(
-            [*env_args, *map(str, args)],
+            [*env_args, command, *map(str, args)],
             cwd=cwd,
             capture_output=capture_output,
             encoding="utf-8",
@@ -146,7 +148,7 @@ def run_process(
         )
         return process.stdout or "", process.stderr or ""
     except FileNotFoundError:
-        raise CalledProcessError(127, args[0:1], "", f"Command not found {''.join(args[0:1])}")
+        raise CalledProcessError(127, str(args[0]), "", f"Command not found {args[0]}")
 
 
 def get_encoding(path: Path, bof_length: int = 2048) -> str | None:
