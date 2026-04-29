@@ -78,6 +78,7 @@ class ConverterSASSpreadsheet(ConverterABC):
             self.file,
             self.database,
             self.file.root,
+            timeout=self.timeout,
             capture_output=self.capture_output,
             hashed_output_name=False,
         )
@@ -89,6 +90,7 @@ class ConverterSASSpreadsheet(ConverterABC):
                 dummy_base_file(tmp_file, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 capture_output=self.capture_output,
                 hashed_output_name=self.hashed_output_name,
             ).convert(

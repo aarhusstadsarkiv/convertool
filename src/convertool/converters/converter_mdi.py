@@ -70,13 +70,16 @@ class ConverterMDIToPDF(ConverterABC):
                 self.file,
                 self.database,
                 self.file.root,
+                timeout=self.timeout,
                 capture_output=self.capture_output,
                 hashed_output_name=self.hashed_output_name,
             ).convert(tmp_dir, "tif", keep_relative_path=False)[0]
+
             pdfs: list[Path] = ConverterImage(
                 dummy_base_file(tiff, tmp_dir),
                 None,
                 tmp_dir,
+                timeout=self.timeout,
                 capture_output=self.capture_output,
                 hashed_output_name=self.hashed_output_name,
             ).convert(tmp_dir, output, keep_relative_path=False)

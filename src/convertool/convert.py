@@ -193,6 +193,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
     verbose: bool,
     hashed_output_name: bool,
     logger: BoundLogger,
+    timeout: int | None,
 ) -> tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]:
     output_paths: list[Path] = []
 
@@ -201,6 +202,7 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
             file=instructions.file.model_copy(deep=True),
             database=database,
             options=instructions.options,
+            timeout=timeout,
             capture_output=not verbose,
             hashed_output_name=hashed_output_name,
         )
@@ -279,11 +281,23 @@ def convert_async_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile
     verbose: bool,
     hashed_output_names: bool,
     logger: BoundLogger,
+    timeout: int | None,
 ) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
     context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
     with Pool(threads) as pool:
         args = [
-            (context_str, database, output_dir, root_dir, relative_root_dir, inst, verbose, hashed_output_names, logger)
+            (
+                context_str,
+                database,
+                output_dir,
+                root_dir,
+                relative_root_dir,
+                inst,
+                verbose,
+                hashed_output_names,
+                logger,
+                timeout,
+            )
             for inst in instructions
         ]
         results = pool.starmap(convert, args)
@@ -303,6 +317,7 @@ def convert_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Sta
     verbose: bool,
     hashed_output_names: bool,
     logger: BoundLogger,
+    timeout: int | None,
 ) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
     context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
     return [
@@ -316,6 +331,7 @@ def convert_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Sta
             verbose,
             hashed_output_names,
             logger,
+            timeout,
         )
         for inst in queue
     ]

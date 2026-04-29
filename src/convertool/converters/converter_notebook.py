@@ -65,9 +65,12 @@ class ConverterIPYNBToPDF(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            htmls = ConverterIPYNBToHTML(self.file, self.database, hashed_output_name=self.hashed_output_name).convert(
-                tmp_dir, "html"
-            )
+            htmls = ConverterIPYNBToHTML(
+                self.file,
+                self.database,
+                timeout=self.timeout,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(tmp_dir, "html")
             if not htmls:
                 return []
 
@@ -77,6 +80,7 @@ class ConverterIPYNBToPDF(ConverterABC):
                 dummy_base_file(html, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(
                 output_dir,
@@ -99,9 +103,12 @@ class ConverterIPYNBToImage(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            htmls = ConverterIPYNBToHTML(self.file, self.database, hashed_output_name=self.hashed_output_name).convert(
-                tmp_dir, "html"
-            )
+            htmls = ConverterIPYNBToHTML(
+                self.file,
+                self.database,
+                timeout=self.timeout,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(tmp_dir, "html")
             if not htmls:
                 return []
 
@@ -111,6 +118,7 @@ class ConverterIPYNBToImage(ConverterABC):
                 dummy_base_file(html, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(
                 output_dir,

@@ -90,6 +90,7 @@ class ConverterABC(ABC):
         root: Path | None = None,
         options: dict[str, Any] | None = None,
         *,
+        timeout: int | None = None,
         capture_output: bool = True,
         hashed_output_name: bool = True,
     ) -> None:
@@ -101,6 +102,7 @@ class ConverterABC(ABC):
         self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
         self.hashed_output_name: bool = hashed_output_name
+        self.timeout: int | None = timeout
 
         self.test_options()
 
@@ -150,20 +152,34 @@ class ConverterABC(ABC):
         :raise BadOption: If the given options are invalid.
         """
 
-    def run_process(self, *args: str | int | PathLike, cwd: str | PathLike | None = None) -> tuple[str, str]:
+    def run_process(
+        self,
+        command: str,
+        *args: str | int | PathLike,
+        cwd: str | PathLike | None = None,
+    ) -> tuple[str, str]:
         """
         Run process and capture output.
 
         If a ``CalledProcessError`` is raised, it is converted to ``ConvertError``.
 
-        :param args: The arguments for ``subprocess.run``. Non-string arguments are cast to string.
+        :param command: The command to run.
+        :param args: The arguments for the given command. Non-string arguments are cast to string.
         :param cwd: Optionally, the working directory to use.
         :raise ConvertError: If the process exists with a non-zero code.
         :raise ConvertTimeoutError: If the process times out.
         :return: A tuple with the captured stdout and stderr outputs in string format.
         """
         try:
-            return run_process(*args, cwd=cwd, capture_output=self.capture_output, timeout=self.process_timeout)
+            return run_process(
+                command,
+                *args,
+                cwd=cwd,
+                capture_output=self.capture_output,
+                timeout=self.process_timeout
+                if self.timeout is None or self.process_timeout is None
+                else (self.timeout or None),
+            )
         except TimeoutExpired as err:
             raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s", err)
         except CalledProcessError as err:

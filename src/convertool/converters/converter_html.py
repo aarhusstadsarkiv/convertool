@@ -50,7 +50,12 @@ class ConverterHTMLToImage(ConverterABC):
         output = self.output(output)
 
         with TempDir(output_dir) as tmp_dir:
-            pdfs = ConverterHTML(self.file, self.database, hashed_output_name=self.hashed_output_name).convert(
+            pdfs = ConverterHTML(
+                self.file,
+                self.database,
+                timeout=self.timeout,
+                hashed_output_name=self.hashed_output_name,
+            ).convert(
                 tmp_dir,
                 "pdf",
             )
@@ -63,6 +68,7 @@ class ConverterHTMLToImage(ConverterABC):
                 dummy_base_file(pdf, tmp_dir),
                 self.database,
                 tmp_dir,
+                timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(
                 output_dir,
