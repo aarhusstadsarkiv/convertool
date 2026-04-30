@@ -3,7 +3,6 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
-from .base import _hashed_file_name
 from .base import _shared_dependencies
 from .base import _shared_platforms
 from .base import _shared_process_timeout
@@ -53,10 +52,7 @@ class ConverterDocument(ConverterABC):
             for f in tmp_dir.iterdir():
                 if not f.is_file():
                     continue
-                if self.hashed_output_name:
-                    output_files.append(f.replace(dest_dir / _hashed_file_name(f.name)))
-                else:
-                    output_files.append(f.replace(dest_dir / f.name))
+                output_files.append(f.replace(self.output_file(dest_dir, output)))
 
         return output_files
 
