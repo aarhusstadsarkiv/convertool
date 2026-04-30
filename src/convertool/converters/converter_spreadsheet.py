@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
+from .base import _hashed_file_name
 from .base import ConverterABC
 
 
@@ -47,6 +48,9 @@ class ConverterSpreadsheet(ConverterABC):
             for f in tmp_dir.iterdir():
                 if not f.is_file():
                     continue
-                output_files.append(f.replace(self.output_file(dest_dir, output)))
+                if self.hashed_output_name:
+                    output_files.append(f.replace(dest_dir / _hashed_file_name(f.name)))
+                else:
+                    output_files.append(f.replace(dest_dir / f.name))
 
         return output_files
