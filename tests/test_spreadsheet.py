@@ -16,7 +16,7 @@ def test_spreadsheet_to_ods(test_files: dict[str, Path], output_dir: Path, siegf
         converter = ConverterSpreadsheet(file, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "ods")
-        expected_output_file = _hashed_file_name(file.relative_path.with_suffix(".ods"))
+        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".ods").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
@@ -33,7 +33,7 @@ def test_spreadsheet_to_pdf(test_files: dict[str, Path], output_dir: Path, siegf
         converter = ConverterSpreadsheet(file, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "pdf")
-        expected_output_file = _hashed_file_name(file.relative_path.with_suffix(".pdf"))
+        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
@@ -50,7 +50,7 @@ def test_spreadsheet_to_html(test_files: dict[str, Path], output_dir: Path, sieg
         converter = ConverterSpreadsheet(file, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "html")
-        expected_output_file = _hashed_file_name(file.relative_path.with_suffix(".html"))
+        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
