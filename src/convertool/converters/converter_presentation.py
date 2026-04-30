@@ -49,7 +49,7 @@ class ConverterPresentation(ConverterABC):
                 if not f.is_file():
                     continue
                 if self.hashed_output_name:
-                    output_files.append(f.replace(dest_dir / _hashed_file_name(f.name)))
+                    output_files.append(f.replace(dest_dir / _hashed_file_name(self.file.relative_path / f.name)))
                 else:
                     output_files.append(f.replace(dest_dir / f.name))
 
