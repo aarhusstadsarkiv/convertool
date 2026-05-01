@@ -8,7 +8,7 @@ from .base import ConverterABC
 
 
 class ConverterCAD(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["cad"]
+    tool_names: ClassVar[list[str]] = ["cad", "emf"]
     outputs: ClassVar[list[str]] = ["dxf", "pdf", "svg"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["win32"]
