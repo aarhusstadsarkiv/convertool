@@ -8,8 +8,8 @@ resolution-markers = [
 
 [[package]]
 name = "acacore"
-version = "5.5.1"
-source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.1#723bbc9a7d211a312976a99fa893c4ca85287411" }
+version = "5.5.2"
+source = { git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.2#2f5f135af55ccb98d1381b57f07ee92232488f6d" }
 dependencies = [
     { name = "chardet" },
     { name = "click" },
@@ -209,7 +209,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.1" },
+    { name = "acacore", git = "https://github.com/aarhusstadsarkiv/acacore.git?tag=v5.5.2" },
     { name = "beautifulsoup4", specifier = ">=4.13.5,<5" },
     { name = "eml-analyzer", specifier = ">=3.0.1" },
     { name = "extract-msg", specifier = ">=0.55.0,<1" },
