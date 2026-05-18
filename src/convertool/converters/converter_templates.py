@@ -62,6 +62,8 @@ class ConverterTemplate(ConverterABC):
             template = "Den originale fil var ikke bevaringsværdig."
         elif output == "not-convertable":
             template = "Den originale fil kunne ikke konverteres til et gyldigt arkivformat."
+        elif output == "unidentified":
+            template = "Den originale fil kunne ikke genkendes og derfor ikke konverteres til et gyldigt arkivformat."
         elif output == "extracted-archive" and not self.database:
             raise ConvertError(self.file, f"{output!r} template requires a database")
         elif output == "extracted-archive":
