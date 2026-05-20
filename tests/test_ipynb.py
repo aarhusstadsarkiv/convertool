@@ -12,7 +12,7 @@ from .test_image import MIMETYPES
 
 def test_ipynb_to_html(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["ipynb.ipynb"], test_files["ipynb.ipynb"].parent)
-    converter = ConverterIPYNBToHTML(file)
+    converter = ConverterIPYNBToHTML(file, test_files["ipynb.ipynb"].parent)
 
     output_files = converter.convert(output_dir, "html")
     assert len(output_files) == 1
@@ -22,7 +22,7 @@ def test_ipynb_to_html(test_files: dict[str, Path], output_dir: Path, siegfried:
 
 def test_ipynb_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["ipynb.ipynb"], test_files["ipynb.ipynb"].parent)
-    converter = ConverterIPYNBToPDF(file)
+    converter = ConverterIPYNBToPDF(file, test_files["ipynb.ipynb"].parent)
 
     output_files = converter.convert(output_dir, "pdf")
     assert len(output_files) == 1
@@ -32,7 +32,7 @@ def test_ipynb_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: 
 
 def test_ipynb_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["ipynb.ipynb"], test_files["ipynb.ipynb"].parent)
-    converter = ConverterIPYNBToImage(file)
+    converter = ConverterIPYNBToImage(file, test_files["ipynb.ipynb"].parent)
 
     for output in converter.outputs:
         print(output)

@@ -10,7 +10,7 @@ from convertool.util import AVID
 # noinspection DuplicatedCode
 def test_gis_to_gml(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["gis.tab"], test_files["gis.tab"].parent)
-    converter = ConverterGIS(file, hashed_output_name=False)
+    converter = ConverterGIS(file, test_files["gis.tab"].parent, hashed_output_name=False)
 
     output_files = converter.convert(output_dir, "gml")
     assert len(output_files) == 2
@@ -24,6 +24,6 @@ def test_gis_to_gml_database(avid_dir_copy: Path, output_dir: Path):
 
     with FilesDB(avid.database_path) as db:
         for file in db.original_files.select("gis_main is not null and action = 'convert'"):
-            converter = ConverterGIS(file, db, avid.path, hashed_output_name=False)
+            converter = ConverterGIS(file, avid.path, avid.dirs.original_documents, db, hashed_output_name=False)
             output_files = converter.convert(output_dir, "gml")
             assert len(output_files) == 2

@@ -9,7 +9,7 @@ from convertool.converters.base import dummy_base_file
 def test_video_to_mpeg2(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("video.")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterVideo(file)
+        converter = ConverterVideo(file, path.parent)
 
         output_files = converter.convert(output_dir, "mpeg2")
         assert len(output_files) == 1
@@ -20,7 +20,7 @@ def test_video_to_mpeg2(test_files: dict[str, Path], output_dir: Path, siegfried
 def test_video_to_h264(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("video.")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterVideo(file)
+        converter = ConverterVideo(file, path.parent)
 
         output_files = converter.convert(output_dir, "h264")
         assert len(output_files) == 1
@@ -31,7 +31,7 @@ def test_video_to_h264(test_files: dict[str, Path], output_dir: Path, siegfried:
 def test_video_to_h264_mpg(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("video.")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterVideo(file)
+        converter = ConverterVideo(file, path.parent)
 
         output_files = converter.convert(output_dir, "h264-mpg")
         assert len(output_files) == 1
@@ -42,7 +42,7 @@ def test_video_to_h264_mpg(test_files: dict[str, Path], output_dir: Path, siegfr
 def test_video_to_h265(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("video.")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterVideo(file)
+        converter = ConverterVideo(file, path.parent)
 
         output_files = converter.convert(output_dir, "h265")
         assert len(output_files) == 1
