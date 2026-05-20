@@ -33,7 +33,7 @@ class ConverterGIS(ConverterABC):
 
         if self.database and isinstance(self.file, OriginalFile) and self.file.gis_main:
             for file in self.database.original_files.select({"gis_main": str(self.file.gis_main)}):
-                copy2(file.get_absolute_path(root), dest := tmp_dir.joinpath(self.file.stem).with_suffix(file.suffixes))
+                copy2(file.get_absolute_path(root), dest := tmp_dir.joinpath(self.file.stem).with_suffix(file.suffix))
                 files.append(dest)
         else:
             file_stem: str = self.file.stem
@@ -43,7 +43,7 @@ class ConverterGIS(ConverterABC):
                 suffixes: str = file_suffixes(path)
                 stem: str = path.name.removesuffix(suffixes)
                 if stem == file_stem:
-                    copy2(path, dest := tmp_dir.joinpath(stem).with_suffix(suffixes))
+                    copy2(path, dest := tmp_dir.joinpath(stem).with_suffix(path.suffix))
                     files.append(dest)
 
         return files
