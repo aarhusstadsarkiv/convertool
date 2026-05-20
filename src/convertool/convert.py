@@ -201,13 +201,13 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
         converter = instructions.converter_cls(
             file=instructions.file.model_copy(deep=True),
             database=database,
+            root=root_dir,
+            relative_root=relative_root_dir,
             options=instructions.options,
             timeout=timeout,
             capture_output=not verbose,
             hashed_output_name=hashed_output_name,
         )
-        converter.file.relative_path = converter.file.get_absolute_path(root_dir).relative_to(relative_root_dir)
-        converter.file.root = relative_root_dir
 
         Event.from_command(context, "run", instructions.file).log(
             INFO,

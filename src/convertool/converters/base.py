@@ -86,8 +86,9 @@ class ConverterABC(ABC):
     def __init__(
         self,
         file: BaseFile,
-        database: FilesDB | None = None,
-        root: Path | None = None,
+        database: FilesDB | None,
+        root: Path,
+        relative_root: Path | None = None,
         options: dict[str, Any] | None = None,
         *,
         timeout: int | None = None,
@@ -98,7 +99,9 @@ class ConverterABC(ABC):
         self.test_dependencies()
         self.file: BaseFile = file
         self.database: FilesDB | None = database
-        self.file.root = self.file.root or root
+        self.root: Path = root
+        self.relative_root: Path = relative_root or root
+        self.file.root = root
         self.options: dict[str, Any] = options or {}
         self.capture_output: bool = capture_output
         self.hashed_output_name: bool = hashed_output_name
@@ -200,7 +203,11 @@ class ConverterABC(ABC):
         :raise OutputDirError: If the path already exists and is not a directory.
         :return: The path to the output directory.
         """
-        dest_dir: Path = output_dir.joinpath(self.file.relative_path.parent) if keep_relative_path else output_dir
+        dest_dir: Path = (
+            output_dir.joinpath(self.file.get_absolute_path(self.root).relative_to(self.relative_root).parent)
+            if keep_relative_path
+            else output_dir
+        )
         if dest_dir.exists() and not dest_dir.is_dir():
             raise OutputDirError(self.file, FileExistsError(dest_dir))
         if mkdir:
@@ -229,7 +236,11 @@ class ConverterABC(ABC):
             suffix(es).
         :return: The path to the putput file.
         """
-        name: str = _hashed_file_name(self.file.relative_path) if self.hashed_output_name else self.file.name
+        name: str = (
+            _hashed_file_name(self.file.get_absolute_path(self.root).relative_to(self.relative_root))
+            if self.hashed_output_name
+            else self.file.name
+        )
         if not output:
             return output_dir.joinpath(name)
         if append:

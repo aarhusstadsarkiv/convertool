@@ -557,10 +557,12 @@ def cmd_standalone(
         return
 
     for instruction in instructions:
+        # noinspection PyTypeChecker
         converter = instruction.converter_cls(
             instruction.file,
             None,
-            Path(instruction.file.root) if instruction.file.root else None,
+            instruction.file.root,
+            None,
             instruction.options,
             timeout=timeout,
             capture_output=not verbose,
