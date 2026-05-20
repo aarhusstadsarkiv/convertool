@@ -86,9 +86,9 @@ class ConverterABC(ABC):
     def __init__(
         self,
         file: BaseFile,
-        database: FilesDB | None,
         root: Path,
         relative_root: Path | None = None,
+        database: FilesDB | None = None,
         options: dict[str, Any] | None = None,
         *,
         timeout: int | None = None,

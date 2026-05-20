@@ -560,10 +560,8 @@ def cmd_standalone(
         # noinspection PyTypeChecker
         converter = instruction.converter_cls(
             instruction.file,
-            None,
             instruction.file.root,
-            None,
-            instruction.options,
+            options=instruction.options,
             timeout=timeout,
             capture_output=not verbose,
             hashed_output_name=False,

@@ -200,9 +200,9 @@ def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | Statutory
     with ExceptionManager(BaseException) as exception:
         converter = instructions.converter_cls(
             file=instructions.file.model_copy(deep=True),
-            database=database,
             root=root_dir,
             relative_root=relative_root_dir,
+            database=database,
             options=instructions.options,
             timeout=timeout,
             capture_output=not verbose,
