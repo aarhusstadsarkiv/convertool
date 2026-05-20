@@ -188,8 +188,9 @@ class ConverterEMLToPDF(ConverterABC):
             if not (
                 htmls := ConverterEML(
                     self.file,
+                    self.root,
+                    self.relative_root,
                     self.database,
-                    self.file.root,
                     timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
@@ -200,8 +201,9 @@ class ConverterEMLToPDF(ConverterABC):
 
             return ConverterHTML(
                 dummy_base_file(html, tmp_dir),
-                self.database,
                 tmp_dir,
+                tmp_dir,
+                self.database,
                 timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(output_dir, output, keep_relative_path=keep_relative_path)
@@ -221,8 +223,9 @@ class ConverterEMLToImage(ConverterABC):
             if not (
                 htmls := ConverterEML(
                     self.file,
+                    self.root,
+                    self.relative_root,
                     self.database,
-                    self.file.root,
                     timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
@@ -233,8 +236,9 @@ class ConverterEMLToImage(ConverterABC):
 
             return ConverterHTMLToImage(
                 dummy_base_file(html, tmp_dir),
-                self.database,
                 tmp_dir,
+                tmp_dir,
+                self.database,
                 timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(output_dir, output, keep_relative_path=keep_relative_path)

@@ -31,7 +31,7 @@ class ConverterZIPFile(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, "")
 
-        with TempDir(self.file.root) as tmp_dir:
+        with TempDir(self.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:
                 try:
                     member = zf.getinfo(self.options["path"])

@@ -71,13 +71,14 @@ class ConverterSASSpreadsheet(ConverterABC):
     process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterSAS, ConverterSpreadsheet)
 
     def output_puid(self, output: str) -> str | None:
-        return ConverterSpreadsheet(self.file, self.database, self.file.root).output_puid(output)
+        return ConverterSpreadsheet(self.file, self.root, self.relative_root, self.database).output_puid(output)
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         sas_converter = ConverterSAS(
             self.file,
+            self.root,
+            self.relative_root,
             self.database,
-            self.file.root,
             timeout=self.timeout,
             capture_output=self.capture_output,
             hashed_output_name=False,
@@ -88,8 +89,9 @@ class ConverterSASSpreadsheet(ConverterABC):
 
             return ConverterSpreadsheet(
                 dummy_base_file(tmp_file, tmp_dir),
-                self.database,
                 tmp_dir,
+                tmp_dir,
+                self.database,
                 timeout=self.timeout,
                 capture_output=self.capture_output,
                 hashed_output_name=self.hashed_output_name,
