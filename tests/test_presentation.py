@@ -13,7 +13,7 @@ def test_presentation_to_odp(test_files: dict[str, Path], output_dir: Path, sieg
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterPresentation(file, hashed_output_name=True)
+        converter = ConverterPresentation(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "odp")
         expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".odp").name)
@@ -30,7 +30,7 @@ def test_presentation_to_pdf(test_files: dict[str, Path], output_dir: Path, sieg
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterPresentation(file, hashed_output_name=True)
+        converter = ConverterPresentation(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "pdf")
         expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
@@ -47,7 +47,7 @@ def test_presentation_to_html(test_files: dict[str, Path], output_dir: Path, sie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterPresentation(file, hashed_output_name=True)
+        converter = ConverterPresentation(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "html")
         expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)

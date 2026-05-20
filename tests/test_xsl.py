@@ -15,7 +15,7 @@ from .test_image import MIMETYPES
 
 def test_xml_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterXSL(file, hashed_output_name=False)
+    converter = ConverterXSL(file, test_files["medcom.xml"].parent, hashed_output_name=False)
 
     output_files = converter.convert(output_dir, "html")
     assert len(output_files) == 1
@@ -26,7 +26,7 @@ def test_xml_to_html(test_files: dict[str, Path], reference_files: dict[str, Pat
 
 def test_xml_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterXSLToPDF(file)
+    converter = ConverterXSLToPDF(file, test_files["medcom.xml"].parent)
 
     output_files = converter.convert(output_dir, "pdf")
     assert len(output_files) == 1
@@ -37,7 +37,7 @@ def test_xml_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 def test_xml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterXSLToImage(file)
+    converter = ConverterXSLToImage(file, test_files["medcom.xml"].parent)
 
     for output in converter.outputs:
         output_files = converter.convert(output_dir, output)
@@ -48,7 +48,7 @@ def test_xml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: 
 
 def test_medcom_to_html(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterMedCom(file, hashed_output_name=False)
+    converter = ConverterMedCom(file, test_files["medcom.xml"].parent, hashed_output_name=False)
 
     output_files = converter.convert(output_dir, "html")
     assert len(output_files) == 1
@@ -59,7 +59,7 @@ def test_medcom_to_html(test_files: dict[str, Path], reference_files: dict[str, 
 
 def test_medcom_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterMedComToPDF(file)
+    converter = ConverterMedComToPDF(file, test_files["medcom.xml"].parent)
 
     output_files = converter.convert(output_dir, "pdf")
     assert len(output_files) == 1
@@ -70,7 +70,7 @@ def test_medcom_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried:
 
 def test_medcom_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
-    converter = ConverterMedComToImage(file)
+    converter = ConverterMedComToImage(file, test_files["medcom.xml"].parent)
 
     for output in converter.outputs:
         output_files = converter.convert(output_dir, output)

@@ -234,8 +234,9 @@ class ConverterMSGToPDF(ConverterABC):
             if not (
                 htmls := ConverterMSG(
                     self.file,
+                    self.root,
+                    self.relative_root,
                     self.database,
-                    self.file.root,
                     timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "html")
@@ -246,8 +247,9 @@ class ConverterMSGToPDF(ConverterABC):
 
             return ConverterHTML(
                 dummy_base_file(html, tmp_dir),
-                self.database,
                 tmp_dir,
+                tmp_dir,
+                self.database,
                 timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(
@@ -271,8 +273,9 @@ class ConverterMSGToImage(ConverterABC):
             if not (
                 pdfs := ConverterMSGToPDF(
                     self.file,
+                    self.root,
+                    self.relative_root,
                     self.database,
-                    self.file.root,
                     timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "pdf")
@@ -283,8 +286,9 @@ class ConverterMSGToImage(ConverterABC):
 
             return ConverterPDFToImage(
                 dummy_base_file(pdf, tmp_dir),
-                self.database,
                 tmp_dir,
+                tmp_dir,
+                self.database,
                 timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(

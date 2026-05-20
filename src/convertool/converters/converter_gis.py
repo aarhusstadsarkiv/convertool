@@ -9,7 +9,6 @@ from convertool.util import TempDir
 
 from .base import ConverterABC
 from .exceptions import BadOption
-from .exceptions import ConvertError
 
 
 class ConverterGIS(ConverterABC):
@@ -26,14 +25,12 @@ class ConverterGIS(ConverterABC):
     def assemble(self, tmp_dir: Path) -> list[Path]:
         files: list[Path] = []
 
-        root: Path | None = self.file.root
-
-        if root is None:
-            raise ConvertError(self.file, "File root not set")
-
         if self.database and isinstance(self.file, OriginalFile) and self.file.gis_main:
             for file in self.database.original_files.select({"gis_main": str(self.file.gis_main)}):
-                copy2(file.get_absolute_path(root), dest := tmp_dir.joinpath(self.file.stem).with_suffix(file.suffix))
+                copy2(
+                    file.get_absolute_path(self.root),
+                    dest := tmp_dir.joinpath(self.file.stem).with_suffix(file.suffix),
+                )
                 files.append(dest)
         else:
             file_stem: str = self.file.stem

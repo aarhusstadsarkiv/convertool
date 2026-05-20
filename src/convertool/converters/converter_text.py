@@ -82,8 +82,9 @@ class ConverterTextToImage(ConverterABC):
             if not (
                 pdfs := ConverterDocument(
                     dummy_base_file(tmp_text_file, tmp_dir),
-                    self.database,
                     tmp_dir,
+                    tmp_dir,
+                    self.database,
                     timeout=self.timeout,
                     hashed_output_name=self.hashed_output_name,
                 ).convert(tmp_dir, "pdf")
@@ -96,8 +97,9 @@ class ConverterTextToImage(ConverterABC):
 
             return ConverterPDFToImage(
                 dummy_base_file(pdf, tmp_dir),
-                self.database,
                 tmp_dir,
+                tmp_dir,
+                self.database,
                 timeout=self.timeout,
                 hashed_output_name=self.hashed_output_name,
             ).convert(output_dir, output, keep_relative_path=keep_relative_path)

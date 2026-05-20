@@ -11,7 +11,7 @@ from .test_image import MIMETYPES
 # noinspection DuplicatedCode
 def test_text_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["text_to_img.txt"], test_files["text_to_img.txt"].parent)
-    converter = ConverterTextToImage(file)
+    converter = ConverterTextToImage(file, test_files["text_to_img.txt"].parent)
 
     for output in converter.outputs:
         print(output)

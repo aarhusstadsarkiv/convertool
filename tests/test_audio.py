@@ -15,7 +15,7 @@ MIMETYPES: dict[str, list[str]] = {
 def test_audio(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("audio.")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterAudio(file)
+        converter = ConverterAudio(file, path.parent)
 
         for output, mimetypes in MIMETYPES.items():
             output_files = converter.convert(output_dir, output)

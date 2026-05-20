@@ -13,7 +13,7 @@ from .test_image import MIMETYPES
 # noinspection DuplicatedCode
 def test_eml(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["email.eml"], test_files["email.eml"].parent)
-    converter = ConverterEML(file, hashed_output_name=False)
+    converter = ConverterEML(file, test_files["email.eml"].parent, hashed_output_name=False)
 
     for output in converter.outputs:
         print(output)
@@ -25,7 +25,7 @@ def test_eml(test_files: dict[str, Path], reference_files: dict[str, Path], outp
 
 def test_eml_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["email.eml"], test_files["email.eml"].parent)
-    converter = ConverterEMLToPDF(file, hashed_output_name=False)
+    converter = ConverterEMLToPDF(file, test_files["email.eml"].parent, hashed_output_name=False)
 
     output_files = converter.convert(output_dir, "pdf")
     assert len(output_files) == 1
@@ -35,7 +35,7 @@ def test_eml_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
 def test_eml_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["email.eml"], test_files["email.eml"].parent)
-    converter = ConverterEMLToImage(file, hashed_output_name=False)
+    converter = ConverterEMLToImage(file, test_files["email.eml"].parent, hashed_output_name=False)
 
     for output in converter.outputs:
         if output == "jp2":

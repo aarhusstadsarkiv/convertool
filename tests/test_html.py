@@ -12,7 +12,7 @@ from .test_image import MIMETYPES
 def test_html_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("html")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterHTML(file)
+        converter = ConverterHTML(file, path.parent)
 
         output_files = converter.convert(output_dir, "pdf")
         assert len(output_files) == 1
@@ -23,7 +23,7 @@ def test_html_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: S
 def test_html_to_image(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("html")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterHTMLToImage(file)
+        converter = ConverterHTMLToImage(file, path.parent)
 
         for output in converter.outputs:
             print(output)

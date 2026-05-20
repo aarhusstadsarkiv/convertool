@@ -16,7 +16,7 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file, hashed_output_name=True)
+        converter = ConverterDocument(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "odt")
         expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".odt").name)
@@ -33,7 +33,7 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file, hashed_output_name=True)
+        converter = ConverterDocument(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "pdf")
         expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
@@ -50,7 +50,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file, hashed_output_name=True)
+        converter = ConverterDocument(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "html")
         expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
@@ -63,7 +63,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
 
 def test_document_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["document.docx"], test_files["document.docx"].parent)
-    converter = ConverterDocumentToImage(file)
+    converter = ConverterDocumentToImage(file, test_files["document.docx"].parent)
 
     for output in converter.outputs:
         print(output)

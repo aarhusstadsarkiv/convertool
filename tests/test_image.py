@@ -19,7 +19,7 @@ MIMETYPES = {
 # noinspection DuplicatedCode
 def test_img_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["img-to-img.webp"], test_files["img-to-img.webp"].parent)
-    converter = ConverterImage(file)
+    converter = ConverterImage(file, test_files["img-to-img.webp"].parent)
 
     for output in converter.outputs:
         print(output)
