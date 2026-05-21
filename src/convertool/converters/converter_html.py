@@ -39,7 +39,7 @@ class ConverterHTML(ConverterABC):
             if not tmp_file.is_file():
                 raise ConvertError(
                     self.file,
-                    "Ouptut file not found.",
+                    "Output file not found.",
                     CalledProcessError(
                         process_result.returncode,
                         process_result.args,
