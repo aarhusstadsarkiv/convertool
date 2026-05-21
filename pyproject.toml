@@ -1,6 +1,6 @@
 [project]
 name = "convertool"
-version = "4.5.26"
+version = "4.5.27"
 description = ""
 authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
 requires-python = ">=3.12"
