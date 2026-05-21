@@ -181,7 +181,7 @@ wheels = [
 
 [[package]]
 name = "convertool"
-version = "4.5.27"
+version = "4.5.28"
 source = { editable = "." }
 dependencies = [
     { name = "acacore" },
