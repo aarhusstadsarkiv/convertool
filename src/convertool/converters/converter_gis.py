@@ -13,7 +13,7 @@ from .exceptions import BadOption
 
 class ConverterGIS(ConverterABC):
     tool_names: ClassVar[list[str]] = ["gis"]
-    outputs: ClassVar[list[str]] = ["gml", "shp", "geojson"]
+    outputs: ClassVar[list[str]] = ["gml", "gml3", "shp", "geojson"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
@@ -54,7 +54,7 @@ class ConverterGIS(ConverterABC):
         if iformat := self.options.get("input_format"):
             args.extend(("-if", str(iformat)))
 
-        if output == "gml":
+        if output in ("gml", "gml3"):
             args.extend(("-of", "GML", "-dsco", "FORMAT=GML3"))
         elif output == "shp":
             args.extend(("-of", "ESRI Shapefile"))

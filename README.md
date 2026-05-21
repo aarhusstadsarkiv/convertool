@@ -111,7 +111,9 @@ Options:
 | eml          | jpg                | Convert an EML file to JPEG                                                    | .jpg      |
 | eml          | png                | Convert an EML file to PNG                                                     | .png      |
 | eml          | tiff               | Convert an EML file to TIFF                                                    | .tiff     |
-| gis          | gml                | Convert GIS file with its auxiliaries to GMLv3                                 | .gml      |
+| gis          | gml/gml3           | Convert GIS file with its auxiliaries to GMLv3                                 | .gml      |
+| gis          | shp                | Convert GIS file with its auxiliaries to ESRI Shapefile                        | .shp      |
+| gis          | geojson            | Convert GIS file with its auxiliaries to GeoJSON                               | .geojson  |
 | html         | pdf                | Convert HTML to PDF                                                            | .pdf      |
 | html         | jp2                | Convert HTML to JPEG2000 images (one per page)                                 | .jp2      |
 | html         | jpg                | Convert HTML to JPEG images (one per page)                                     | .jpg      |
