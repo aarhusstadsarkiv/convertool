@@ -7,6 +7,7 @@ from os import PathLike
 from pathlib import Path
 from shutil import which
 from subprocess import CalledProcessError
+from subprocess import CompletedProcess
 from subprocess import TimeoutExpired
 from sys import platform
 from typing import Any
@@ -160,7 +161,7 @@ class ConverterABC(ABC):
         command: str,
         *args: str | int | PathLike,
         cwd: str | PathLike | None = None,
-    ) -> tuple[str, str]:
+    ) -> tuple[str, str, CompletedProcess[str]]:
         """
         Run process and capture output.
 

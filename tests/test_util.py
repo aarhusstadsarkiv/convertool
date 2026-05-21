@@ -9,11 +9,11 @@ from convertool.util import TempDir
 
 
 def test_run_process(output_dir: Path):
-    out, err = run_process("echo", "hello")
+    out, err, _ = run_process("echo", "hello")
     assert out == "hello\n"
     assert err == ""
 
-    out, err = run_process("pwd", cwd=output_dir)
+    out, err, _ = run_process("pwd", cwd=output_dir)
     assert out == f"{output_dir}\n"
     assert err == ""
 
