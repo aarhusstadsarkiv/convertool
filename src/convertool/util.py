@@ -119,7 +119,7 @@ def run_process(
     env: bool = True,
     capture_output: bool = True,
     timeout: float | None = None,
-) -> tuple[str, str]:
+) -> tuple[str, str, CompletedProcess[str]]:
     """
     Run process and capture output.
 
@@ -146,7 +146,7 @@ def run_process(
             check=True,
             timeout=timeout,
         )
-        return process.stdout or "", process.stderr or ""
+        return process.stdout, process.stderr, process
     except FileNotFoundError:
         raise CalledProcessError(127, command, "", f"Command not found {command}")
 

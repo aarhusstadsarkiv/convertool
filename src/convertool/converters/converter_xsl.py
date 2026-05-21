@@ -48,7 +48,7 @@ class ConverterXSL(ConverterABC):
                     '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"></xsl:stylesheet>',
                     encoding="utf-8",
                 )
-            stdout, _ = self.run_process(
+            stdout, _, _ = self.run_process(
                 self.dependencies["xmlstarlet"][0],
                 "tr",
                 "" if xsl else "--embed",
@@ -85,7 +85,7 @@ class ConverterMedCom(ConverterABC):
 
         xsl: Path = resources.medcom.joinpath("viewEmessage.xslt")
 
-        stdout, _ = self.run_process(self.dependencies["xmlstarlet"][0], "tr", xsl, self.file.get_absolute_path())
+        stdout, _, _ = self.run_process(self.dependencies["xmlstarlet"][0], "tr", xsl, self.file.get_absolute_path())
 
         dest_dir.mkdir(parents=True, exist_ok=True)
         dest_file.write_text(stdout, encoding="utf-8")
