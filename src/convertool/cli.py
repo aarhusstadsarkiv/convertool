@@ -13,6 +13,8 @@ from typing import Literal
 import structlog
 from acacore.__version__ import __version__ as __acacore_version__
 from acacore.database import FilesDB
+from acacore.database.query import QueryTokens
+from acacore.database.query import tokens_to_where
 from acacore.database.table import Table
 from acacore.models.event import Event
 from acacore.models.file import AccessFile
@@ -122,7 +124,7 @@ def compile_convert_targets(
     avid: AVID,
     database: FilesDB,
     target: Literal["original:master", "master:access", "master:statutory"],
-    query: tuple[str | None, list[str]],
+    query: QueryTokens,
 ) -> tuple[
     Table[OriginalFile | MasterFile],
     Table[ConvertedFile],
@@ -165,10 +167,12 @@ def compile_convert_targets(
     else:
         raise ValueError(f"Unsupported file and destination combination: {target}")
 
-    if query[0]:  # noqa: SIM108
-        query = (f"({query[0]}) and ({src_query})", query[1])
+    where, params = tokens_to_where(query)
+
+    if where:  # noqa: SIM108
+        where = f"({where}) and ({src_query})"
     else:
-        query = (src_query, [])
+        where = (src_query, [])
 
     to_process_table: Table[OriginalFile | MasterFile] = database.create_table(
         src_table.model,
@@ -183,9 +187,9 @@ def compile_convert_targets(
         f"""
                 insert into {to_process_table.name}
                 select {",".join(to_process_table.columns.keys())} from {src_table.name}
-                where {query[0] or "uuid is not null"}
+                where {where or "true"}
                 """,
-        query[1],
+        params,
     )
     database.commit()
 
@@ -227,6 +231,7 @@ def app():
             "uuid",
             "warning",
         ],
+        ["warning", "encoding", "action_data", "convert_access", "convert_statutory"],
     ),
 )
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
@@ -256,7 +261,7 @@ def cmd_digiarch(
     ctx: Context,
     avid_dir: str,
     target: Literal["original:master", "master:access", "master:statutory"],
-    query: tuple[str | None, list[str]],
+    query: QueryTokens,
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
