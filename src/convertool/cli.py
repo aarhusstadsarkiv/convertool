@@ -227,6 +227,7 @@ def app():
             "uuid",
             "warning",
         ],
+        ["warning", "encoding", "action_data", "convert_access", "convert_statutory"],
     ),
 )
 @option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
