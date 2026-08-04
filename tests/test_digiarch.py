@@ -52,7 +52,7 @@ def test_digiarch_exception(avid_dir_copy: Path):
         random_file = db.original_files.select("relative_path like '%/random' and action = 'convert'").fetchone()
         assert random_file is not None
 
-    app.main(["digiarch", str(avid.path), "original:master"], standalone_mode=False)
+    app.main(["digiarch", str(avid.path), "original:master", f"@uuid {random_file.uuid}"], standalone_mode=False)
 
     with FilesDB(avid.database_path) as db:
         event = db.log.select(
