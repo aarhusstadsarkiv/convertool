@@ -46,6 +46,7 @@ from .convert import ConvertInstructions
 from .convert import file_queues
 from .convert import master_file_converter
 from .convert import original_file_converter
+from .converters import converters
 from .converters.exceptions import ConverterNotFound
 from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
@@ -582,3 +583,40 @@ def cmd_standalone(
             logger.error(error.msg)
         except BaseException as error:
             logger.exception(error.__class__.__name__)
+
+
+@app.command("list", help="List available converters and their dependencies.")
+def cmd_list():
+    data: dict[tuple[str, str], tuple[list[str], list[str]]] = {}
+
+    for converter in converters:
+        name = " / ".join(converter.tool_names)
+        for output in converter.outputs or ["-"]:
+            key = (name, output)
+            data[key] = data.get(key, ([], []))
+            data[key] = (
+                list(set(data[key][0]) | set(converter.platforms or [])),
+                list(set(data[key][1]) | set((converter.dependencies or {}).keys())),
+            )
+
+    table: list[tuple[str, str, str, str]] = [("Tool", "Output", "Platform", "Dependencies")]
+
+    table.extend(
+        (
+            k[0],
+            k[1],
+            ", ".join(sorted(data[k][0])),
+            ", ".join(sorted(data[k][1])),
+        )
+        for k in sorted(data.keys())
+    )
+
+    max_columns = max(map(len, table))
+    column_widths = [max(len(r[c]) for r in table) for c in range(max_columns)]
+
+    print(*(table[0][c].ljust(column_widths[c]) for c in range(max_columns)), sep=" | ")
+
+    print(*("-" * column_widths[c] for c in range(max_columns)), sep=" | ")
+
+    for row in table[1:]:
+        print(*(row[c].ljust(column_widths[c]) for c in range(max_columns)), sep=" | ")
