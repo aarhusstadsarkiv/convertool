@@ -89,138 +89,172 @@ Options:
 
 ## Tools
 
-| Tool         | Output             | Explanation                                                                    | Extension |
-|--------------|--------------------|--------------------------------------------------------------------------------|-----------|
-| audio        | mp3                | Convert audio/video to MP3                                                     | .mp3      |
-| audio        | wav                | Convert audio/video to WAV                                                     | .wav      |
-| audio        | flac               | Convert audio/video to FLAC                                                    | .flac     |
-| cad          | dxf                | Convert CAD file (DWG, DXF, etc.) to DXF                                       | .dxf      |
-| cad          | pdf                | Convert CAD file (DWG, DXF, etc.) to PDF                                       | .pdf      |
-| cad          | svg                | Convert CAD file (DWG, DXF, etc.) to SVG                                       | .svg      |
-| document     | odt                | Convert a document file (Word, LibreOffice, etc.) to ODT                       | .odt      |
-| document     | html               | Convert a document file (Word, LibreOffice, etc.) to HTML                      | .html     |
-| document     | pdf                | Convert a document file (Word, LibreOffice, etc.) to PDF                       | .pdf      |
-| document     | jp2                | Convert a document file (Word, LibreOffice, etc.) to JPEG2000                  | .jp2      |
-| document     | jpg                | Convert a document file (Word, LibreOffice, etc.) to JPEG                      | .jpg      |
-| document     | png                | Convert a document file (Word, LibreOffice, etc.) to PNG                       | .png      |
-| document     | tiff               | Convert a document file (Word, LibreOffice, etc.) to TIFF                      | .tiff     |
-| eml          | html               | Convert an EML file to HTML                                                    | .html     |
-| eml          | txt                | Convert an EML file to TXT                                                     | .txt      |
-| eml          | pdf                | Convert an EML file to TXT                                                     | .pdf      |
-| eml          | jp2                | Convert an EML file to JPEG2000                                                | .jp2      |
-| eml          | jpg                | Convert an EML file to JPEG                                                    | .jpg      |
-| eml          | png                | Convert an EML file to PNG                                                     | .png      |
-| eml          | tiff               | Convert an EML file to TIFF                                                    | .tiff     |
-| gis          | gml/gml3           | Convert GIS file with its auxiliaries to GMLv3                                 | .gml      |
-| gis          | shp                | Convert GIS file with its auxiliaries to ESRI Shapefile                        | .shp      |
-| gis          | geojson            | Convert GIS file with its auxiliaries to GeoJSON                               | .geojson  |
-| html         | pdf                | Convert HTML to PDF                                                            | .pdf      |
-| html         | jp2                | Convert HTML to JPEG2000 images (one per page)                                 | .jp2      |
-| html         | jpg                | Convert HTML to JPEG images (one per page)                                     | .jpg      |
-| html         | png                | Convert HTML to PNG images (one per page)                                      | .png      |
-| html         | tiff               | Convert HTML to TIFF image (multipage)                                         | .tiff     |
-| image        | jp2                | Convert image to JPEG2000                                                      | .jp2      |
-| image        | jpg                | Convert image to JPEG                                                          | .jpg      |
-| image        | pdf                | Convert image to PDF                                                           | .pdf      |
-| image        | png                | Convert image to PNG                                                           | .png      |
-| image        | tiff               | Convert image to TIFF                                                          | .tiff     |
-| ipynb        | html               | Convert Jupyter notebook to HTML                                               | .html     |
-| ipynb        | pdf                | Convert Jupyter notebook to PDF                                                | .pdf      |
-| ipynb        | jp2                | Convert Jupyter notebook to JPEG2000                                           | .jp2      |
-| ipynb        | jpg                | Convert Jupyter notebook to JPEG                                               | .jpg      |
-| ipynb        | pdf                | Convert Jupyter notebook to PDF                                                | .pdf      |
-| ipynb        | png                | Convert Jupyter notebook to PNG                                                | .png      |
-| ipynb        | tiff               | Convert Jupyter notebook to TIFF                                               | .tiff     |
-| msg          | html               | Convert an MSG file to HTML                                                    | .html     |
-| msg          | txt                | Convert an MSG file to TXT                                                     | .txt      |
-| msg          | pdf                | Convert an MSG file to TXT                                                     | .pdf      |
-| msg          | jp2                | Convert an MSG file to JPEG2000                                                | .jp2      |
-| msg          | jpg                | Convert an MSG file to JPEG                                                    | .jpg      |
-| msg          | png                | Convert an MSG file to PNG                                                     | .png      |
-| msg          | tiff               | Convert an MSG file to TIFF                                                    | .tiff     |
-| pdf          | pdfa-1             | Convert PDF to PDF/A-1b                                                        | .pdf      |
-| pdf          | pdfa-2             | Convert PDF to PDF/A-2b                                                        | .pdf      |
-| pdf          | pdfa-3             | Convert PDF to PDF/A-3b                                                        | .pdf      |
-| pdf          | jp2                | Convert PDF to JPEG2000 images (one per page)                                  | .jp2      |
-| pdf          | jpg                | Convert PDF to JPEG images (one per page)                                      | .jpg      |
-| pdf          | png                | Convert PDF to PNG images (one per page)                                       | .png      |
-| pdf          | tiff               | Convert PDF to TIFF image (multipage)                                          | .tiff     |
-| mdi          | tiff               | Convert MDI to TIFF image (multipage)                                          | .tiff     |
-| mdi          | pdf                | Convert MDI to PDF                                                             | .pdf      |
-| presentation | odp                | Convert a presentation file (PowerPoint, LibreOffice, etc.) to ODP             | .odp      |
-| presentation | html               | Convert a presentation file (PowerPoint, LibreOffice, etc.) to HTML            | .html     |
-| presentation | pdf                | Convert a presentation file (PowerPoint, LibreOffice, etc.) to PDF             | .pdf      |
-| spreadsheet  | ods                | Convert a spreadsheet file (Excel, LibreOffice, etc.) to ODS                   | .ods      |
-| spreadsheet  | html               | Convert a spreadsheet file (Excel, LibreOffice, etc.) to HTML                  | .html     |
-| spreadsheet  | pdf                | Convert a spreadsheet file (Excel, LibreOffice, etc.) to PDF                   | .pdf      |
-| msword       | pdf                | Convert a document file with Microsoft Word to PDF                             | .pdf      |
-| msword       | pdfa               | Convert a document file with Microsoft Word to PDF/A                           | .pdf      |
-| msword       | odt                | Convert a document file with Microsoft Word to ODT                             | .odt      |
-| msexcel      | pdf                | Convert a spreadsheet file with Microsoft Excel to PDF                         | .pdf      |
-| msexcel      | ods                | Convert a spreadsheet file with Microsoft Excel to ODS                         | .ods      |
-| msexcel      | html               | Convert a spreadsheet file with Microsoft Excel to HTML                        | .html     |
-| mspowerpoint | pdf                | Convert a presentation file with Microsoft PowerPoint to PDF                   | .pdf      |
-| mspowerpoint | odp                | Convert a presentation file with Microsoft PowerPoint to ODP                   | .odp      |
-| sas          | csv                | Convert a sas7bdat file to CSV                                                 | .csv      |
-| sas          | tsv                | Convert a sas7bdat file to TSV                                                 | .tsv      |
-| text         | txt                | Convert text file txt with UTF-8 encoding and x-fmt/111 as PUID                | .txt      |
-| text         | jp2                | Convert text file to a JPEG2000 image                                          | .jp2      |
-| text         | jpg                | Convert text file to a JPEG image                                              | .jpg      |
-| text         | png                | Convert text file to a PNG image                                               | .png      |
-| text         | tiff               | Convert text file to a TIFF image                                              | .tiff     |
-| tnef         | html               | Convert a TNEF file to HTML                                                    | .html     |
-| tnef         | txt                | Convert a TNEF file to TXT                                                     | .txt      |
-| video        | h264               | Convert video to mp4 (H.264 video, AAC audio)                                  | .mp4      |
-| video        | h264-mpg           | Convert video to mp4 (H.264 video, AAC audio) with mpg extension               | .mpg      |
-| video        | h265               | Convert video to mp4 (H.265 video, AAC audio)                                  | .mp4      |
-| video        | mpeg               | Convert video to mpeg2 (mpeg2 video, mp3 audio)                                | .mpg      |
-| xslt         | html               | Convert an XML file to HTML using an XSLT stylesheet                           | .html     |
-| xslt         | xml                | Convert an XML file to XML using an XSLT stylesheet                            | .xml      |
-| xslt         | pdf                | Convert an XML file to PDF using an XSLT stylesheet                            | .pdf      |
-| xslt         | jp2                | Convert an XML file to JPEG2000 images (one per page) using an XSLT stylesheet | .jp2      |
-| xslt         | jpg                | Convert an XML file to JPEG images (one per page) using an XSLT stylesheet     | .jpg      |
-| xslt         | png                | Convert an XML file to PNG images (one per page) using an XSLT stylesheet      | .png      |
-| xslt         | tiff               | Convert an XML file to TIFF image (multipage) using an XSLT stylesheet         | .tiff     |
-| medcom       | html               | Convert a MedCom XML file to HTML                                              | .html     |
-| medcom       | xml                | Convert a MedCom XML file to XML                                               | .xml      |
-| medcom       | pdf                | Convert a MedCom XML file to PDF                                               | .pdf      |
-| medcom       | jp2                | Convert a MedCom XML file to JPEG2000 images (one per page)                    | .jp2      |
-| medcom       | jpg                | Convert a MedCom XML file to JPEG images (one per page)                        | .jpg      |
-| medcom       | png                | Convert a MedCom XML file to PNG images (one per page)                         | .png      |
-| medcom       | tiff               | Convert a MedCom XML file to TIFF image (multipage)                            | .tiff     |
-| zipfile      | -                  | Extract a single file from a ZIP                                               | *         |
-| template     | text               | Create a TXT template with custom text                                         | .txt      |
-| template     | empty              | Create a TXT template for an empty file                                        | .txt      |
-| template     | password-protected | Create a TXT template for a password-protected file                            | .txt      |
-| template     | corrupted          | Create a TXT template for a corrupted file                                     | .txt      |
-| template     | duplicate          | Create a TXT template for a duplicate file                                     | .txt      |
-| template     | not-preservable    | Create a TXT template for a not-preservable file                               | .txt      |
-| template     | not-convertable    | Create a TXT template for a not-convertable file                               | .txt      |
-| template     | extracted-archive  | Create a TXT template for a extracted-archive file                             | .txt      |
-| symphovert   | odt                | Check if the file exists as an ODT file in the output directory                | .odt      |
-| symphovert   | ods                | Check if the file exists as an ODS file in the output directory                | .ods      |
-| symphovert   | odp                | Check if the file exists as an ODP file in the output directory                | .odp      |
+| Tool                 | Output             | Explanation                                                      | Extension |
+|----------------------|--------------------|------------------------------------------------------------------|-----------|
+| audio                | flac               |                                                                  | .flac     |
+| audio                | mp3                |                                                                  | .mp3      |
+| audio                | wav                |                                                                  | .wav      |
+| cad / emf            | dxf                |                                                                  | .dxf      |
+| cad / emf            | jp2                |                                                                  | .jp2      |
+| cad / emf            | jpeg               |                                                                  | .jpg      |
+| cad / emf            | jpg                |                                                                  | .jpg      |
+| cad / emf            | pdf                |                                                                  | .pdf      |
+| cad / emf            | png                |                                                                  | .png      |
+| cad / emf            | svg                |                                                                  | .svg      |
+| cad / emf            | tif                |                                                                  | .tif      |
+| cad / emf            | tiff               |                                                                  | .tif      |
+| copy                 | copy               |                                                                  | .copy     |
+| document             | html               |                                                                  | .html     |
+| document             | jp2                |                                                                  | .jp2      |
+| document             | jpeg               |                                                                  | .jpg      |
+| document             | jpg                |                                                                  | .jpg      |
+| document             | odt                |                                                                  | .odt      |
+| document             | pdf                |                                                                  | .pdf      |
+| document             | png                |                                                                  | .png      |
+| document             | tif                |                                                                  | .tif      |
+| document             | tiff               |                                                                  | .tif      |
+| eml                  | html               |                                                                  | .html     |
+| eml                  | jp2                |                                                                  | .jp2      |
+| eml                  | jpeg               |                                                                  | .jpg      |
+| eml                  | jpg                |                                                                  | .jpg      |
+| eml                  | pdf                |                                                                  | .pdf      |
+| eml                  | png                |                                                                  | .png      |
+| eml                  | tif                |                                                                  | .tif      |
+| eml                  | tiff               |                                                                  | .tif      |
+| eml                  | txt                |                                                                  | .txt      |
+| gis                  | geojson            |                                                                  | .geojson  |
+| gis                  | gml                |                                                                  | .gml      |
+| gis                  | gml3               |                                                                  | .gml3     |
+| gis                  | shp                |                                                                  | .shp      |
+| html / browser       | jp2                |                                                                  | .jp2      |
+| html / browser       | jpeg               |                                                                  | .jpg      |
+| html / browser       | jpg                |                                                                  | .jpg      |
+| html / browser       | pdf                |                                                                  | .pdf      |
+| html / browser       | png                |                                                                  | .png      |
+| html / browser       | tif                |                                                                  | .tif      |
+| html / browser       | tiff               |                                                                  | .tif      |
+| image                | jp2                |                                                                  | .jp2      |
+| image                | jpeg               |                                                                  | .jpg      |
+| image                | jpg                |                                                                  | .jpg      |
+| image                | png                |                                                                  | .png      |
+| image                | tif                |                                                                  | .tif      |
+| image                | tiff               |                                                                  | .tif      |
+| ipynb                | html               |                                                                  | .html     |
+| ipynb                | jp2                |                                                                  | .jp2      |
+| ipynb                | jpeg               |                                                                  | .jpg      |
+| ipynb                | jpg                |                                                                  | .jpg      |
+| ipynb                | pdf                |                                                                  | .pdf      |
+| ipynb                | png                |                                                                  | .png      |
+| ipynb                | tif                |                                                                  | .tif      |
+| ipynb                | tiff               |                                                                  | .tif      |
+| mdi                  | pdf                |                                                                  | .pdf      |
+| mdi                  | tif                |                                                                  | .tif      |
+| mdi                  | tiff               |                                                                  | .tif      |
+| medcom               | html               |                                                                  | .html     |
+| medcom               | jp2                |                                                                  | .jp2      |
+| medcom               | jpeg               |                                                                  | .jpg      |
+| medcom               | jpg                |                                                                  | .jpg      |
+| medcom               | pdf                |                                                                  | .pdf      |
+| medcom               | png                |                                                                  | .png      |
+| medcom               | tif                |                                                                  | .tif      |
+| medcom               | tiff               |                                                                  | .tif      |
+| msexcel              | html               |                                                                  | .html     |
+| msexcel              | ods                |                                                                  | .ods      |
+| msexcel              | pdf                |                                                                  | .pdf      |
+| msg                  | html               |                                                                  | .html     |
+| msg                  | jp2                |                                                                  | .jp2      |
+| msg                  | jpeg               |                                                                  | .jpg      |
+| msg                  | jpg                |                                                                  | .jpg      |
+| msg                  | pdf                |                                                                  | .pdf      |
+| msg                  | png                |                                                                  | .png      |
+| msg                  | tif                |                                                                  | .tif      |
+| msg                  | tiff               |                                                                  | .tif      |
+| msg                  | txt                |                                                                  | .txt      |
+| mspowerpoint         | odp                |                                                                  | .odp      |
+| mspowerpoint         | pdf                |                                                                  | .pdf      |
+| msword               | odt                |                                                                  | .odt      |
+| msword               | pdf                |                                                                  | .pdf      |
+| msword               | pdfa               | Convert PDF to PDF/A                                             | .pdf      |
+| pdf                  | jp2                |                                                                  | .jp2      |
+| pdf                  | jpeg               |                                                                  | .jpg      |
+| pdf                  | jpg                |                                                                  | .jpg      |
+| pdf                  | pdfa-1             | Convert PDF to PDF/A-1b                                          | .pdf      |
+| pdf                  | pdfa-2             | Convert PDF to PDF/A-2b                                          | .pdf      |
+| pdf                  | pdfa-3             | Convert PDF to PDF/A-3b                                          | .pdf      |
+| pdf                  | png                |                                                                  | .png      |
+| pdf                  | tif                |                                                                  | .tif      |
+| pdf                  | tiff               |                                                                  | .tif      |
+| presentation         | html               |                                                                  | .html     |
+| presentation         | odp                |                                                                  | .odp      |
+| presentation         | pdf                |                                                                  | .pdf      |
+| sas                  | csv                |                                                                  | .csv      |
+| sas                  | html               |                                                                  | .html     |
+| sas                  | ods                |                                                                  | .ods      |
+| sas                  | pdf                |                                                                  | .pdf      |
+| sas                  | tsv                |                                                                  | .tsv      |
+| spreadsheet          | html               |                                                                  | .html     |
+| spreadsheet          | ods                |                                                                  | .ods      |
+| spreadsheet          | pdf                |                                                                  | .pdf      |
+| symphovert           | odp                | Convert Lotus files using IBM Symphony                           | .odp      |
+| symphovert           | ods                | Convert Lotus files using IBM Symphony                           | .ods      |
+| symphovert           | odt                | Convert Lotus files using IBM Symphony                           | .odt      |
+| template             | corrupted          |                                                                  | .txt      |
+| template             | duplicate          |                                                                  | .txt      |
+| template             | empty              |                                                                  | .txt      |
+| template             | extracted-archive  |                                                                  | .txt      |
+| template             | not-convertable    |                                                                  | .txt      |
+| template             | not-preservable    |                                                                  | .txt      |
+| template             | password-protected |                                                                  | .txt      |
+| template             | temporary-file     |                                                                  | .txt      |
+| template             | text               |                                                                  | .txt      |
+| template             | unidentified       |                                                                  | .txt      |
+| text                 | txt                | Convert text file txt with UTF-8 encoding and x-fmt/111 as PUID  | .txt      |
+| text / text-to-image | jp2                |                                                                  | .jp2      |
+| text / text-to-image | jpeg               |                                                                  | .jpg      |
+| text / text-to-image | jpg                |                                                                  | .jpg      |
+| text / text-to-image | png                |                                                                  | .png      |
+| text / text-to-image | tif                |                                                                  | .tif      |
+| text / text-to-image | tiff               |                                                                  | .tif      |
+| tnef                 | html               |                                                                  | .html     |
+| tnef                 | txt                |                                                                  | .txt      |
+| video                | h264               | Convert video to MP4 (H.264 video, AAC audio)                    | .mp4      |
+| video                | h264-mpg           | Convert video to MP4 (H.264 video, AAC audio) with mpg extension | .mpg      |
+| video                | h265               | Convert video to MP4 (H.265 video, AAC audio)                    | .mp4      |
+| video                | mpeg               | Convert video to MPEG2 (MPEG2 video, MP3 audio)                  | .mpg      |
+| xslt                 | html               |                                                                  | .html     |
+| xslt                 | jp2                |                                                                  | .jp2      |
+| xslt                 | jpeg               |                                                                  | .jpg      |
+| xslt                 | jpg                |                                                                  | .jpg      |
+| xslt                 | pdf                |                                                                  | .pdf      |
+| xslt                 | png                |                                                                  | .png      |
+| xslt                 | tif                |                                                                  | .tif      |
+| xslt                 | tiff               |                                                                  | .tif      |
+| xslt                 | xml                |                                                                  | .xml      |
+| zipfile              | -                  | Extract a specific file from a ZIP container.                    | -         |
 
 ## Dependencies
 
-| Tool         | OS      | Program              |
-|--------------|---------|----------------------|
-| audio        |         | ffmpeg               |
-| cad          | Windows | ABViewer             |
-| document     |         | libreoffice, convert |
-| gis          | Linux   | ogr2ogr              |
-| html         |         | chromium, convert    |
-| image        |         | convert              |
-| medcom       |         | xmlstarlet, chromium |
-| mdi          | Windows | mdi2tif              |
-| msg          |         | convert              |
-| msexcel      | Windows | docto                |
-| mspowerpoint | Windows | docto                |
-| msword       | Windows | docto                |
-| pdf          |         | convert              |
-| pdf-large    |         | convert              |
-| presentation |         | libreoffice          |
-| spreadsheet  |         | libreoffice          |
-| text         |         | convert              |
-| video        |         | ffmpeg               |
-| xslt         |         | xmlstarlet, chromium |
+| Tool                 | OS      | Program                                     |
+|----------------------|---------|---------------------------------------------|
+| audio                |         | ffmpeg                                      |
+| cad / emf            | Windows | abviewer, imagemagick, nconvert             |
+| document             |         | imagemagick, libreoffice, nconvert          |
+| eml                  |         | chromium, imagemagick, nconvert             |
+| gis                  | Linux   | ogr2ogr                                     |
+| html / browser       |         | chromium, imagemagick, nconvert             |
+| image                |         | imagemagick, nconvert                       |
+| ipynb                |         | chromium, imagemagick, nconvert             |
+| mdi                  | Windows | imagemagick, mdi2tif, nconvert              |
+| medcom               |         | chromium, imagemagick, nconvert, xmlstarlet |
+| msexcel              | Windows | docto                                       |
+| msg                  |         | imagemagick, nconvert                       |
+| mspowerpoint         | Windows | docto                                       |
+| msword               | Windows | docto                                       |
+| pdf                  |         | ghostscript, imagemagick, nconvert          |
+| presentation         |         | libreoffice                                 |
+| sas                  |         | libreoffice                                 |
+| spreadsheet          |         | libreoffice                                 |
+| symphovert           | Windows | symphony                                    |
+| text / text-to-image |         | imagemagick, libreoffice, nconvert          |
+| video                |         | ffmpeg                                      |
+| xslt                 |         | chromium, imagemagick, nconvert, xmlstarlet |
