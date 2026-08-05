@@ -13,7 +13,7 @@ from typing import Literal
 import structlog
 from acacore.__version__ import __version__ as __acacore_version__
 from acacore.database import FilesDB
-from acacore.database.query import QueryTokens
+from acacore.database.query import QueryToken
 from acacore.database.query import tokens_to_where
 from acacore.database.table import Table
 from acacore.models.event import Event
@@ -124,7 +124,7 @@ def compile_convert_targets(
     avid: AVID,
     database: FilesDB,
     target: Literal["original:master", "master:access", "master:statutory"],
-    query: QueryTokens,
+    query: list[QueryToken],
 ) -> tuple[
     Table[OriginalFile | MasterFile],
     Table[ConvertedFile],
@@ -261,7 +261,7 @@ def cmd_digiarch(
     ctx: Context,
     avid_dir: str,
     target: Literal["original:master", "master:access", "master:statutory"],
-    query: QueryTokens,
+    query: list[QueryToken],
     tool_ignore: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
