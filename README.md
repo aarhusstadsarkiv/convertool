@@ -234,105 +234,124 @@ Options:
 
 ## Dependencies
 
-| Tool                 | Output   | OS      | Program                                     |
-|----------------------|----------|---------|---------------------------------------------|
-| audio                | flac     |         | ffmpeg                                      |
-| audio                | mp3      |         | ffmpeg                                      |
-| audio                | wav      |         | ffmpeg                                      |
-| cad / emf            | dxf      | Windows | abviewer                                    |
-| cad / emf            | jp2      | Windows | abviewer, imagemagick, nconvert             |
-| cad / emf            | jpeg     | Windows | abviewer, imagemagick, nconvert             |
-| cad / emf            | jpg      | Windows | abviewer, imagemagick, nconvert             |
-| cad / emf            | pdf      | Windows | abviewer                                    |
-| cad / emf            | png      | Windows | abviewer, imagemagick, nconvert             |
-| cad / emf            | svg      | Windows | abviewer                                    |
-| document             | html     |         | libreoffice                                 |
-| document             | jp2      |         | imagemagick, libreoffice, nconvert          |
-| document             | jpeg     |         | imagemagick, libreoffice, nconvert          |
-| document             | jpg      |         | imagemagick, libreoffice, nconvert          |
-| document             | odt      |         | libreoffice                                 |
-| document             | pdf      |         | libreoffice                                 |
-| document             | png      |         | imagemagick, libreoffice, nconvert          |
-| eml                  | jp2      |         | chromium, imagemagick, nconvert             |
-| eml                  | jpeg     |         | chromium, imagemagick, nconvert             |
-| eml                  | jpg      |         | chromium, imagemagick, nconvert             |
-| eml                  | pdf      |         | chromium                                    |
-| eml                  | png      |         | chromium, imagemagick, nconvert             |
-| gis                  | geojson  | Linux   | ogr2ogr                                     |
-| gis                  | gml      | Linux   | ogr2ogr                                     |
-| gis                  | gml3     | Linux   | ogr2ogr                                     |
-| gis                  | shp      | Linux   | ogr2ogr                                     |
-| html / browser       | jp2      |         | chromium, imagemagick, nconvert             |
-| html / browser       | jpeg     |         | chromium, imagemagick, nconvert             |
-| html / browser       | jpg      |         | chromium, imagemagick, nconvert             |
-| html / browser       | pdf      |         | chromium                                    |
-| html / browser       | png      |         | chromium, imagemagick, nconvert             |
-| image                | jp2      |         | imagemagick, nconvert                       |
-| image                | jpeg     |         | imagemagick, nconvert                       |
-| image                | jpg      |         | imagemagick, nconvert                       |
-| image                | png      |         | imagemagick, nconvert                       |
-| image                | tif      |         | imagemagick, nconvert                       |
-| image                | tiff     |         | imagemagick, nconvert                       |
-| ipynb                | jp2      |         | chromium, imagemagick, nconvert             |
-| ipynb                | jpeg     |         | chromium, imagemagick, nconvert             |
-| ipynb                | jpg      |         | chromium, imagemagick, nconvert             |
-| ipynb                | pdf      |         | chromium                                    |
-| ipynb                | png      |         | chromium, imagemagick, nconvert             |
-| mdi                  | pdf      | Windows | imagemagick, mdi2tif, nconvert              |
-| mdi                  | tif      | Windows | mdi2tif                                     |
-| mdi                  | tiff     | Windows | mdi2tif                                     |
-| medcom               | html     |         | xmlstarlet                                  |
-| medcom               | jp2      |         | chromium, imagemagick, nconvert, xmlstarlet |
-| medcom               | jpeg     |         | chromium, imagemagick, nconvert, xmlstarlet |
-| medcom               | jpg      |         | chromium, imagemagick, nconvert, xmlstarlet |
-| medcom               | pdf      |         | chromium, xmlstarlet                        |
-| medcom               | png      |         | chromium, imagemagick, nconvert, xmlstarlet |
-| msexcel              | html     | Windows | docto                                       |
-| msexcel              | ods      | Windows | docto                                       |
-| msexcel              | pdf      | Windows | docto                                       |
-| msg                  | jp2      |         | imagemagick, nconvert                       |
-| msg                  | jpeg     |         | imagemagick, nconvert                       |
-| msg                  | jpg      |         | imagemagick, nconvert                       |
-| msg                  | pdf      |         | imagemagick, nconvert                       |
-| msg                  | png      |         | imagemagick, nconvert                       |
-| mspowerpoint         | odp      | Windows | docto                                       |
-| mspowerpoint         | pdf      | Windows | docto                                       |
-| msword               | odt      | Windows | docto                                       |
-| msword               | pdf      | Windows | docto                                       |
-| msword               | pdfa     | Windows | docto                                       |
-| pdf                  | jp2      |         | imagemagick, nconvert                       |
-| pdf                  | jpeg     |         | imagemagick, nconvert                       |
-| pdf                  | jpg      |         | imagemagick, nconvert                       |
-| pdf                  | pdfa-1   |         | ghostscript                                 |
-| pdf                  | pdfa-2   |         | ghostscript                                 |
-| pdf                  | pdfa-3   |         | ghostscript                                 |
-| pdf                  | png      |         | imagemagick, nconvert                       |
-| pdf                  | tif      |         | pdftoppm, tiffcp                            |
-| pdf                  | tiff     |         | pdftoppm, tiffcp                            |
-| presentation         | html     |         | libreoffice                                 |
-| presentation         | odp      |         | libreoffice                                 |
-| presentation         | pdf      |         | libreoffice                                 |
-| sas                  | html     |         | libreoffice                                 |
-| sas                  | ods      |         | libreoffice                                 |
-| sas                  | pdf      |         | libreoffice                                 |
-| spreadsheet          | html     |         | libreoffice                                 |
-| spreadsheet          | ods      |         | libreoffice                                 |
-| spreadsheet          | pdf      |         | libreoffice                                 |
-| symphovert           | odp      | Windows | symphony                                    |
-| symphovert           | ods      | Windows | symphony                                    |
-| symphovert           | odt      | Windows | symphony                                    |
-| text / text-to-image | jp2      |         | imagemagick, libreoffice, nconvert          |
-| text / text-to-image | jpeg     |         | imagemagick, libreoffice, nconvert          |
-| text / text-to-image | jpg      |         | imagemagick, libreoffice, nconvert          |
-| text / text-to-image | png      |         | imagemagick, libreoffice, nconvert          |
-| video                | h264     |         | ffmpeg                                      |
-| video                | h264-mpg |         | ffmpeg                                      |
-| video                | h265     |         | ffmpeg                                      |
-| video                | mpeg2    |         | ffmpeg                                      |
-| xslt                 | html     |         | xmlstarlet                                  |
-| xslt                 | jp2      |         | chromium, imagemagick, nconvert, xmlstarlet |
-| xslt                 | jpeg     |         | chromium, imagemagick, nconvert, xmlstarlet |
-| xslt                 | jpg      |         | chromium, imagemagick, nconvert, xmlstarlet |
-| xslt                 | pdf      |         | chromium, xmlstarlet                        |
-| xslt                 | png      |         | chromium, imagemagick, nconvert, xmlstarlet |
-| xslt                 | xml      |         | xmlstarlet                                  |
+| Tool                 | Output   | OS      | Program                                                       |
+|----------------------|----------|---------|---------------------------------------------------------------|
+| audio                | flac     |         | ffmpeg                                                        |
+| audio                | mp3      |         | ffmpeg                                                        |
+| audio                | wav      |         | ffmpeg                                                        |
+| cad / emf            | dxf      | Windows | abviewer                                                      |
+| cad / emf            | jp2      | Windows | abviewer, imagemagick, nconvert, pdftoppm, tiffcp             |
+| cad / emf            | jpeg     | Windows | abviewer, imagemagick, nconvert, pdftoppm, tiffcp             |
+| cad / emf            | jpg      | Windows | abviewer, imagemagick, nconvert, pdftoppm, tiffcp             |
+| cad / emf            | pdf      | Windows | abviewer                                                      |
+| cad / emf            | png      | Windows | abviewer, imagemagick, nconvert, pdftoppm, tiffcp             |
+| cad / emf            | svg      | Windows | abviewer                                                      |
+| cad / emf            | tif      | Windows | abviewer, imagemagick, nconvert, pdftoppm, tiffcp             |
+| cad / emf            | tiff     | Windows | abviewer, imagemagick, nconvert, pdftoppm, tiffcp             |
+| document             | html     |         | libreoffice                                                   |
+| document             | jp2      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| document             | jpeg     |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| document             | jpg      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| document             | odt      |         | libreoffice                                                   |
+| document             | pdf      |         | libreoffice                                                   |
+| document             | png      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| document             | tif      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| document             | tiff     |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| eml                  | html     |         |                                                               |
+| eml                  | jp2      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| eml                  | jpeg     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| eml                  | jpg      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| eml                  | pdf      |         | chromium                                                      |
+| eml                  | png      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| eml                  | tif      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| eml                  | tiff     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| gis                  | geojson  | Linux   | ogr2ogr                                                       |
+| gis                  | gml      | Linux   | ogr2ogr                                                       |
+| gis                  | gml3     | Linux   | ogr2ogr                                                       |
+| gis                  | shp      | Linux   | ogr2ogr                                                       |
+| html / browser       | jp2      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| html / browser       | jpeg     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| html / browser       | jpg      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| html / browser       | pdf      |         | chromium                                                      |
+| html / browser       | png      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| html / browser       | tif      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| html / browser       | tiff     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| image                | jp2      |         | imagemagick, nconvert                                         |
+| image                | jpeg     |         | imagemagick, nconvert                                         |
+| image                | jpg      |         | imagemagick, nconvert                                         |
+| image                | png      |         | imagemagick, nconvert                                         |
+| image                | tif      |         | imagemagick, nconvert                                         |
+| image                | tiff     |         | imagemagick, nconvert                                         |
+| ipynb                | jp2      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| ipynb                | jpeg     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| ipynb                | jpg      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| ipynb                | pdf      |         | chromium                                                      |
+| ipynb                | png      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| ipynb                | tif      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| ipynb                | tiff     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| mdi                  | pdf      | Windows | imagemagick, mdi2tif, nconvert                                |
+| mdi                  | tif      | Windows | mdi2tif                                                       |
+| mdi                  | tiff     | Windows | mdi2tif                                                       |
+| medcom               | html     |         | xmlstarlet                                                    |
+| medcom               | jp2      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| medcom               | jpeg     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| medcom               | jpg      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| medcom               | pdf      |         | chromium, xmlstarlet                                          |
+| medcom               | png      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| medcom               | tif      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| medcom               | tiff     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| msexcel              | html     | Windows | docto                                                         |
+| msexcel              | ods      | Windows | docto                                                         |
+| msexcel              | pdf      | Windows | docto                                                         |
+| msg                  | jp2      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| msg                  | jpeg     |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| msg                  | jpg      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| msg                  | pdf      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| msg                  | png      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| msg                  | tif      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| msg                  | tiff     |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| mspowerpoint         | odp      | Windows | docto                                                         |
+| mspowerpoint         | pdf      | Windows | docto                                                         |
+| msword               | odt      | Windows | docto                                                         |
+| msword               | pdf      | Windows | docto                                                         |
+| msword               | pdfa     | Windows | docto                                                         |
+| pdf                  | jp2      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| pdf                  | jpeg     |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| pdf                  | jpg      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| pdf                  | pdfa-1   |         | ghostscript                                                   |
+| pdf                  | pdfa-2   |         | ghostscript                                                   |
+| pdf                  | pdfa-3   |         | ghostscript                                                   |
+| pdf                  | png      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| pdf                  | tif      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| pdf                  | tiff     |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| presentation         | html     |         | libreoffice                                                   |
+| presentation         | odp      |         | libreoffice                                                   |
+| presentation         | pdf      |         | libreoffice                                                   |
+| sas                  | html     |         | libreoffice                                                   |
+| sas                  | ods      |         | libreoffice                                                   |
+| sas                  | pdf      |         | libreoffice                                                   |
+| spreadsheet          | html     |         | libreoffice                                                   |
+| spreadsheet          | ods      |         | libreoffice                                                   |
+| spreadsheet          | pdf      |         | libreoffice                                                   |
+| symphovert           | odp      | Windows | symphony                                                      |
+| symphovert           | ods      | Windows | symphony                                                      |
+| symphovert           | odt      | Windows | symphony                                                      |
+| text / text-to-image | jp2      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| text / text-to-image | jpeg     |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| text / text-to-image | jpg      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| text / text-to-image | png      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| text / text-to-image | tif      |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| text / text-to-image | tiff     |         | imagemagick, libreoffice, nconvert, pdftoppm, tiffcp          |
+| video                | h264     |         | ffmpeg                                                        |
+| video                | h264-mpg |         | ffmpeg                                                        |
+| video                | h265     |         | ffmpeg                                                        |
+| video                | mpeg2    |         | ffmpeg                                                        |
+| xslt                 | html     |         | xmlstarlet                                                    |
+| xslt                 | jp2      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| xslt                 | jpeg     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| xslt                 | jpg      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| xslt                 | pdf      |         | chromium, xmlstarlet                                          |
+| xslt                 | png      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| xslt                 | tif      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| xslt                 | tiff     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp, xmlstarlet |
+| xslt                 | xml      |         | xmlstarlet                                                    |
