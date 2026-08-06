@@ -34,7 +34,7 @@ class ConverterImage(ConverterABC):
         :param default_density: The default max DPI value.
         :return: The DPI and the number of pages in the file.
         """
-        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", file)
+        density_stdout, *_ = self.run_process("identify", "-format", r"%x,%y\n", file)
         density: int = default_density
         pages: int = 0
 
