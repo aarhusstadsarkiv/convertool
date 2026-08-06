@@ -4,6 +4,7 @@ from typing import ClassVar
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .exceptions import BadOption
 
 
 class ConverterImage(ConverterABC):
@@ -18,6 +19,12 @@ class ConverterImage(ConverterABC):
     ]
     process_timeout: ClassVar[float] = 180.0
     dependencies: ClassVar[dict[str, list[str]]] = {"nconvert": ["nconvert"], "imagemagick": ["magick", "convert"]}
+
+    def test_options(self):
+        if (v := self.options.get("program")) not in ("nconvert", "imagemagick", None):
+            raise BadOption(f"Invalid value {v!r} for 'program' option.")
+        if (v := self.options.get("layers")) not in ("true", True, None):
+            raise BadOption(f"Invalid value {v!r} for 'layers' option.")
 
     def output(self, output: str) -> str:
         if output == "jpeg":
