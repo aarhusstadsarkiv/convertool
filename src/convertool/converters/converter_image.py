@@ -4,6 +4,7 @@ from typing import ClassVar
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .exceptions import BadOption
 
 
 class ConverterImage(ConverterABC):
@@ -18,6 +19,12 @@ class ConverterImage(ConverterABC):
     ]
     process_timeout: ClassVar[float] = 180.0
     dependencies: ClassVar[dict[str, list[str]]] = {"nconvert": ["nconvert"], "imagemagick": ["magick", "convert"]}
+
+    def test_options(self):
+        if (v := self.options.get("program")) not in ("nconvert", "imagemagick", None):
+            raise BadOption(f"Invalid value {v!r} for 'program' option.")
+        if (v := self.options.get("layers")) not in ("true", True, None):
+            raise BadOption(f"Invalid value {v!r} for 'layers' option.")
 
     def output(self, output: str) -> str:
         if output == "jpeg":
@@ -34,7 +41,7 @@ class ConverterImage(ConverterABC):
         :param default_density: The default max DPI value.
         :return: The DPI and the number of pages in the file.
         """
-        density_stdout, _ = self.run_process("identify", "-format", r"%x,%y\n", file)
+        density_stdout, *_ = self.run_process("identify", "-format", r"%x,%y\n", file)
         density: int = default_density
         pages: int = 0
 
@@ -47,7 +54,33 @@ class ConverterImage(ConverterABC):
 
         return density, pages
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def convert_imagemagick(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        output = self.output(output)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = self.output_file(dest_dir, output)
+        args: list[str] = []
+        filename: Path = self.file.get_absolute_path()
+
+        if self.options.get("layers") in ("true", True):
+            filename = filename.with_name(filename.name + "[0]")
+            args.extend(("-background", "none", "-flatten"))
+        if output == "tif":
+            args.extend(("-compress", "LZW", "-depth", "16"))
+
+        with TempDir(output_dir) as tmp_dir:
+            self.run_process(
+                self.dependencies["imagemagick"][0],
+                filename,
+                *args,
+                dest_file.name,
+                cwd=tmp_dir,
+            )
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            tmp_dir.joinpath(dest_file.name).replace(dest_file)
+
+        return [dest_file]
+
+    def convert_nconvert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
@@ -81,3 +114,9 @@ class ConverterImage(ConverterABC):
                 for f in sorted(tmp_dir.iterdir())
                 if f.is_file()
             ]
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        if self.options.get("program") == "imagemagick":
+            return self.convert_imagemagick(output_dir, output, keep_relative_path=keep_relative_path)
+        else:
+            return self.convert_nconvert(output_dir, output, keep_relative_path=keep_relative_path)

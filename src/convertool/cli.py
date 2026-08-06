@@ -170,10 +170,10 @@ def compile_convert_targets(
 
     where, params = tokens_to_where(query)
 
-    if where:  # noqa: SIM108
+    if where:
         where = f"({where}) and ({src_query})"
     else:
-        where = (src_query, [])
+        where, params = src_query, []
 
     to_process_table: Table[OriginalFile | MasterFile] = database.create_table(
         src_table.model,
