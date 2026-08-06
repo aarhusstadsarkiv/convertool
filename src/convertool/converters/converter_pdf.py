@@ -104,7 +104,7 @@ class ConverterPDFToImage(ConverterImage):
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         output = self.output(output)
 
-        if output in ("tiff", "tiff"):
+        if output in ("tif", "tiff"):
             return self.convert_tiff(output_dir, output, keep_relative_path=keep_relative_path)
 
         return super().convert(output_dir, output, keep_relative_path=keep_relative_path)
