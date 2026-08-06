@@ -28,6 +28,12 @@ tar zxvf nconvert.tgz
 mv NConvert/* ~/.local/bin
 rm -rf nconvert.tgz NConvert/
 
+# Install pdftoppm
+apt install poppler-utils
+
+# Install tiffcp
+apt install libtiff-tools
+
 # Install vipps
 apt install -y libvips-tools
 

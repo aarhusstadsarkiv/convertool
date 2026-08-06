@@ -51,8 +51,12 @@ def _shared_platforms(*converters: type["ConverterABC"]) -> list[str]:
     return list(reduce(lambda a, c: a.union(set(c)), platforms[1:], set(platforms[0]))) or ["no-platform"]
 
 
-def _shared_dependencies(*converters: type["ConverterABC"]) -> dict[str, list[str]] | None:
-    return {dep: cmds for conv in converters for dep, cmds in (conv.dependencies or {}).items()} or None
+def _shared_dependencies(*converters: type["ConverterABC"] | dict[str, list[str]]) -> dict[str, list[str]] | None:
+    return {
+        dep: cmds
+        for conv in converters
+        for dep, cmds in (conv if isinstance(conv, dict) else (conv.dependencies or {})).items()
+    } or None
 
 
 def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
