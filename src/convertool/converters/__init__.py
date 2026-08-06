@@ -26,6 +26,7 @@ from .converter_notebook import ConverterIPYNBToImage
 from .converter_notebook import ConverterIPYNBToPDF
 from .converter_pdf import ConverterPDF
 from .converter_pdf import ConverterPDFToImage
+from .converter_pdf import ConverterPDFToTiff
 from .converter_presentation import ConverterPresentation
 from .converter_sas import ConverterSAS
 from .converter_sas import ConverterSASSpreadsheet
@@ -74,6 +75,7 @@ converters: list[type[ConverterABC]] = [
     ConverterMedComToPDF,
     ConverterPDF,
     ConverterPDFToImage,
+    ConverterPDFToTiff,
     ConverterPresentation,
     ConverterSAS,
     ConverterSASSpreadsheet,
@@ -121,6 +123,7 @@ __all__ = [
     "ConverterMedComToPDF",
     "ConverterPDF",
     "ConverterPDFToImage",
+    "ConverterPDFToTiff",
     "ConverterPresentation",
     "ConverterSAS",
     "ConverterSASSpreadsheet",
