@@ -235,7 +235,7 @@ def app():
         ["warning", "encoding", "action_data", "convert_access", "convert_statutory"],
     ),
 )
-@option("--tool-ignore", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
+@option("--tool-exclude", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option("--threads", type=IntRange(min=1), default=4, help="Set number of threads for async conversion.")
@@ -263,7 +263,7 @@ def cmd_digiarch(
     avid_dir: str,
     target: Literal["original:master", "master:access", "master:statutory"],
     query: list[QueryToken],
-    tool_ignore: tuple[str, ...],
+    tool_exclude: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
     threads: int,
@@ -288,7 +288,7 @@ def cmd_digiarch(
     The default behaviour is to used MD5 checksums as output names based on the relative path of the source file to avoid collisions.
     To use the original names with new suffixes, use the --no-hashed-names option.
 
-    To restrict the tools that should be used for conversion, use the --tool-ignore and --tool-include options.
+    To restrict the tools that should be used for conversion, use the --tool-exclude and --tool-include options.
     The former will skip files whose tools are in the list, the second will skip files whose tools are not in the list.
 
     Use the --timeout option to override the converters' timeout, set to 0 to disable timeouts altogether.
@@ -363,14 +363,14 @@ def cmd_digiarch(
                             # noinspection PyTypeChecker
                             # dest_type cannot be anything but "access" or "statutory" when file is a MasterFile
                             instruction = master_file_converter(file, target.split(":")[1])
-                        if instruction.tool in tool_ignore:
+                        if instruction.tool in tool_exclude:
                             continue
                         if tool_include and instruction.tool not in tool_include:
                             continue
                         instruction.converter_cls.test()
                         instructions.append(instruction)
                     except ConverterNotFound as error:
-                        if error.tool in tool_ignore:
+                        if error.tool in tool_exclude:
                             continue
                         if tool_include and error.tool not in tool_include:
                             continue
