@@ -4,11 +4,11 @@ from typing import ClassVar
 
 from acacore.models.file import OriginalFile
 
-from convertool.exceptions import BadOption
 from convertool.util import file_suffixes
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .exceptions import BadOption
 
 
 class ConverterGIS(ConverterABC):

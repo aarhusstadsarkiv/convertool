@@ -5,9 +5,8 @@ from acacore.models.file import OriginalFile
 from acacore.models.reference_files import TemplateTypeEnum
 from chardet import DetectionDict
 
-from convertool.exceptions import ConvertError
-
 from .base import ConverterABC
+from .exceptions import ConvertError
 
 
 class ConverterTemplate(ConverterABC):

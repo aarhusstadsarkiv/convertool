@@ -3,7 +3,6 @@ from typing import ClassVar
 
 from chardet import DetectionDict
 
-from convertool.exceptions import BadOption
 from convertool.util import TempDir
 
 from . import ConverterDocument
@@ -12,6 +11,7 @@ from .base import _shared_dependencies
 from .base import _shared_process_timeout
 from .base import ConverterABC
 from .base import dummy_base_file
+from .exceptions import BadOption
 
 
 class ConverterText(ConverterABC):
