@@ -8,13 +8,8 @@ from eml_analyzer.library.parser import ParsedEmail
 
 from convertool.util import TempDir
 
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
 from .base import dummy_base_file
-from .converter_html import ConverterHTML
-from .converter_html import ConverterHTMLToImage
 from .converter_msg import html_to_text
 from .converter_msg import text_to_html
 from .exceptions import OutputTargetError
@@ -139,9 +134,31 @@ def eml_plain_body(eml: ParsedEmail) -> str:
     return f"{eml_front_matter(eml, eml_attachments(eml))}\n\n{plain.strip()}"
 
 
-class ConverterEML(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["eml"]
+class EMLConverter(ConverterABC):
+    name: ClassVar[str] = "eml"
     outputs: ClassVar[list[str]] = ["html", "txt"]
+
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "html":
+            return "html"
+        if output == "txt":
+            return "text"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "html":
+            return ".html"
+        if output == "txt":
+            return ".txt"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
+        if output == "html":
+            return "fmt/471"
+        if output == "txt":
+            return "x-fmt/111"
+        return None
 
     def output_encoding(self, output: str) -> DetectionDict | None:
         if output == "txt":
@@ -151,9 +168,9 @@ class ConverterEML(ConverterABC):
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
 
         eml = ParsedEmail(
             self.file.get_absolute_path().read_text(self.file.encoding["encoding"] if self.file.encoding else None)
@@ -172,73 +189,3 @@ class ConverterEML(ConverterABC):
         dest_file.write_text(body, "utf-8")
 
         return [dest_file]
-
-
-class ConverterEMLToPDF(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterEML.tool_names
-    outputs: ClassVar[list[str]] = ConverterHTML.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterEML, ConverterHTML)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterEML, ConverterHTML)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterEML, ConverterHTML)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            if not (
-                htmls := ConverterEML(
-                    self.file,
-                    self.root,
-                    self.relative_root,
-                    self.database,
-                    timeout=self.timeout,
-                    hashed_output_name=self.hashed_output_name,
-                ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
-            ):
-                return []
-
-            html = htmls[0]
-
-            return ConverterHTML(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(output_dir, output, keep_relative_path=keep_relative_path)
-
-
-class ConverterEMLToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterEML.tool_names
-    outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterEML, ConverterHTMLToImage)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterEML, ConverterHTMLToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterEML, ConverterHTMLToImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            if not (
-                htmls := ConverterEML(
-                    self.file,
-                    self.root,
-                    self.relative_root,
-                    self.database,
-                    timeout=self.timeout,
-                    hashed_output_name=self.hashed_output_name,
-                ).convert(tmp_dir, "html", keep_relative_path=keep_relative_path)
-            ):
-                return []
-
-            html = htmls[0]
-
-            return ConverterHTMLToImage(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(output_dir, output, keep_relative_path=keep_relative_path)

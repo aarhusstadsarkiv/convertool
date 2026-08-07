@@ -1,9 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 from functools import lru_cache
-from functools import reduce
 from hashlib import md5
-from os import PathLike
 from pathlib import Path
 from shutil import which
 from subprocess import CalledProcessError
@@ -19,17 +17,19 @@ from chardet import DetectionDict
 
 from convertool.util import run_process
 
+from .exceptions import BadFile
 from .exceptions import ConvertError
 from .exceptions import ConvertTimeoutError
 from .exceptions import MissingDependency
 from .exceptions import OutputDirError
-from .exceptions import OutputTargetError
+from .exceptions import UnsupportedOutput
 from .exceptions import UnsupportedPlatform
 
 
 @lru_cache
-def _test_dependency(*commands: str) -> str:
+def test_dependency(*commands: str) -> str:
     for command in commands:
+        # noinspection deprecation
         if command_path := which(command):
             return command_path
 
@@ -37,37 +37,16 @@ def _test_dependency(*commands: str) -> str:
 
 
 @lru_cache
-def _test_platform(*platforms: str):
+def test_platforms(*platforms: str):
     if platforms and platform not in platforms:
-        raise UnsupportedPlatform(platform, f"Not one of {platforms}")
+        raise UnsupportedPlatform(platform, f"Not one of {set(platforms)}.")
 
 
-def _shared_platforms(*converters: type["ConverterABC"]) -> list[str]:
-    platforms: list[list[str]] = [c.platforms for c in converters if c.platforms]
-
-    if not platforms:
-        return []
-
-    return list(reduce(lambda a, c: a.union(set(c)), platforms[1:], set(platforms[0]))) or ["no-platform"]
-
-
-def _shared_dependencies(*converters: type["ConverterABC"] | dict[str, list[str]]) -> dict[str, list[str]] | None:
-    return {
-        dep: cmds
-        for conv in converters
-        for dep, cmds in (conv if isinstance(conv, dict) else (conv.dependencies or {})).items()
-    } or None
-
-
-def _shared_process_timeout(*converters: type["ConverterABC"]) -> float | None:
-    return max([c.process_timeout or 0.0 for c in converters], default=0.0) or None
-
-
-def _hashed_file_name(path: str | PathLike[str]) -> str:
+def hashed_file_name(path: str | Path) -> str:
     return md5(str(path).encode("utf-8")).hexdigest() + dummy_base_file(path).suffixes
 
 
-def dummy_base_file(path: str | PathLike[str], root: str | PathLike[str] | None = None) -> BaseFile:
+def dummy_base_file(path: str | Path, root: str | Path | None = None) -> BaseFile:
     return BaseFile(
         checksum="",
         encoding=None,
@@ -81,12 +60,14 @@ def dummy_base_file(path: str | PathLike[str], root: str | PathLike[str] | None 
 
 
 class ConverterABC(ABC):
-    tool_names: ClassVar[list[str]]
+    name: ClassVar[str]
     outputs: ClassVar[list[str]]
-    process_timeout: ClassVar[float | None] = None
+    process_timeout: ClassVar[int | float | None] = None
     platforms: ClassVar[list[str] | None] = None
     dependencies: ClassVar[dict[str, list[str]] | None] = None
     multithreading: ClassVar[bool] = False
+    requires_file_classes: ClassVar[list[type[BaseFile]]] = [BaseFile]
+    requires_database: ClassVar[bool] = False
 
     def __init__(
         self,
@@ -112,11 +93,17 @@ class ConverterABC(ABC):
         self.hashed_output_name: bool = hashed_output_name
         self.timeout: int | None = timeout
 
+        if self.requires_file_classes and type(self.file) not in self.requires_file_classes:
+            raise BadFile(f"File is not of class {self.requires_file_classes}")
+
+        if self.requires_database and self.database is None:
+            raise BadFile("Database is not provided")
+
         self.test_options()
 
     @classmethod
     def match_tool(cls, tool: str, output: str) -> bool:
-        return tool in cls.tool_names and output in cls.outputs
+        return tool == cls.name and output in cls.outputs
 
     @classmethod
     @lru_cache
@@ -138,7 +125,7 @@ class ConverterABC(ABC):
 
         :raise UnsupportedPlatform: If the platform is not supported.
         """
-        _test_platform(*cls.platforms or [])
+        test_platforms(*cls.platforms or [])
 
     @classmethod
     @lru_cache
@@ -150,8 +137,20 @@ class ConverterABC(ABC):
         """
         dependencies: dict[str, list[str]] = {}
         for dependency, commands in (cls.dependencies or {}).items():
-            dependencies[dependency] = [_test_dependency(*commands)]
+            dependencies[dependency] = [test_dependency(*commands)]
         cls.dependencies = dependencies
+
+    @classmethod
+    @lru_cache
+    def test_output(cls, output: str):
+        """
+        Test whether an output is supported by the converter.
+
+        :param output: The output.
+        :raise OutputExtensionError: If ``output`` is not part of the converter's outputs list.
+        """
+        if not any(o.lower() == output.lower() for o in cls.outputs):
+            raise UnsupportedOutput(output)
 
     def test_options(self):
         """
@@ -163,8 +162,8 @@ class ConverterABC(ABC):
     def run_process(
         self,
         command: str,
-        *args: str | int | PathLike,
-        cwd: str | PathLike | None = None,
+        *args: str | int | Path,
+        cwd: str | Path | None = None,
     ) -> tuple[str, str, CompletedProcess[str]]:
         """
         Run process and capture output.
@@ -219,58 +218,114 @@ class ConverterABC(ABC):
             dest_dir.mkdir(parents=True, exist_ok=True)
         return dest_dir
 
-    def output(self, output: str) -> str:
+    @classmethod
+    def output_name(cls, output: str) -> str:
         """
-        Get the normalized output extension and check if it is valid.
+        Get the name of a given output.
 
-        :param output: The desired output extension.
-        :raise OutputExtensionError: If ``output`` is not part of the converter's outputs list.
-        :return: The normalized output extension.
+        :param output: The output.
+        :return: The name of the output.
         """
-        if output := next((o for o in self.outputs if o.lower() == output.lower()), None):
-            return output
-        raise OutputTargetError(self.file, f"Unsupported output {output}")
+        return output
 
-    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
+    def output_extension(self, output: str) -> str:
         """
-        Get the path to the output file.
+        Get the extension for a given output.
 
-        :param output_dir: The path to the output directory.
-        :param output: The desired output extension.
-        :param append: ``True`` if the extension should be appended to the file name instead of replacing the existing
-            suffix(es).
-        :return: The path to the putput file.
+        :param output: The output.
+        :return: The extension.
         """
-        name: str = (
-            _hashed_file_name(self.file.get_absolute_path(self.root).relative_to(self.relative_root))
-            if self.hashed_output_name
-            else self.file.name
-        )
-        if not output:
-            return output_dir.joinpath(name)
-        if append:
-            return output_dir.joinpath(f"{name}.{output}")
-        return output_dir.joinpath(f"{name.removesuffix(self.file.suffixes)}.{output}")
+        return f".{output}"
 
-    # noinspection PyMethodMayBeStatic
+    # noinspection unused-parameter
     def output_puid(self, output: str) -> str | None:  # noqa: ARG002
         """
-        Get the PUID of a given output, if available.
+        Get the PUID for a given output, if available.
 
         :param output: The output value.
         :return: A PUID if available, else ``None``.
         """
         return None
 
-    # noinspection PyMethodMayBeStatic
+    # noinspection unused-parameter
     def output_encoding(self, output: str) -> DetectionDict | None:  # noqa: ARG002
         """
-        Get the encoding of a given output, if available.
+        Get the encoding for a given output, if available.
 
         :param output: The output value.
         :return: A ``chardet.DetectionDict`` if available, else ``None``.
         """
         return None
 
+    def output_file(self, output: str, *, append: bool = False) -> str:
+        """
+        Get the name of the output file.
+
+        :param output: The desired output.
+        :param append: ``True`` if the extension should be appended to the file name instead of replacing the existing
+            suffix(es).
+        :return: The path to the putput file.
+        """
+        extension: str = self.output_extension(output)
+        name: str = (
+            hashed_file_name(self.file.get_absolute_path(self.root).relative_to(self.relative_root))
+            if self.hashed_output_name
+            else self.file.name
+        )
+
+        if not extension:
+            return name
+
+        if append:
+            return f"{name}.{extension}"
+
+        return f"{name.removesuffix(self.file.suffixes)}.{extension}"
+
     @abstractmethod
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
+
+
+class ConvertersEdge:
+    def __init__(self, converter: type[ConverterABC], output: str) -> None:
+        self.converter: type[ConverterABC] = converter
+        self.output: str = output
+
+    def __repr__(self) -> str:
+        return f"{self.converter.name}({self.output})"
+
+    def __hash__(self) -> int:
+        return hash((self.converter.name, self.output))
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, ConvertersEdge):
+            return self.converter.__class__ is other.converter.__class__ and self.output == other.output
+        return False
+
+    def __ne__(self, other: object) -> bool:
+        return not (self == other)
+
+    def __add__(self, other: "ConvertersEdge") -> "ConvertersPath":
+        return ConvertersPath(self.converter.name, other.output, [self, other])
+
+
+class ConvertersPath:
+    def __init__(self, name: str, output: str, branch: list[ConvertersEdge]) -> None:
+        self.name: str = name
+        self.output: str = output
+        self.branch: list[ConvertersEdge] = branch
+
+    def __repr__(self) -> str:
+        return " -> ".join(map(repr, self.branch))
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.branch))
+
+    def __len__(self) -> int:
+        return len(self.branch)
+
+    def __getitem__(self, item: int) -> ConvertersEdge:
+        return self.branch[item]
+
+    def test(self):
+        for c in self.branch:
+            c.converter.test()

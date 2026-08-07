@@ -8,8 +8,8 @@ from .base import ConverterABC
 from .exceptions import ConvertError
 
 
-class HTMLConverter(ConverterABC):
-    name: ClassVar[str] = "html"
+class VectorConverter(ConverterABC):
+    name: ClassVar[str] = "vector"
     outputs: ClassVar[list[str]] = ["pdf"]
     dependencies: ClassVar[dict[str, list[str]]] = {"chromium": ["chromium", "chromium-browser", "google-chrome"]}
     process_timeout: ClassVar[int] = 60

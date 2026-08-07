@@ -1,26 +1,47 @@
 from pathlib import Path
 from typing import ClassVar
 
+from chardet import DetectionDict
+
 from convertool.util import TempDir
 
-from .base import _hashed_file_name
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
-from .base import dummy_base_file
-from .converter_pdf import ConverterPDFToImage
+from .base import hashed_file_name
 
 
-class ConverterDocument(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["document"]
+class DocumentConverter(ConverterABC):
+    name: ClassVar[str] = "document"
     outputs: ClassVar[list[str]] = ["odt", "pdf", "html"]
     process_timeout: ClassVar[float] = 60.0
     dependencies: ClassVar[dict[str, list[str]]] = {"libreoffice": ["libreoffice", "soffice"]}
 
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "odt":
+            return "document"
+        if output == "pdf":
+            return "pdf"
+        if output == "html":
+            return "html"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "odt":
+            return ".odt"
+        if output == "pdf":
+            return ".pdf"
+        if output == "html":
+            return ".html"
+        return f".{output}"
+
     def output_puid(self, output: str) -> str | None:
         if output == "html":
             return "fmt/471"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
         return None
 
     # noinspection PyMethodMayBeStatic
@@ -31,7 +52,7 @@ class ConverterDocument(ConverterABC):
 
     # noinspection DuplicatedCode
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
 
@@ -48,53 +69,15 @@ class ConverterDocument(ConverterABC):
                 f"-env:UserInstallation={tmp_dir.joinpath('_libreoffice').as_uri()}",
                 self.file.get_absolute_path(),
             )
+
             dest_dir.mkdir(parents=True, exist_ok=True)
 
             for f in tmp_dir.iterdir():
                 if not f.is_file():
                     continue
                 if self.hashed_output_name:
-                    output_files.append(f.replace(dest_dir / _hashed_file_name(self.file.relative_path / f.name)))
+                    output_files.append(f.replace(dest_dir / hashed_file_name(self.file.relative_path / f.name)))
                 else:
                     output_files.append(f.replace(dest_dir / f.name))
 
         return output_files
-
-
-class ConverterDocumentToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["document"]
-    outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterDocument, ConverterPDFToImage)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterDocument, ConverterPDFToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterDocument, ConverterPDFToImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            if not (
-                pdfs := ConverterDocument(
-                    self.file,
-                    self.root,
-                    self.relative_root,
-                    self.database,
-                    timeout=self.timeout,
-                    hashed_output_name=self.hashed_output_name,
-                ).convert(tmp_dir, "pdf")
-            ):
-                return []
-
-            pdf = pdfs[0]
-
-            return ConverterPDFToImage(
-                dummy_base_file(pdf, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )

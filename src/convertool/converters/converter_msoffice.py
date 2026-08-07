@@ -2,29 +2,32 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import ClassVar
 
-from convertool.converters import ConverterABC
-from convertool.converters.exceptions import ConvertError
+from chardet import DetectionDict
+
 from convertool.util import TempDir
 
+from .base import ConverterABC
+from .exceptions import ConvertError
 
-class ConverterMSOffice(ConverterABC):
+
+class MSOfficeConverter(ConverterABC):
     platforms: ClassVar[list[str]] = ["win32"]
     dependencies: ClassVar[dict[str, list[str]]] = {"docto": ["docto"]}
     _application: ClassVar[str]
 
     @abstractmethod
-    def _file_format(self, output: str) -> tuple[str, str, list[str]]:
+    def _file_format(self, output: str) -> tuple[str, list[str]]:
         """
         :param output: The desired output format.
-        :return: A tuple containing the export format, the extension, and any extra arguments required.
+        :return: A tuple containing the export format and any extra arguments required.
         """  # noqa: D205
         ...
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        file_format, extension, arguments = self._file_format(output)
-        dest_file: Path = self.output_file(dest_dir, extension)
+        file_format, arguments = self._file_format(output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
 
         with TempDir(output_dir) as tmp_dir:
             tmp_file: Path = tmp_dir.joinpath(dest_file.name)
@@ -47,47 +50,106 @@ class ConverterMSOffice(ConverterABC):
             raise ConvertError(self.file, "Could not convert file.")
 
 
-class ConverterMSWord(ConverterMSOffice):
-    tool_names: ClassVar[list[str]] = ["msword"]
+class MSWordConverter(MSOfficeConverter):
+    name: ClassVar[str] = "msword"
     outputs: ClassVar[list[str]] = ["pdf", "pdfa", "odt"]
     _application = "-WD"
 
-    def _file_format(self, output: str) -> tuple[str, str, list[str]]:
-        if output == "pdf":
-            return "wdFormatPDF", "pdf", []
-        if output == "pdfa":
-            return "wdFormatPDF", "pdf", ["--use-ISO190051"]
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output in ("pdf", "pdfa"):
+            return "pdf"
         if output == "odt":
-            return "wdFormatOpenDocumentText", "odt", []
+            return "document"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output in ("pdf", "pdfa"):
+            return ".pdf"
+        if output == "odt":
+            return ".odt"
+        return super().output_extension(output)
+
+    def _file_format(self, output: str) -> tuple[str, list[str]]:
+        if output == "pdf":
+            return "wdFormatPDF", []
+        if output == "pdfa":
+            return "wdFormatPDF", ["--use-ISO190051"]
+        if output == "odt":
+            return "wdFormatOpenDocumentText", []
 
         raise KeyError(f"Unknown output {output}")
 
 
-class ConverterMSExcel(ConverterMSOffice):
-    tool_names: ClassVar[list[str]] = ["msexcel"]
+class MSExcelConverter(MSOfficeConverter):
+    name: ClassVar[str] = "msexcel"
     outputs: ClassVar[list[str]] = ["pdf", "ods", "html"]
     _application = "-XL"
 
-    def _file_format(self, output: str) -> tuple[str, str, list[str]]:
+    @classmethod
+    def output_name(cls, output: str) -> str:
         if output == "pdf":
-            return "xlPDF", "pdf", []
+            return "pdf"
         if output == "ods":
-            return "xlOpenDocumentSpreadsheet", "ods", []
+            return "spreadsheet"
         if output == "html":
-            return "xlHtml", "html", []
+            return "html"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "pdf":
+            return ".pdf"
+        if output == "ods":
+            return ".ods"
+        if output == "html":
+            return ".html"
+        return super().output_extension(output)
+
+    def output_puid(self, output: str) -> str | None:
+        if output == "html":
+            return "fmt/471"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "html":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
+        return None
+
+    def _file_format(self, output: str) -> tuple[str, list[str]]:
+        if output == "pdf":
+            return "xlPDF", []
+        if output == "ods":
+            return "xlOpenDocumentSpreadsheet", []
+        if output == "html":
+            return "xlHtml", []
 
         raise KeyError(f"Unknown output {output}")
 
 
-class ConverterMSPowerPoint(ConverterMSOffice):
-    tool_names: ClassVar[list[str]] = ["mspowerpoint"]
+class MSPowerPointConverter(MSOfficeConverter):
+    name: ClassVar[str] = "mspowerpoint"
     outputs: ClassVar[list[str]] = ["pdf", "odp"]
     _application = "-PP"
 
-    def _file_format(self, output: str) -> tuple[str, str, list[str]]:
+    @classmethod
+    def output_name(cls, output: str) -> str:
         if output == "pdf":
-            return "ppSaveAsPDF", "pdf", []
+            return "pdf"
         if output == "odp":
-            return "ppSaveAsOpenDocumentPresentation", "odp", []
+            return "presentation"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "pdf":
+            return ".pdf"
+        if output == "odp":
+            return ".odp"
+        return super().output_extension(output)
+
+    def _file_format(self, output: str) -> tuple[str, list[str]]:
+        if output == "pdf":
+            return "ppSaveAsPDF", []
+        if output == "odp":
+            return "ppSaveAsOpenDocumentPresentation", []
 
         raise KeyError(f"Unknown output {output}")

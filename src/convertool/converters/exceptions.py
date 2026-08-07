@@ -17,6 +17,12 @@ class UnsupportedPlatform(Exception):
         super().__init__(platform, *args)
 
 
+class UnsupportedOutput(Exception):
+    def __init__(self, output: str, *args: Any) -> None:  # noqa: ANN401
+        self.output: str = output
+        super().__init__(output, *args)
+
+
 class ConverterNotFound(Exception):
     def __init__(self, tool: str | None, output: str | None, *args: Any) -> None:  # noqa: ANN401
         self.tool: str | None = tool
@@ -29,6 +35,9 @@ class ConverterNotFound(Exception):
 
 
 class BadOption(Exception): ...
+
+
+class BadFile(Exception): ...
 
 
 class ConvertError(Exception):

@@ -2,24 +2,39 @@ from pathlib import Path
 from typing import ClassVar
 
 from chardet import DetectionDict
-
-from convertool.util import TempDir
+from util import TempDir
 
 from . import resources
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
-from .base import dummy_base_file
-from .converter_html import ConverterHTML
-from .converter_html import ConverterHTMLToImage
 
 
-class ConverterXSL(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["xslt"]
+class XSLConverter(ConverterABC):
+    name: ClassVar[str] = "xslt"
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
+
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "html":
+            return "html"
+        if output == "xml":
+            return "xml"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "html":
+            return ".html"
+        if output == "xml":
+            return ".xml"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
+        if output == "html":
+            return "fmt/471"
+        if output == "xml":
+            return "fmt/101"
+        return None
 
     def output_encoding(self, output: str) -> DetectionDict | None:
         if output == "html":
@@ -36,9 +51,9 @@ class ConverterXSL(ConverterABC):
         keep_relative_path: bool = True,
         xsl: Path | None = None,
     ) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
 
         with TempDir(output_dir) as tmp_dir:
             tmp_xsl: Path = xsl or tmp_dir.joinpath(f"{tmp_dir.name}.xsl")
@@ -62,26 +77,29 @@ class ConverterXSL(ConverterABC):
         return [dest_file]
 
 
-class ConverterMedCom(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["medcom"]
+class MedComConverter(ConverterABC):
+    name: ClassVar[str] = "medcom"
     outputs: ClassVar[list[str]] = ["html"]
     process_timeout: ClassVar[float] = 10
     dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
 
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        return "html"
+
+    def output_extension(self, output: str) -> str:
+        return ".html"
+
     def output_puid(self, output: str) -> str | None:
-        if output == "html":
-            return "fmt/471"
-        return None
+        return "fmt/471"
 
     def output_encoding(self, output: str) -> DetectionDict | None:
-        if output == "html":
-            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
-        return None
+        return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/html")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
 
         xsl: Path = resources.medcom.joinpath("viewEmessage.xslt")
 
@@ -91,139 +109,3 @@ class ConverterMedCom(ConverterABC):
         dest_file.write_text(stdout, encoding="utf-8")
 
         return [dest_file]
-
-
-class ConverterXSLToPDF(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterXSL.tool_names
-    outputs: ClassVar[list[str]] = ConverterHTML.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterXSL, ConverterHTML)
-    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterXSL, ConverterHTML)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterXSL, ConverterHTML)
-
-    def convert(
-        self,
-        output_dir: Path,
-        output: str,
-        *,
-        keep_relative_path: bool = True,
-        xsl: Path | None = None,
-    ) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            html = ConverterXSL(
-                self.file,
-                self.root,
-                self.relative_root,
-                self.database,
-                timeout=self.timeout,
-            ).convert(tmp_dir, "html", xsl=xsl)[0]
-
-            return ConverterHTML(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-            ).convert(output_dir, output, keep_relative_path=keep_relative_path)
-
-
-class ConverterXSLToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterXSL.tool_names
-    outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterXSL, ConverterHTMLToImage)
-    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterXSL, ConverterHTMLToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterXSL, ConverterHTMLToImage)
-
-    def convert(
-        self,
-        output_dir: Path,
-        output: str,
-        *,
-        keep_relative_path: bool = True,
-        xsl: Path | None = None,
-    ) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            html = ConverterXSL(
-                self.file,
-                self.root,
-                self.relative_root,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(tmp_dir, "html", xsl=xsl)[0]
-
-            return ConverterHTMLToImage(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )
-
-
-class ConverterMedComToPDF(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterMedCom.tool_names
-    outputs: ClassVar[list[str]] = ConverterHTML.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterMedCom, ConverterHTML)
-    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterMedCom, ConverterHTML)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMedCom, ConverterHTML)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            html = ConverterMedCom(
-                self.file,
-                self.root,
-                self.relative_root,
-                self.database,
-                timeout=self.timeout,
-            ).convert(tmp_dir, "html")[0]
-
-            return ConverterHTML(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-            ).convert(output_dir, output, keep_relative_path=keep_relative_path)
-
-
-class ConverterMedComToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterMedCom.tool_names
-    outputs: ClassVar[list[str]] = ConverterHTMLToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterMedCom, ConverterHTMLToImage)
-    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterMedCom, ConverterHTMLToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMedCom, ConverterHTMLToImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            html = ConverterMedCom(
-                self.file,
-                self.root,
-                self.relative_root,
-                self.database,
-                timeout=self.timeout,
-            ).convert(tmp_dir, "html")[0]
-
-            return ConverterHTMLToImage(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )

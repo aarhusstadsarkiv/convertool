@@ -8,17 +8,23 @@ from sas7bdat import SAS7BDAT
 from convertool.util import get_encoding
 from convertool.util import TempDir
 
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
-from .base import dummy_base_file
-from .converter_spreadsheet import ConverterSpreadsheet
 
 
-class ConverterSAS(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["sas"]
+class SASConverter(ConverterABC):
+    name: ClassVar[str] = "sas"
     outputs: ClassVar[list[str]] = ["csv", "tsv"]
+
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        return "spreadsheet"
+
+    def output_extension(self, output: str) -> str:
+        if output == "csv":
+            return ".csv"
+        if output == "tsv":
+            return ".tsv"
+        return super().output_extension(output)
 
     def output_puid(self, output: str) -> str | None:
         if output == "csv":
@@ -35,9 +41,9 @@ class ConverterSAS(ConverterABC):
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
 
         encoding: str | None = get_encoding(self.file.get_absolute_path())
 
@@ -61,42 +67,3 @@ class ConverterSAS(ConverterABC):
             tmp_file.replace(dest_file)
 
         return [dest_file]
-
-
-class ConverterSASSpreadsheet(ConverterABC):
-    tool_names: ClassVar[list[str]] = ConverterSAS.tool_names
-    outputs: ClassVar[list[str]] = ConverterSpreadsheet.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterSAS, ConverterSpreadsheet)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterSAS, ConverterSpreadsheet)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterSAS, ConverterSpreadsheet)
-
-    def output_puid(self, output: str) -> str | None:
-        return ConverterSpreadsheet(self.file, self.root, self.relative_root, self.database).output_puid(output)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        sas_converter = ConverterSAS(
-            self.file,
-            self.root,
-            self.relative_root,
-            self.database,
-            timeout=self.timeout,
-            capture_output=self.capture_output,
-            hashed_output_name=False,
-        )
-
-        with TempDir(output_dir) as tmp_dir:
-            tmp_file: Path = sas_converter.convert(tmp_dir, "csv", keep_relative_path=keep_relative_path)[0]
-
-            return ConverterSpreadsheet(
-                dummy_base_file(tmp_file, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                capture_output=self.capture_output,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )

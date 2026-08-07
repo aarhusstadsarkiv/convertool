@@ -6,8 +6,8 @@ from convertool.util import TempDir
 from .base import ConverterABC
 
 
-class ConverterVideo(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["video"]
+class VideoConverter(ConverterABC):
+    name: ClassVar[str] = "video"
     outputs: ClassVar[list[str]] = [
         "mpeg2",
         "h264",
@@ -17,8 +17,34 @@ class ConverterVideo(ConverterABC):
     process_timeout: ClassVar[float] = 7200
     dependencies: ClassVar[dict[str, list[str]]] = {"ffmpeg": ["ffmpeg"]}
 
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        return "video"
+
+    def output_extension(self, output: str) -> str:
+        if output == "mpeg2":
+            return ".mpg"
+        if output == "h264":
+            return ".mp4"
+        if output == "h264-mpg":
+            return ".mpg"
+        if output == "h265":
+            return ".mp4"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
+        if output == "mpeg2":
+            return "x-fmt/386"
+        if output == "h264":
+            return "fmt/199"
+        if output == "h264-mpg":
+            return "fmt/199"
+        if output == "h265":
+            return "fmt/199"
+        return None
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         final_extension: str = ""
         arguments: list[str] = []
@@ -37,7 +63,7 @@ class ConverterVideo(ConverterABC):
             output = "mp4"
             arguments.extend(["-c:v", "libx265", "-c:a", "aac", "-vtag", "hvc1"])
 
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(

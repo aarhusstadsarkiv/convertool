@@ -3,6 +3,7 @@ from shutil import copy2
 from typing import ClassVar
 
 from acacore.models.file import OriginalFile
+from chardet import DetectionDict
 
 from convertool.util import file_suffixes
 from convertool.util import TempDir
@@ -11,12 +12,57 @@ from .base import ConverterABC
 from .exceptions import BadOption
 
 
-class ConverterGIS(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["gis"]
+class GISConverter(ConverterABC):
+    name: ClassVar[str] = "gis"
     outputs: ClassVar[list[str]] = ["gml", "gml3", "shp", "geojson"]
     process_timeout: ClassVar[float] = 120
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
+
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "gml":
+            return "xml"
+        elif output == "gml3":
+            return "xml"
+        elif output == "shp":
+            return "xml"
+        elif output == "geojson":
+            return "text"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "gml":
+            return ".gml"
+        if output == "gml3":
+            return ".gml"
+        if output == "shp":
+            return ".shp"
+        if output == "geojson":
+            return ".geojson"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
+        if output == "gml":
+            return "x-fmt/227"
+        if output == "gml3":
+            return "fmt/1047"
+        if output == "shp":
+            return "x-fmt/235"
+        if output == "geojson":
+            return "fmt/1367"
+        return None
+
+    def output_encoding(self, output: str) -> DetectionDict | None:
+        if output == "gml":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="application/gml+xml")
+        if output == "gml3":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="application/gml+xml")
+        if output == "shp":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type=None)
+        if output == "geojson":
+            return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="application/geo+json")
+        return None
 
     def test_options(self):
         if (iformat := self.options.get("input_format")) is not None and not isinstance(iformat, str):
@@ -46,9 +92,9 @@ class ConverterGIS(ConverterABC):
         return files
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_file(output))
         args: list[str] = []
 
         if iformat := self.options.get("input_format"):
