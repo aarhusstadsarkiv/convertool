@@ -17,14 +17,13 @@ from acacore.database import FilesDB
 from acacore.models.file import BaseFile
 from chardet import DetectionDict
 
+from convertool.exceptions import ConvertError
+from convertool.exceptions import ConvertTimeoutError
+from convertool.exceptions import MissingDependency
+from convertool.exceptions import OutputDirError
+from convertool.exceptions import OutputTargetError
+from convertool.exceptions import UnsupportedPlatform
 from convertool.util import run_process
-
-from .exceptions import ConvertError
-from .exceptions import ConvertTimeoutError
-from .exceptions import MissingDependency
-from .exceptions import OutputDirError
-from .exceptions import OutputTargetError
-from .exceptions import UnsupportedPlatform
 
 
 @lru_cache

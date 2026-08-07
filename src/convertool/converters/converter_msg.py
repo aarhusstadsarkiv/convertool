@@ -18,6 +18,7 @@ from extract_msg.msg_classes import MessageBase
 from extract_msg.msg_classes import MessageSigned
 from striprtf.striprtf import rtf_to_text
 
+from convertool.exceptions import ConvertError
 from convertool.util import TempDir
 
 from .base import _shared_dependencies
@@ -27,7 +28,6 @@ from .base import ConverterABC
 from .base import dummy_base_file
 from .converter_html import ConverterHTML
 from .converter_pdf import ConverterPDFToImage
-from .exceptions import ConvertError
 
 
 # noinspection DuplicatedCode

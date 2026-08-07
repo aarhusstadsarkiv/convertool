@@ -2,12 +2,12 @@ from pathlib import Path
 from typing import ClassVar
 from zipfile import ZipFile
 
+from convertool.exceptions import BadOption
+from convertool.exceptions import ConvertError
 from convertool.util import TempDir
 
 from .base import _hashed_file_name
 from .base import ConverterABC
-from .exceptions import BadOption
-from .exceptions import ConvertError
 
 
 class ConverterZIPFile(ConverterABC):

@@ -6,6 +6,7 @@ from chardet import DetectionDict
 from eml_analyzer.library.parser import Attachment
 from eml_analyzer.library.parser import ParsedEmail
 
+from convertool.exceptions import OutputTargetError
 from convertool.util import TempDir
 
 from .base import _shared_dependencies
@@ -17,7 +18,6 @@ from .converter_html import ConverterHTML
 from .converter_html import ConverterHTMLToImage
 from .converter_msg import html_to_text
 from .converter_msg import text_to_html
-from .exceptions import OutputTargetError
 
 
 def eml_front_matter(eml: ParsedEmail, attachments: list[tuple[str | None, Attachment]]) -> str:

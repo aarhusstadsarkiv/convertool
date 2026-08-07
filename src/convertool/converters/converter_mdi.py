@@ -2,6 +2,7 @@ from pathlib import Path
 from sys import stderr
 from typing import ClassVar
 
+from convertool.exceptions import ConvertError
 from convertool.util import TempDir
 
 from .base import _shared_dependencies
@@ -10,7 +11,6 @@ from .base import _shared_process_timeout
 from .base import ConverterABC
 from .base import dummy_base_file
 from .converter_image import ConverterImage
-from .exceptions import ConvertError
 
 
 class ConverterMDI(ConverterABC):

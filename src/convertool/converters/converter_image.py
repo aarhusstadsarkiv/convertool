@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import ClassVar
 
+from convertool.exceptions import BadOption
 from convertool.util import TempDir
 
 from .base import ConverterABC
-from .exceptions import BadOption
 
 
 class ConverterImage(ConverterABC):

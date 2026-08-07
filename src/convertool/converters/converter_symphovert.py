@@ -5,11 +5,11 @@ from typing import ClassVar
 
 import pyperclip
 
+from convertool.exceptions import ConvertError
+from convertool.exceptions import MissingDependency
 from convertool.util import TempDir
 
 from .base import ConverterABC
-from .exceptions import ConvertError
-from .exceptions import MissingDependency
 
 # noinspection PyBroadException
 try:

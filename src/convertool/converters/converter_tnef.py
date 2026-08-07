@@ -13,8 +13,9 @@ from tnefparse import TNEF
 from tnefparse import TNEFObject
 from tnefparse.mapi import TNEFMAPI_Attribute
 
+from convertool.exceptions import ConvertError
+
 from .base import ConverterABC
-from .exceptions import ConvertError
 
 
 @dataclass
