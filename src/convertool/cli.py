@@ -579,6 +579,8 @@ def cmd_standalone(
                 logger.info(f"--> {file.relative_to(dest)}")
         except KeyboardInterrupt:
             raise
+        except (MissingDependency, UnsupportedPlatform) as error:
+            logger.error(f"{error.__class__.__name__}: {' '.join(map(str, error.args))}")
         except ConvertError as error:
             logger.error(error.msg)
         except BaseException as error:
