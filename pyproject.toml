@@ -91,6 +91,8 @@ ignore = [
     "ANN202",  # missing return type
     "ANN206",  # missing return type
     "ARG001",  # missing type anotattion for args
+    "ARG002",
+    "ARG003",
     "BLE001",  # catching general exceptions
     "C901",    # complexity check
     "D100",    # missing docstring
