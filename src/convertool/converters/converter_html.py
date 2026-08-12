@@ -24,7 +24,8 @@ class ConverterHTML(ConverterABC):
 
         with TempDir(output_dir) as tmp_dir:
             html = HTML(
-                self.file.get_absolute_path().read_text(self.file.encoding["encoding"] if self.file.encoding else None)
+                filename=self.file.get_absolute_path(),
+                encoding=(self.file.encoding["encoding"] or "") if self.file.encoding else "",
             )
 
             html.write_pdf(tmp_file := tmp_dir.joinpath(dest_file.name))
