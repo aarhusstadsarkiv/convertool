@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
 from functools import lru_cache
+from functools import reduce
 from hashlib import md5
 from pathlib import Path
 from shutil import which
@@ -343,6 +344,24 @@ class ConvertersPath:
 
     def __getitem__(self, item: int) -> ConvertersEdge:
         return self.branch[item]
+
+    @property
+    def dependencies(self) -> list[list[str]] | None:
+        return (
+            reduce(
+                lambda dss, ds: [*dss, _ds] if (_ds := [d for d in ds if not any(d in __ds for __ds in dss)]) else dss,
+                [ds for e in self.branch if e.dependencies is not None for ds in e.dependencies.values()],
+                [],
+            )
+            or None
+        )
+
+    @property
+    def platforms(self) -> list[str] | None:
+        platforms = [set(e.platforms) for e in self.branch if e.platforms is not None]
+        if platforms:
+            return list(reduce(lambda pss, ps: pss & ps, platforms))
+        return None
 
     def test(self):
         for c in self.branch:
