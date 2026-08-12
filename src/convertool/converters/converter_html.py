@@ -18,7 +18,7 @@ except (ImportError, OSError):
 
 
 class ConverterHTML(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["html"]
+    tool_names: ClassVar[list[str]] = ["html", "browser"]
     outputs: ClassVar[list[str]] = ["pdf"]
 
     @classmethod
