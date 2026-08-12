@@ -297,8 +297,16 @@ class ConvertersEdge:
         self.output: str = output
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.converter.name
+
+    @property
+    def dependencies(self) -> dict[str, list[str]] | None:
+        return self.converter.dependencies
+
+    @property
+    def platforms(self) -> list[str] | None:
+        return self.converter.platforms
 
     def __repr__(self) -> str:
         return f"{self.converter.name}({self.output})"
