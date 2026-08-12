@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import ClassVar
 
-from weasyprint import HTML
-
 from convertool.util import TempDir
 
 from .base import _shared_dependencies
@@ -11,19 +9,33 @@ from .base import _shared_process_timeout
 from .base import ConverterABC
 from .base import dummy_base_file
 from .converter_pdf import ConverterPDFToImage
+from .exceptions import MissingDependency
+
+try:
+    import weasyprint
+except (ImportError, OSError):
+    weasyprint = None
 
 
 class ConverterHTML(ConverterABC):
     tool_names: ClassVar[list[str]] = ["html"]
     outputs: ClassVar[list[str]] = ["pdf"]
 
+    @classmethod
+    def test_dependencies(cls):
+        if weasyprint is None:
+            raise MissingDependency(["weasyprint"], "Missing system dependencies")
+        super().test_dependencies()
+
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        assert weasyprint is not None
+
         output = self.output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = self.output_file(dest_dir, output)
 
         with TempDir(output_dir) as tmp_dir:
-            html = HTML(
+            html = weasyprint.HTML(
                 filename=self.file.get_absolute_path(),
                 encoding=(self.file.encoding["encoding"] or "") if self.file.encoding else "",
             )
