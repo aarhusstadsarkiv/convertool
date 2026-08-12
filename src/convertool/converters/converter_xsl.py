@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import ClassVar
 
 from chardet import DetectionDict
-from util import TempDir
+
+from convertool.util import TempDir
 
 from . import resources
 from .base import ConverterABC
