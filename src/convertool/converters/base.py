@@ -605,10 +605,7 @@ class ConvertersGraph:
                     return None
                 if requires_file_classes and any(
                     not e.converter.requires_file_classes
-                    or any(
-                        any(issubclass(c, c2) for c2 in e.converter.requires_file_classes)
-                        for c in requires_file_classes
-                    )
+                    or any(c in e.converter.requires_file_classes for c in requires_file_classes)
                     for e in path.branch
                 ):
                     return None
