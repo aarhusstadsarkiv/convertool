@@ -5,6 +5,7 @@ from acacore.models.file import BaseFile
 from .base import ConverterABC
 from .base import ConvertersEdge
 from .base import ConvertersPath
+from .base import dummy_base_file
 from .converter_audio import AudioConverter
 from .converter_cad import CADConverter
 from .converter_copy import CopyConverter
@@ -155,5 +156,6 @@ __all__ = [
     "ConvertersPath",
     "conversion_graph",
     "converters",
+    "dummy_base_file",
     "filter_conversion_graph",
 ]
