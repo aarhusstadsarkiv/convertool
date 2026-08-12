@@ -19,6 +19,7 @@ dependencies = [
     "nbconvert>=7.17.1",
     "nbformat>=5.10.4",
     "eml-analyzer>=3.0.1",
+    "weasyprint>=69.0",
 ]
 
 [project.scripts]
