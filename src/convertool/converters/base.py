@@ -21,6 +21,7 @@ from acacore.models.file import BaseFile
 from chardet import DetectionDict
 
 from convertool.util import run_process
+from convertool.util import TempDir
 
 from .exceptions import BadFile
 from .exceptions import ConvertError
@@ -345,6 +346,63 @@ class ConvertersPath:
         if isinstance(step, tuple) and step[0] is None:
             return any(e.output == step[1] for e in self.branch)
         return any(e.name == step[0] and e.output == step[1] for e in self.branch)
+
+    def __call__(
+        self,
+        file: BaseFile,
+        root: str | Path,
+        output_dir: str | Path,
+        relative_root: str | Path | None = None,
+        database: FilesDB | None = None,
+        options: dict[str, dict[str, Any]] | None = None,
+        *,
+        on_edge: Callable[[int, ConvertersEdge], None] | None = None,
+        timeout: int | None = None,
+        capture_output: bool = True,
+        hashed_output_name: bool = True,
+        keep_relative_path: bool = True,
+        keep_temporary_files: bool = False,
+    ) -> list[Path]:
+        output_dir = Path(output_dir)
+        working_file: BaseFile = file
+        working_root: Path = Path(root)
+        working_relative_root: Path = Path(relative_root or root)
+        working_outputs: list[Path] = []
+        outputs: list[Path] = []
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        with TempDir(output_dir, delete=not keep_temporary_files) as temp_dir:
+            for n, edge in enumerate(self.branch, 1):
+                if on_edge:
+                    on_edge(n, edge)
+
+                converter = edge.converter(
+                    working_file,
+                    working_root,
+                    working_relative_root,
+                    database,
+                    options.get(edge.name) if options else None,
+                    timeout=timeout,
+                    capture_output=capture_output,
+                    hashed_output_name=hashed_output_name,
+                )
+
+                edge_dir = temp_dir.joinpath(f"{n:02} {edge.name} {edge.output}")
+                edge_dir.mkdir(parents=True, exist_ok=True)
+
+                working_outputs = converter.convert(edge_dir, edge.output, keep_relative_path=keep_relative_path)
+
+                working_file = dummy_base_file(working_outputs[0], edge_dir)
+                working_root = edge_dir
+                working_relative_root = edge_dir
+
+            for output in working_outputs:
+                dest_file = output_dir.joinpath(output.relative_to(working_root))
+                dest_file.parent.mkdir(parents=True, exist_ok=True)
+                outputs.append(output.replace(dest_file))
+
+        return outputs
 
 
 class ConvertersGraph:
