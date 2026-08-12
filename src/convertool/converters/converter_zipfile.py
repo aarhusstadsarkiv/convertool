@@ -12,7 +12,7 @@ from .exceptions import ConvertError
 
 class ZIPFileConverter(ConverterABC):
     name: ClassVar[str] = "zipfile"
-    outputs: ClassVar[list[str]] = ["file"]
+    outputs: ClassVar[list[str]] = ["zipfile"]
 
     def test_options(self):
         if "path" not in self.options:
