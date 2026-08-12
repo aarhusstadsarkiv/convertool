@@ -27,7 +27,7 @@ class ConverterHTML(ConverterABC):
     @classmethod
     def test_dependencies(cls):
         if weasyprint is None:
-            raise MissingDependency(["weasyprint"], weasyprint_error or "Missing system dependencies")
+            raise MissingDependency(["weasyprint"], weasyprint_error or "missing system dependencies")
         super().test_dependencies()
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
