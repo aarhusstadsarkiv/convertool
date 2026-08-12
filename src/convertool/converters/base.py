@@ -593,9 +593,25 @@ class ConvertersGraph:
 
         return ConvertersGraph({(k[0], k[1]): bs for k, bs in paths.items()})
 
-    def filter_conversion_graph(self, on_invalid: Callable[[ConvertersPath], None] | None = None) -> Self:
+    def filter_conversion_graph(
+        self,
+        requires_database: bool = True,
+        requires_file_classes: list[type[BaseFile]] | None = None,
+        on_invalid: Callable[[ConvertersPath], None] | None = None,
+    ) -> Self:
         def _test_path(path: ConvertersPath) -> ConvertersPath | None:
             try:
+                if requires_database is False and any(e.converter.requires_database for e in path.branch):
+                    return None
+                if requires_file_classes and any(
+                    not e.converter.requires_file_classes
+                    or any(
+                        any(issubclass(c, c2) for c2 in e.converter.requires_file_classes)
+                        for c in requires_file_classes
+                    )
+                    for e in path.branch
+                ):
+                    return None
                 path.test()
                 return path
             except (MissingDependency, UnsupportedPlatform):
