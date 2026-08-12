@@ -389,13 +389,14 @@ class ConvertersPath:
         hashed_output_name: bool = True,
         keep_relative_path: bool = True,
         keep_temporary_files: bool = False,
-    ) -> list[Path]:
+    ) -> tuple[list[Path], list[tuple[ConvertersEdge, ConverterABC]]]:
         output_dir = Path(output_dir)
         working_file: BaseFile = file
         working_root: Path = Path(root)
         working_relative_root: Path = Path(relative_root or root)
         working_outputs: list[Path] = []
         outputs: list[Path] = []
+        converters: list[tuple[ConvertersEdge, ConverterABC]] = []
 
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -423,13 +424,14 @@ class ConvertersPath:
                 working_file = dummy_base_file(working_outputs[0], edge_dir)
                 working_root = edge_dir
                 working_relative_root = edge_dir
+                converters.append((edge, converter))
 
             for output in working_outputs:
                 dest_file = output_dir.joinpath(output.relative_to(working_root))
                 dest_file.parent.mkdir(parents=True, exist_ok=True)
                 outputs.append(output.replace(dest_file))
 
-        return outputs
+        return outputs, converters
 
 
 class ConvertersGraph:
