@@ -356,7 +356,7 @@ class ConvertersPath:
         database: FilesDB | None = None,
         options: dict[str, dict[str, Any]] | None = None,
         *,
-        on_edge: Callable[[int, ConvertersEdge], None] | None = None,
+        on_edge: Callable[["ConvertersPath", int], None] | None = None,
         timeout: int | None = None,
         capture_output: bool = True,
         hashed_output_name: bool = True,
@@ -375,7 +375,7 @@ class ConvertersPath:
         with TempDir(output_dir, delete=not keep_temporary_files) as temp_dir:
             for n, edge in enumerate(self.branch, 1):
                 if on_edge:
-                    on_edge(n, edge)
+                    on_edge(self, n)
 
                 converter = edge.converter(
                     working_file,
