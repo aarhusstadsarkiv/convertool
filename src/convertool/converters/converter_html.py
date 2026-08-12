@@ -13,8 +13,11 @@ from .exceptions import MissingDependency
 
 try:
     import weasyprint
-except (ImportError, OSError):
+
+    weasyprint_error: Exception | None = None
+except (ImportError, OSError) as e:
     weasyprint = None
+    weasyprint_error: Exception | None = e
 
 
 class ConverterHTML(ConverterABC):
@@ -24,7 +27,7 @@ class ConverterHTML(ConverterABC):
     @classmethod
     def test_dependencies(cls):
         if weasyprint is None:
-            raise MissingDependency(["weasyprint"], "Missing system dependencies")
+            raise MissingDependency(["weasyprint"], weasyprint_error or "Missing system dependencies")
         super().test_dependencies()
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
