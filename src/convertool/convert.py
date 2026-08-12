@@ -1,338 +1,266 @@
-from logging import ERROR
 from logging import INFO
-from multiprocessing import Pool
 from pathlib import Path
 from typing import Any
 from typing import Literal
-from typing import NamedTuple
+from typing import overload
 
 from acacore.database import FilesDB
 from acacore.models.event import Event
 from acacore.models.file import AccessFile
+from acacore.models.file import BaseFile
 from acacore.models.file import ConvertedFile
 from acacore.models.file import MasterFile
 from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
-from acacore.utils.click import context_commands
-from acacore.utils.helpers import ExceptionManager
+from chardet import DetectionDict
 from click import Context
+from converters import ConvertersPath
+from converters import dummy_base_file
 from structlog.stdlib import BoundLogger
+from util import AVID
 
-from . import converters
+from .converters import ConvertersGraph
 from .converters.exceptions import ConverterNotFound
-from .converters.exceptions import ConvertError
-from .converters.exceptions import ConvertTimeoutError
-from .converters.exceptions import OutputDirError
-from .converters.exceptions import OutputTargetError
 
 
-class ConvertInstructions[M: OriginalFile | MasterFile, O: ConvertedFile](NamedTuple):
-    file: M
-    file_type: Literal["original", "master"]
-    dest_type: Literal["master", "access", "statutory"]
-    converter_cls: type[converters.ConverterABC]
+def edge_logger(
+    ctx: Context | str,
+    operation: str,
+    logger: BoundLogger,
+    file: OriginalFile | MasterFile | None,
+    path: ConvertersPath,
+    n: int,
+):
+    # noinspection bad-argument-type
+    Event.from_command(ctx, operation, file).log(
+        INFO,
+        logger,
+        step=n,
+        converter=f"{path[n].name} -{path[n].output}-> {path[n].converter.output_name(path[n].output)}",
+    )
+
+
+def convert_original_file(
+    ctx: Context,
+    avid: AVID,
+    database: FilesDB,
+    file: OriginalFile,
+    logger: BoundLogger,
+    graph: ConvertersGraph,
+    timeout: int | None = None,
+    capture_output: bool = True,
+    hashed_output_name: bool = True,
+    keep_temporary_files: bool = False,
+) -> list[MasterFile] | None:
+    if file.processed:
+        return None
+
     tool: str
     output: str
-    options: dict[str, Any] | None
-    output_cls: type[O]
+    via: list[str | tuple[str | None, str]] = []
+    options: dict[str, dict[str, Any]] = {}
 
-
-def find_converter(tool: str, output: str) -> type[converters.ConverterABC] | None:
-    for converter in (
-        converters.ConverterCopy,
-        converters.ConverterTemplate,
-        converters.ConverterSymphovert,
-        converters.ConverterEML,
-        converters.ConverterEMLToImage,
-        converters.ConverterEMLToPDF,
-        converters.ConverterGIS,
-        converters.ConverterHTML,
-        converters.ConverterHTMLToImage,
-        converters.ConverterIPYNBToHTML,
-        converters.ConverterIPYNBToPDF,
-        converters.ConverterIPYNBToImage,
-        converters.ConverterCAD,
-        converters.ConverterCADToImage,
-        converters.ConverterTNEF,
-        converters.ConverterMedCom,
-        converters.ConverterMedComToImage,
-        converters.ConverterMedComToPDF,
-        converters.ConverterMDI,
-        converters.ConverterMDIToPDF,
-        converters.ConverterMSG,
-        converters.ConverterMSGToImage,
-        converters.ConverterMSGToPDF,
-        converters.ConverterMSExcel,
-        converters.ConverterMSPowerPoint,
-        converters.ConverterMSWord,
-        converters.ConverterDocument,
-        converters.ConverterDocumentToImage,
-        converters.ConverterPresentation,
-        converters.ConverterSpreadsheet,
-        converters.ConverterSAS,
-        converters.ConverterSASSpreadsheet,
-        converters.ConverterPDFToImage,
-        converters.ConverterText,
-        converters.ConverterTextToImage,
-        converters.ConverterImage,
-        converters.ConverterAudio,
-        converters.ConverterVideo,
-        converters.ConverterPDF,
-        converters.ConverterXSL,
-        converters.ConverterXSLToImage,
-        converters.ConverterXSLToPDF,
-        converters.ConverterZIPFile,
-    ):
-        if converter.match_tool(tool, output):
-            return converter
-
-    return None
-
-
-def original_file_converter(file: OriginalFile) -> ConvertInstructions[OriginalFile, MasterFile]:
-    """
-    Get conversion instructions for original file.
-
-    :param file:
-    :return: converter class, tool, output, options
-    """
-    if file.action == "convert" and not file.action_data.convert:
-        raise ConverterNotFound(None, None, "Missing convert action data")
-    if file.action == "convert":
-        tool, output, options = (
-            file.action_data.convert.tool,
-            file.action_data.convert.output,
-            file.action_data.convert.options,
-        )
-        converter_cls = find_converter(tool, output)
-    elif file.action == "ignore" and not file.action_data.ignore:
-        raise ConverterNotFound(None, None, "Missing ignore action data")
-    elif file.action == "ignore":
-        tool, output, options = "template", file.action_data.ignore.template, None
-        converter_cls = find_converter(tool, output)
+    if file.action == "ignore":
+        if not file.action_data.ignore:
+            raise ConverterNotFound(None, None, "Missing ignore action data")
+        tool, output = "template", file.action_data.ignore.template
+    elif file.action == "convert":
+        if not file.action_data.convert:
+            raise ConverterNotFound(None, None, "Missing convert action data")
+        tool, output = file.action_data.convert.tool, file.action_data.convert.output or file.action_data.convert.tool
     else:
-        raise ValueError(f"Unsupported action {file.action!r}")
+        raise ConverterNotFound(None, None, f"File with {file.action!r} cannot be converted.")
 
-    if not converter_cls:
-        raise ConverterNotFound(tool, output, f"No converter found for tool {tool!r} and output {output!r}")
+    conversion_path = graph.find(tool, output, via, shortest=True)
 
-    # noinspection PyTypeChecker
-    return ConvertInstructions(file, "original", "master", converter_cls, tool, output, options, MasterFile)
+    if not conversion_path:
+        raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
+
+    output_paths, converters = conversion_path(
+        file,
+        avid.path,
+        avid.dirs.master_documents,
+        avid.dirs.original_documents,
+        database,
+        options,
+        on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
+        timeout=timeout,
+        capture_output=capture_output,
+        hashed_output_name=hashed_output_name,
+        keep_temporary_files=keep_temporary_files,
+    )
+
+    output_files: list[MasterFile] = []
+
+    for i, path in enumerate(output_paths):
+        puid: str | None = None
+        encoding: DetectionDict | None = None
+        if path.suffix == output_paths[0].suffix:
+            puid = converters[-1][1].output_puid(converters[-1][0].output)
+            encoding = converters[-1][1].output_encoding(converters[-1][0].output)
+
+        output_file = MasterFile.from_file(
+            path,
+            avid.path,
+            {"original_uuid": file.uuid, "sequence": i},
+            encoding=encoding["encoding"] if encoding else None,
+        )
+        output_file.puid = puid
+
+    return output_files
 
 
-def master_file_converter(
+@overload
+def convert_master_file(
+    ctx: Context,
+    avid: AVID,
+    database: FilesDB,
     file: MasterFile,
-    dest_type: Literal["access", "statutory"],
-) -> ConvertInstructions[MasterFile, AccessFile | StatutoryFile]:
-    """
-    Get conversion instructions for master file.
+    target: Literal["statutory"],
+    graph: ConvertersGraph,
+    logger: BoundLogger,
+    timeout: int | None = None,
+    capture_output: bool = True,
+    hashed_output_name: bool = True,
+    keep_temporary_files: bool = False,
+) -> list[StatutoryFile] | None: ...
 
-    :param file:
-    :param dest_type:
-    :return: converter class, tool, output, options
-    """
-    if dest_type == "access" and not file.convert_access:
-        raise ConverterNotFound(None, None, "Missing convert action data")
-    if dest_type == "access":
-        tool, output, options = (
-            file.convert_access.tool,
-            file.convert_access.output,
-            file.convert_access.options,
-        )
-        converter_cls = find_converter(tool, output)
-        output_cls = ConvertedFile
-    elif dest_type == "statutory" and not file.convert_statutory:
-        raise ConverterNotFound(None, None, "Missing convert action data")
-    elif dest_type == "statutory":
-        tool, output, options = (
-            file.convert_statutory.tool,
-            file.convert_statutory.output,
-            file.convert_statutory.options,
-        )
-        converter_cls = find_converter(tool, output)
+
+# noinspection overloads
+@overload
+def convert_master_file(
+    ctx: Context,
+    avid: AVID,
+    database: FilesDB,
+    file: MasterFile,
+    target: Literal["access"],
+    logger: BoundLogger,
+    graph: ConvertersGraph,
+    timeout: int | None = None,
+    capture_output: bool = True,
+    hashed_output_name: bool = True,
+    keep_temporary_files: bool = False,
+) -> list[AccessFile] | None: ...
+
+
+def convert_master_file(
+    ctx: Context,
+    avid: AVID,
+    database: FilesDB,
+    file: MasterFile,
+    target: Literal["statutory", "access"],
+    graph: ConvertersGraph,
+    logger: BoundLogger,
+    timeout: int | None = None,
+    capture_output: bool = True,
+    hashed_output_name: bool = True,
+    keep_temporary_files: bool = False,
+) -> list[StatutoryFile] | list[AccessFile] | None:
+    if file.processed:
+        return None
+
+    tool: str
+    output: str
+    via: list[str | tuple[str | None, str]] = []
+    options: dict[str, dict[str, Any]] = {}
+    output_dir: Path
+    output_cls: type[StatutoryFile] | type[AccessFile]
+
+    if target == "statutory":
+        if not file.convert_statutory:
+            raise ConverterNotFound(None, None, "Missing statutory convert data")
+        tool, output = file.convert_statutory.tool, file.convert_statutory.output or file.convert_statutory.tool
+        output_dir = avid.dirs.documents
         output_cls = StatutoryFile
+    elif target == "access":
+        if not file.convert_access:
+            raise ConverterNotFound(None, None, "Missing access convert data")
+        tool, output = file.convert_access.tool, file.convert_access.output or file.convert_access.tool
+        output_dir = avid.dirs.access_documents
+        output_cls = AccessFile
+    else:
+        raise ValueError(f"Unknown target {target!r}")
 
-    if not converter_cls:
-        raise ConverterNotFound(tool, output, f"No converter found for tool {tool!r} and output {output!r}")
+    conversion_path = graph.find(tool, output, via, shortest=True)
 
-    return ConvertInstructions(file, "master", dest_type, converter_cls, tool, output, options, output_cls)
+    if not conversion_path:
+        raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
+
+    output_paths, converters = conversion_path(
+        file,
+        avid.path,
+        output_dir,
+        avid.dirs.master_documents,
+        database,
+        options,
+        on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
+        timeout=timeout,
+        capture_output=capture_output,
+        hashed_output_name=hashed_output_name,
+        keep_temporary_files=keep_temporary_files,
+    )
+
+    output_files: list[ConvertedFile] = []
+
+    for i, path in enumerate(output_paths):
+        puid: str | None = None
+        encoding: DetectionDict | None = None
+        if path.suffix == output_paths[0].suffix:
+            puid = converters[-1][1].output_puid(converters[-1][0].output)
+            encoding = converters[-1][1].output_encoding(converters[-1][0].output)
+
+        output_file = output_cls.from_file(
+            path,
+            avid.path,
+            {"original_uuid": file.uuid, "sequence": i},
+            encoding=encoding["encoding"] if encoding else None,
+        )
+        output_file.puid = puid
+
+    # noinspection bad-return
+    return output_files
 
 
-def file_queues[M: OriginalFile | MasterFile, O: ConvertedFile](
-    instructions: list[ConvertInstructions[M, O]],
-    threads: int,
-) -> tuple[list[ConvertInstructions[M, O]], list[list[ConvertInstructions[M, O]]]]:
-    """
-    Create conversion queues.
-
-    :param instructions:
-    :param threads:
-    :return: synchronous queue, asynchronous queue
-    """
-    sync_queue: list[ConvertInstructions[M, O]] = []
-    async_queues: list[list[ConvertInstructions[M, O]]] = [[]]
-
-    for inst in instructions:
-        if threads <= 1 or not inst.converter_cls.multithreading:
-            sync_queue.append(inst)
-        elif len(async_queues[-1]) < threads:
-            async_queues[-1].append(inst)
-        else:
-            async_queues.append([])
-            async_queues[-1].append(inst)
-
-    return sync_queue, async_queues
-
-
-def convert[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | StatutoryFile](
-    context: Context | str,
-    database: FilesDB | None,
-    output_dir: Path,
-    root_dir: Path,
-    relative_root_dir: Path,
-    instructions: ConvertInstructions[M, O],
-    verbose: bool,
-    hashed_output_name: bool,
+def convert_file(
+    path: Path,
+    root: str | Path | None,
+    output_dir: str | Path,
+    tool: str,
+    output: str,
+    via: list[str | tuple[str | None, str]] | None,
+    options: dict[str, dict[str, Any]] | None,
+    graph: ConvertersGraph,
     logger: BoundLogger,
-    timeout: int | None,
-) -> tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]:
-    output_paths: list[Path] = []
+    timeout: int | None = None,
+    capture_output: bool = True,
+    hashed_output_name: bool = True,
+    keep_temporary_files: bool = False,
+) -> list[Path]:
+    graph = ConvertersGraph(graph.graph).filter_conversion_graph(
+        requires_database=False,
+        requires_file_classes=[BaseFile],
+    )
 
-    with ExceptionManager(BaseException) as exception:
-        converter = instructions.converter_cls(
-            file=instructions.file.model_copy(deep=True),
-            root=root_dir,
-            relative_root=relative_root_dir,
-            database=database,
-            options=instructions.options,
-            timeout=timeout,
-            capture_output=not verbose,
-            hashed_output_name=hashed_output_name,
-        )
+    path = path.absolute()
+    file = dummy_base_file(path, root or path.root)
 
-        Event.from_command(context, "run", instructions.file).log(
-            INFO,
-            logger,
-            converter=f"{instructions.tool}:{instructions.output}",
-            name=instructions.file.name,
-        )
+    conversion_path = graph.find(tool, output, via, shortest=True)
 
-        output_paths = converter.convert(output_dir, instructions.output, keep_relative_path=True)
-        output_files: list[O] = []
-        for n, p in enumerate(output_paths):
-            output_file = instructions.output_cls.from_file(
-                p,
-                root_dir,
-                {"original_uuid": instructions.file.uuid, "sequence": n},
-            )
-            output_file.puid = converter.output_puid(instructions.output)
-            output_file.encoding = converter.output_encoding(instructions.output)
-            output_files.append(output_file)
+    if not conversion_path:
+        raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
 
-        for file in output_files:
-            Event.from_command(context, "out", file).log(
-                INFO,
-                logger,
-                converter=f"{instructions.tool}:{instructions.output}",
-                original=instructions.file.name,
-                name=file.name,
-            )
+    output_paths, _ = conversion_path(
+        file,
+        root or path.root,
+        output_dir,
+        root,
+        None,
+        options,
+        on_edge=lambda n, p: edge_logger("convert", "step", logger, None, p, n),
+        timeout=timeout,
+        capture_output=capture_output,
+        hashed_output_name=hashed_output_name,
+        keep_temporary_files=keep_temporary_files,
+    )
 
-        return instructions, output_files, None
-
-    if exception.exception is not None:
-        for p in output_paths:
-            p.unlink(missing_ok=True)
-        log_args: dict[str, Any] = {}
-        if isinstance(exception.exception, ConvertTimeoutError):
-            log_args["timeout"] = converter.process_timeout
-        elif isinstance(exception.exception, OutputDirError | OutputTargetError):
-            log_args["reason"] = exception.exception.msg
-        elif isinstance(exception.exception, ConvertError):
-            if isinstance(exception.exception.msg, BaseException):
-                log_args["exc_info"] = exception.exception.msg
-            elif exception.exception.msg:
-                log_args["msg"] = ""
-            if verbose and exception.exception.process:
-                log_args["stderr"] = exception.exception.process.stderr or exception.exception.process.stderr or ""
-        elif isinstance(exception.exception, Exception):
-            log_args["msg"] = " ".join(map(str, exception.exception.args)) or ""
-            log_args["exc_info"] = exception.exception
-        elif isinstance(exception.exception, BaseException):
-            raise exception.exception
-        Event.from_command(context, "error", instructions.file).log(
-            ERROR,
-            logger,
-            converter=f"{instructions.tool}:{instructions.output}",
-            error=exception.exception.__class__.__name__,
-            **log_args,
-        )
-
-    return instructions, [], exception
-
-
-def convert_async_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | StatutoryFile](
-    context: Context | str,
-    database: FilesDB | None,
-    output_dir: Path,
-    root_dir: Path,
-    relative_root_dir: Path,
-    instructions: list[ConvertInstructions[M, O]],
-    threads: int,
-    verbose: bool,
-    hashed_output_names: bool,
-    logger: BoundLogger,
-    timeout: int | None,
-) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
-    context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
-    with Pool(threads) as pool:
-        args = [
-            (
-                context_str,
-                database,
-                output_dir,
-                root_dir,
-                relative_root_dir,
-                inst,
-                verbose,
-                hashed_output_names,
-                logger,
-                timeout,
-            )
-            for inst in instructions
-        ]
-        results = pool.starmap(convert, args)
-        pool.close()
-        pool.join()
-
-    return results
-
-
-def convert_queue[M: OriginalFile | MasterFile, O: MasterFile | AccessFile | StatutoryFile](
-    context: Context | str,
-    database: FilesDB | None,
-    output_dir: Path,
-    root_dir: Path,
-    relative_root_dir: Path,
-    queue: list[ConvertInstructions[M, O]],
-    verbose: bool,
-    hashed_output_names: bool,
-    logger: BoundLogger,
-    timeout: int | None,
-) -> list[tuple[ConvertInstructions[M, O], list[ConvertedFile], ExceptionManager | None]]:
-    context_str: str = ".".join(context_commands(context)) if isinstance(context, Context) else context
-    return [
-        convert(
-            context_str,
-            database,
-            output_dir,
-            root_dir,
-            relative_root_dir,
-            inst,
-            verbose,
-            hashed_output_names,
-            logger,
-            timeout,
-        )
-        for inst in queue
-    ]
+    return output_paths
