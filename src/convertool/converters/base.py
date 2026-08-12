@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from collections.abc import Callable
 from functools import lru_cache
 from hashlib import md5
 from pathlib import Path
@@ -10,6 +11,10 @@ from subprocess import TimeoutExpired
 from sys import platform
 from typing import Any
 from typing import ClassVar
+from typing import Literal
+from typing import overload
+from typing import Self
+from typing import Union
 
 from acacore.database import FilesDB
 from acacore.models.file import BaseFile
@@ -333,3 +338,186 @@ class ConvertersPath:
     def test(self):
         for c in self.branch:
             c.converter.test()
+
+    def has_step(self, step: str | tuple[str | None, str]) -> bool:
+        if isinstance(step, str):
+            return any(e.name == step for e in self.branch)
+        if isinstance(step, tuple) and step[0] is None:
+            return any(e.output == step[1] for e in self.branch)
+        return any(e.name == step[0] and e.output == step[1] for e in self.branch)
+
+
+class ConvertersGraph:
+    def __init__(self, graph: dict[tuple[str, str], list[ConvertersPath]]) -> None:
+        self.graph: dict[tuple[str, str], list[ConvertersPath]] = graph
+
+    def __repr__(self) -> str:
+        return self.graph.__repr__()
+
+    @overload
+    def __getitem__(self, item: tuple[str, str]) -> list[ConvertersPath]: ...
+
+    @overload
+    def __getitem__(self, item: slice) -> "ConvertersGraph": ...
+
+    def __getitem__(self, item: tuple[str, str] | slice) -> Union[list[ConvertersPath], "ConvertersGraph"]:
+        if isinstance(item, tuple):
+            return self.graph[item]
+
+        return self.slice(item.start, item.stop, item.step)
+
+    @overload
+    def get[T](self, path: tuple[str, str], default: T) -> list[ConvertersPath] | T: ...
+
+    @overload
+    def get(self, path: tuple[str, str], default: None = None) -> list[ConvertersPath] | None: ...
+
+    def get[T](self, path: tuple[str, str], default: T | None = None) -> list[ConvertersPath] | T | None:
+        return self.graph.get(path, default)
+
+    def slice(
+        self,
+        name: str | None = None,
+        output: str | None = None,
+        step: str | list[str | tuple[str | None, str]] | None = None,
+    ) -> "ConvertersGraph":
+        steps = step or []
+        steps = steps if isinstance(steps, list) else [steps]
+        new_graph: dict[tuple[str, str], list[ConvertersPath]] = self.graph
+
+        if name and output and steps:
+            new_graph = {
+                k: _ps
+                for k, ps in self.graph.items()
+                if k == (name, output) and (_ps := [p for p in ps if all(p.has_step(s) for s in steps)])
+            }
+        elif name and output:
+            new_graph = {k: ps for k, ps in self.graph.items() if k == (name, output)}
+        elif name and steps:
+            new_graph = {
+                k: _ps
+                for k, ps in self.graph.items()
+                if k[0] == name and (_ps := [p for p in ps if all(p.has_step(s) for s in steps)])
+            }
+        elif output and steps:
+            new_graph = {
+                k: _ps
+                for k, ps in self.graph.items()
+                if k[1] == output and (_ps := [p for p in ps if all(p.has_step(s) for s in steps)])
+            }
+        elif name:
+            new_graph = {k: ps for k, ps in self.graph.items() if k[0] == name}
+        elif output:
+            new_graph = {k: ps for k, ps in self.graph.items() if k[1] == output}
+        elif steps:
+            new_graph = {
+                k: _ps for k, ps in self.graph.items() if (_ps := [p for p in ps if all(p.has_step(s) for s in steps)])
+            }
+
+        return ConvertersGraph(new_graph)
+
+    @overload
+    def find(
+        self,
+        name: str,
+        output: str,
+        via: list[str | tuple[str | None, str]] | None = None,
+        shortest: Literal[True] = True,
+    ) -> ConvertersPath: ...
+
+    @overload
+    def find(
+        self,
+        name: str,
+        output: str,
+        via: list[str | tuple[str | None, str]] | None = None,
+        shortest: Literal[False] = False,
+    ) -> list[ConvertersPath]: ...
+
+    def find(
+        self,
+        name: str,
+        output: str,
+        via: list[str | tuple[str | None, str]] | None = None,
+        shortest: bool = True,
+    ) -> ConvertersPath | list[ConvertersPath] | None:
+        if not (paths := self.get((name, output))):
+            return None
+
+        if via:
+            paths = [p for p in paths if all(p.has_step(v) for v in via)]
+            if not paths:
+                return None
+
+        if shortest:
+            return sorted(paths, key=len)[0]
+
+        return paths
+
+    @classmethod
+    def from_conversers(cls, converters: list[type[ConverterABC]]) -> "ConvertersGraph":
+        def _compute_converter_branches(
+            _conv: type[ConverterABC],
+            _prev_edges: list[ConvertersEdge] | None = None,
+            _prev_platforms: list[str] | None = None,
+        ) -> list[ConvertersPath]:
+            conv_paths: list[ConvertersPath] = []
+
+            if _conv.platforms and _prev_platforms and not set(_prev_platforms).intersection(_conv.platforms):
+                return []
+
+            for output in _conv.outputs:
+                edge = ConvertersEdge(_conv, output)
+
+                if _prev_edges and edge in _prev_edges:
+                    continue
+
+                conv_paths.append(ConvertersPath(_conv.name, output, [edge]))
+
+                conv_paths.extend(
+                    [
+                        ConvertersPath(_conv.name, b.output, [edge, *b.branch])
+                        for c in converters
+                        if (c.requires_file_classes is None or BaseFile in c.requires_file_classes)
+                        and (_conv.requires_database or not c.requires_database)
+                        and c.name == _conv.output_name(output)
+                        for b in _compute_converter_branches(
+                            c,
+                            [
+                                *(_prev_edges or []),
+                                *(ConvertersEdge(_conv, _o) for _o in _conv.outputs),
+                            ],
+                            [
+                                *(_prev_platforms or []),
+                                *(_conv.platforms or []),
+                            ],
+                        )
+                    ]
+                )
+
+            return list(set(conv_paths))
+
+        paths: dict[tuple[str, str], list[ConvertersPath]] = {}
+
+        for conv in converters:
+            for path in _compute_converter_branches(conv, []):
+                key = (path.name, path.output)
+                paths[key] = [*paths.get(key, []), path]
+
+        return ConvertersGraph({(k[0], k[1]): bs for k, bs in paths.items()})
+
+    def filter_conversion_graph(self, on_invalid: Callable[[ConvertersPath], None] | None = None) -> Self:
+        def _test_path(path: ConvertersPath) -> ConvertersPath | None:
+            try:
+                path.test()
+                return path
+            except (MissingDependency, UnsupportedPlatform):
+                if on_invalid:
+                    on_invalid(path)
+                return None
+
+        self.graph = {
+            k: _ps for k, ps in self.graph.items() if (_ps := [_p for p in ps if (_p := _test_path(p)) is not None])
+        }
+
+        return self
