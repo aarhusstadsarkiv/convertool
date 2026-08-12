@@ -63,7 +63,7 @@ class VideoConverter(ConverterABC):
             output = "mp4"
             arguments.extend(["-c:v", "libx265", "-c:a", "aac", "-vtag", "hvc1"])
 
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
             self.run_process(
@@ -80,7 +80,7 @@ class VideoConverter(ConverterABC):
             )
             if final_extension:
                 tmp_file = tmp_dir.joinpath(dest_file.name)
-                dest_file = dest_file.with_name(tmp_file.replace(self.output_file(tmp_dir, final_extension)).name)
+                dest_file = dest_file.with_name(tmp_file.replace(self.output_filename(tmp_dir, final_extension)).name)
             dest_dir.mkdir(parents=True, exist_ok=True)
             tmp_dir.joinpath(dest_file.name).replace(dest_file)
 

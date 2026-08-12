@@ -27,7 +27,7 @@ class MSOfficeConverter(ConverterABC):
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         file_format, arguments = self._file_format(output)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
             tmp_file: Path = tmp_dir.joinpath(dest_file.name)

@@ -65,7 +65,7 @@ class ImageConverter(ConverterABC):
     def convert_imagemagick(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
         args: list[str] = []
         filename: Path = self.file.get_absolute_path()
 
@@ -91,7 +91,7 @@ class ImageConverter(ConverterABC):
     def convert_nconvert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
         args: list[str] = []
 
         if output == "jpeg":

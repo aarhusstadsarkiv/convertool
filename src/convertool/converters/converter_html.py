@@ -54,7 +54,7 @@ class HTMLConverter(ConverterABC):
             raise MissingDependency(["weasyprint"], self._weasyprint_error or "missing system dependencies")
 
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
             html = self._weasyprint.HTML(

@@ -28,7 +28,7 @@ class IPYNBConverter(ConverterABC):
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with self.file.get_absolute_path().open(encoding=(self.file.encoding or {}).get("encoding")) as f:
             notebook = nbformat.reads(f.read(), as_version=nbformat.NO_CONVERT)

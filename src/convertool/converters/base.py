@@ -257,7 +257,7 @@ class ConverterABC(ABC):
         """
         return None
 
-    def output_file(self, output: str, *, append: bool = False) -> str:
+    def output_filename(self, output: str, *, append: bool = False) -> str:
         """
         Get the name of the output file.
 

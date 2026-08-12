@@ -18,14 +18,14 @@ class ZIPFileConverter(ConverterABC):
         if "path" not in self.options:
             raise BadOption(self.file, "Missing 'path' option.")
 
-    def output_file(self, output: str, *, append: bool = False) -> str:  # noqa: ARG002
+    def output_filename(self, output: str, *, append: bool = False) -> str:
         if self.hashed_output_name:
             return hashed_file_name(self.file.get_absolute_path() / self.options["path"])
         return Path(self.options["path"]).name
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:  # noqa: ARG002
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(self.root) as tmp_dir:
             with ZipFile(self.file.get_absolute_path()) as zf:

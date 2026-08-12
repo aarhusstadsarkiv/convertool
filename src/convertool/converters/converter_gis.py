@@ -23,11 +23,11 @@ class GISConverter(ConverterABC):
     def output_name(cls, output: str) -> str:
         if output == "gml":
             return "xml"
-        elif output == "gml3":
+        if output == "gml3":
             return "xml"
-        elif output == "shp":
+        if output == "shp":
             return "xml"
-        elif output == "geojson":
+        if output == "geojson":
             return "text"
         return output
 
@@ -94,7 +94,7 @@ class GISConverter(ConverterABC):
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
         args: list[str] = []
 
         if iformat := self.options.get("input_format"):

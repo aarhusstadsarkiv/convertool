@@ -14,13 +14,13 @@ class CopyConverter(ConverterABC):
     name: ClassVar[str] = "copy"
     outputs: ClassVar[list[str]] = ["copy"]
 
-    def output_puid(self, output: str) -> str | None:  # noqa: ARG002
+    def output_puid(self, output: str) -> str | None:
         return self.file.puid
 
-    def output_encoding(self, output: str) -> DetectionDict | None:  # noqa: ARG002
+    def output_encoding(self, output: str) -> DetectionDict | None:
         return self.file.encoding
 
-    def output_file(self, output: str, *, append: bool = False) -> str:  # noqa: ARG002
+    def output_filename(self, output: str, *, append: bool = False) -> str:
         name: str = (
             hashed_file_name(self.file.get_absolute_path(self.root).relative_to(self.relative_root))
             if self.hashed_output_name
@@ -30,7 +30,7 @@ class CopyConverter(ConverterABC):
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path, mkdir=True)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
             copy2(self.file.get_absolute_path(), tmp_file := tmp_dir.joinpath(dest_file))

@@ -56,7 +56,7 @@ class SymphovertConverter(ConverterABC):
             raise MissingDependency(["pyautogui"])
         super().test_dependencies()
 
-    def output_file(self, output: str, *, append: bool = False) -> str:
+    def output_filename(self, output: str, *, append: bool = False) -> str:
         if append:
             return self.file.name + f".{output}"
         return self.file.relative_path.with_suffix(f".{output}").name
@@ -100,7 +100,7 @@ class SymphovertConverter(ConverterABC):
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         if dest_file.is_file():
             return [dest_file]

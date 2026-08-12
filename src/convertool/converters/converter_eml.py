@@ -6,10 +6,7 @@ from chardet import DetectionDict
 from eml_analyzer.library.parser import Attachment
 from eml_analyzer.library.parser import ParsedEmail
 
-from convertool.util import TempDir
-
 from .base import ConverterABC
-from .base import dummy_base_file
 from .converter_msg import html_to_text
 from .converter_msg import text_to_html
 from .exceptions import OutputTargetError
@@ -170,7 +167,7 @@ class EMLConverter(ConverterABC):
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         eml = ParsedEmail(
             self.file.get_absolute_path().read_text(self.file.encoding["encoding"] if self.file.encoding else None)

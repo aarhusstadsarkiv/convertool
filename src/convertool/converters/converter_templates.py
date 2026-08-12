@@ -91,7 +91,7 @@ class TemplateConverter(ConverterABC):
             )
 
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = dest_dir.joinpath(self.output_file(output, append=True))
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output, append=True))
 
         dest_file.parent.mkdir(parents=True, exist_ok=True)
         dest_file.write_text(template, encoding="utf-8")
