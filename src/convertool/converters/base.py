@@ -238,7 +238,7 @@ class ConverterABC(ABC):
         return f".{output}"
 
     # noinspection unused-parameter
-    def output_puid(self, output: str) -> str | None:  # noqa: ARG002
+    def output_puid(self, output: str) -> str | None:
         """
         Get the PUID for a given output, if available.
 
@@ -248,7 +248,7 @@ class ConverterABC(ABC):
         return None
 
     # noinspection unused-parameter
-    def output_encoding(self, output: str) -> DetectionDict | None:  # noqa: ARG002
+    def output_encoding(self, output: str) -> DetectionDict | None:
         """
         Get the encoding for a given output, if available.
 
@@ -289,6 +289,10 @@ class ConvertersEdge:
     def __init__(self, converter: type[ConverterABC], output: str) -> None:
         self.converter: type[ConverterABC] = converter
         self.output: str = output
+
+    @property
+    def name(self):
+        return self.converter.name
 
     def __repr__(self) -> str:
         return f"{self.converter.name}({self.output})"
