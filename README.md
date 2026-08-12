@@ -126,13 +126,13 @@ Options:
 | gis                  | gml                |                                                                  | .gml      |
 | gis                  | gml3               |                                                                  | .gml3     |
 | gis                  | shp                |                                                                  | .shp      |
-| html / browser       | jp2                |                                                                  | .jp2      |
-| html / browser       | jpeg               |                                                                  | .jpg      |
-| html / browser       | jpg                |                                                                  | .jpg      |
-| html / browser       | pdf                |                                                                  | .pdf      |
-| html / browser       | png                |                                                                  | .png      |
-| html / browser       | tif                |                                                                  | .tif      |
-| html / browser       | tiff               |                                                                  | .tif      |
+| html                 | jp2                |                                                                  | .jp2      |
+| html                 | jpeg               |                                                                  | .jpg      |
+| html                 | jpg                |                                                                  | .jpg      |
+| html                 | pdf                |                                                                  | .pdf      |
+| html                 | png                |                                                                  | .png      |
+| html                 | tif                |                                                                  | .tif      |
+| html                 | tiff               |                                                                  | .tif      |
 | image                | jp2                |                                                                  | .jp2      |
 | image                | jpeg               |                                                                  | .jpg      |
 | image                | jpg                |                                                                  | .jpg      |
@@ -269,13 +269,13 @@ Options:
 | gis                  | gml      | Linux   | ogr2ogr                                                       |
 | gis                  | gml3     | Linux   | ogr2ogr                                                       |
 | gis                  | shp      | Linux   | ogr2ogr                                                       |
-| html / browser       | jp2      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
-| html / browser       | jpeg     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
-| html / browser       | jpg      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
-| html / browser       | pdf      |         | chromium                                                      |
-| html / browser       | png      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
-| html / browser       | tif      |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
-| html / browser       | tiff     |         | chromium, imagemagick, nconvert, pdftoppm, tiffcp             |
+| html                 | jp2      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| html                 | jpeg     |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| html                 | jpg      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| html                 | pdf      |         |                                                               |
+| html                 | png      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| html                 | tif      |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
+| html                 | tiff     |         | imagemagick, nconvert, pdftoppm, tiffcp                       |
 | image                | jp2      |         | imagemagick, nconvert                                         |
 | image                | jpeg     |         | imagemagick, nconvert                                         |
 | image                | jpg      |         | imagemagick, nconvert                                         |
