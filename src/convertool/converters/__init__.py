@@ -35,6 +35,8 @@ from .converter_video import VideoConverter
 from .converter_xsl import MedComConverter
 from .converter_xsl import XSLConverter
 from .converter_zipfile import ZIPFileConverter
+from .exceptions import MissingDependency
+from .exceptions import UnsupportedPlatform
 
 converters: list[type[ConverterABC]] = [
     AudioConverter,
@@ -127,10 +129,31 @@ def conversion_graph() -> dict[tuple[str, str], list[ConvertersPath]]:
     return {(k[0], k[1]): bs for k, bs in paths.items()}
 
 
+def filter_conversion_graph() -> dict[tuple[str, str], list[ConvertersPath]]:
+    graph: dict[tuple[str, str], list[ConvertersPath]] = {}
+
+    for key, paths in conversion_graph.items():
+        valid_paths: list[ConvertersPath] = []
+
+        for p in paths:
+            try:
+                p.test()
+            except (MissingDependency, UnsupportedPlatform):
+                continue
+
+            valid_paths.append(p)
+
+        if valid_paths:
+            graph[key] = valid_paths
+
+    return graph
+
+
 __all__ = [
     "ConverterABC",
     "ConvertersEdge",
     "ConvertersPath",
     "conversion_graph",
     "converters",
+    "filter_conversion_graph",
 ]
