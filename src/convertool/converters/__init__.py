@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from acacore.models.file import BaseFile
 
 from .base import ConverterABC
@@ -68,7 +70,12 @@ converters: list[type[ConverterABC]] = [
 ]
 
 
-def compute_conversion_graph() -> dict[tuple[str, str], list[ConvertersPath]]:
+def _instantiate[R](f: Callable[[], R]) -> R:
+    return f()
+
+
+@_instantiate
+def conversion_graph() -> dict[tuple[str, str], list[ConvertersPath]]:
     def _compute_converter_branches(
         _conv: type[ConverterABC],
         _prev_edges: list[ConvertersEdge] | None = None,
@@ -122,8 +129,8 @@ def compute_conversion_graph() -> dict[tuple[str, str], list[ConvertersPath]]:
 
 __all__ = [
     "ConverterABC",
-    "ConvertersPath",
     "ConvertersEdge",
-    "compute_conversion_graph",
+    "ConvertersPath",
+    "conversion_graph",
     "converters",
 ]
