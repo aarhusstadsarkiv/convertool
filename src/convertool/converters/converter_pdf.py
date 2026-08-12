@@ -84,7 +84,7 @@ class PDFToImageConverter(ConverterABC):
                 raise BadOption(f"Invalid value {dpi} for 'dpi' option.")
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.test_output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_file(output))
         args: list[str] = []
