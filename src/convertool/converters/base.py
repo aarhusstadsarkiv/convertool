@@ -279,7 +279,7 @@ class ConverterABC(ABC):
         if append:
             return f"{name}.{extension}"
 
-        return f"{name.removesuffix(self.file.suffixes)}.{extension}"
+        return f"{name.removesuffix(self.file.suffixes)}{extension}"
 
     @abstractmethod
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
