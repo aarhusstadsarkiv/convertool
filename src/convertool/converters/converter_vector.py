@@ -40,7 +40,7 @@ class VectorConverter(ConverterABC):
                 encoding=(self.file.encoding["encoding"] or "") if self.file.encoding else "",
             )
 
-            html.write_pdf(tmp_file := tmp_dir.joinpath(dest_file.name))
+            html.write_pdf(tmp_file := tmp_dir.joinpath(dest_file.name), options={"pdf_variant": "pdf/a-4u"})
 
             dest_dir.mkdir(parents=True, exist_ok=True)
 
