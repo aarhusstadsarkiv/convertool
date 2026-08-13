@@ -61,7 +61,7 @@ class VideoConverter(ConverterABC):
             arguments.extend(["-c:v", "libx265", "-c:a", "aac", "-vtag", "hvc1"])
 
         with TempDir(output_dir) as tmp_dir:
-            tmp_file = tmp_dir.joinpath(dest_file.with_suffix(temp_extension or dest_file.suffix))
+            tmp_file = tmp_dir.joinpath(dest_file.with_suffix(temp_extension or dest_file.suffix).name)
 
             self.run_process(
                 self.dependencies["ffmpeg"][0],
