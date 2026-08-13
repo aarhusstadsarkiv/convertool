@@ -36,4 +36,7 @@ def test_converter_path(test_files: dict[str, Path], output_dir: Path):
     assert isinstance(convs[0][1], MedComConverter)
     assert isinstance(convs[1][0], ConvertersEdge)
     assert isinstance(convs[1][1], HTMLConverter)
-    assert files[0].name == test_files["medcom.xml"].with_suffix(convs[1][1].output_extension(HTMLConverter.outputs[0]))
+    assert (
+        files[0].name
+        == test_files["medcom.xml"].with_suffix(convs[1][1].output_extension(HTMLConverter.outputs[0])).name
+    )
