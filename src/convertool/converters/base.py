@@ -605,7 +605,7 @@ class ConvertersGraph:
                     if on_invalid:
                         on_invalid(path, "Requires database")
                     return None
-                if requires_file_classes and any(
+                if requires_file_classes and not all(
                     not e.converter.requires_file_classes
                     or any(c in e.converter.requires_file_classes for c in requires_file_classes)
                     for e in path.branch
