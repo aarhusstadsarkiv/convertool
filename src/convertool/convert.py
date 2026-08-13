@@ -35,8 +35,9 @@ def edge_logger(
     Event.from_command(ctx, operation, file).log(
         INFO,
         logger,
-        step=n,
-        converter=f"{path[n].name} -{path[n].output}-> {path[n].converter.output_name(path[n].output)}",
+        converter=path[n].name,
+        output=path[n].output,
+        step=n + 1,
     )
 
 
