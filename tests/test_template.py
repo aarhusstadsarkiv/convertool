@@ -33,9 +33,7 @@ def test_template(test_files: dict[str, Path], reference_files: dict[str, Path],
         )
         converter = TemplateConverter(file, output_dir, database=db, hashed_output_name=False)
         templates: list[TTemplateType] = [
-            t
-            for t in TemplateTypeEnum
-            if t in TemplateConverter.outputs and t not in ["duplicate", "extracted-archive"]
+            t for t in TemplateTypeEnum if t in TemplateConverter.outputs and t not in ["duplicate"]
         ]
 
         for template in templates:
