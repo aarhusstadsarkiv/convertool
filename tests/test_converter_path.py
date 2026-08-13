@@ -21,7 +21,14 @@ def test_converter_path(test_files: dict[str, Path], output_dir: Path):
 
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
 
-    files, convs = path(file, test_files["medcom.xml"].parent, output_dir, test_files["medcom.xml"].parent, None)
+    files, convs = path(
+        file,
+        test_files["medcom.xml"].parent,
+        output_dir,
+        test_files["medcom.xml"].parent,
+        None,
+        hashed_output_name=False,
+    )
 
     assert len(files) == 1
     assert len(convs) == 2
