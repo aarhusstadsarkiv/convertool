@@ -572,9 +572,9 @@ def cmd_list(ctx: Context, only_available: bool, show_warnings: bool):
     max_columns = max(map(len, table))
     column_widths = [max(len(r[c]) for r in table) for c in range(max_columns)]
 
-    print(*(table[0][c].ljust(column_widths[c]) for c in range(max_columns)), sep=" | ")
+    print("|", " | ".join(table[0][c].ljust(column_widths[c]) for c in range(max_columns)), "|")
 
-    print(*("-" * column_widths[c] for c in range(max_columns)), sep=" | ")
+    print("|", " | ".join("-" * column_widths[c] for c in range(max_columns)), "|")
 
     for row in table[1:]:
-        print(*(row[c].ljust(column_widths[c]) for c in range(max_columns)), sep=" | ")
+        print("|", " | ".join(row[c].ljust(column_widths[c]) for c in range(max_columns)), "|")
