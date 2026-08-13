@@ -1,11 +1,10 @@
 from pathlib import Path
 
-from converters import ConvertersEdge
-from converters import MedComConverter
-
+from convertool.converters import ConvertersEdge
 from convertool.converters import ConvertersPath
 from convertool.converters import dummy_base_file
 from convertool.converters import HTMLConverter
+from convertool.converters import MedComConverter
 
 
 def test_converter_path(test_files: dict[str, Path], output_dir: Path):
