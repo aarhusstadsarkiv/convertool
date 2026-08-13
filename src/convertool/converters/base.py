@@ -597,23 +597,27 @@ class ConvertersGraph:
         self,
         requires_database: bool = True,
         requires_file_classes: list[type[BaseFile]] | None = None,
-        on_invalid: Callable[[ConvertersPath], None] | None = None,
+        on_invalid: Callable[[ConvertersPath, str | Exception], None] | None = None,
     ) -> Self:
         def _test_path(path: ConvertersPath) -> ConvertersPath | None:
             try:
                 if requires_database is False and any(e.converter.requires_database for e in path.branch):
+                    if on_invalid:
+                        on_invalid(path, "Requires database")
                     return None
                 if requires_file_classes and any(
                     not e.converter.requires_file_classes
                     or any(c in e.converter.requires_file_classes for c in requires_file_classes)
                     for e in path.branch
                 ):
+                    if on_invalid:
+                        on_invalid(path, "Requires different classes")
                     return None
                 path.test()
                 return path
-            except (MissingDependency, UnsupportedPlatform):
+            except (MissingDependency, UnsupportedPlatform) as e:
                 if on_invalid:
-                    on_invalid(path)
+                    on_invalid(path, e)
                 return None
 
         self.graph = {
