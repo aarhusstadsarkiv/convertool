@@ -26,6 +26,8 @@ class ImageConverter(ConverterABC):
     def output_extension(self, output: str) -> str:
         if output == "jpeg":
             return ".jpg"
+        if output == "jpeg2000":
+            return ".jp2"
         if output == "tiff":
             return ".tif"
         return f".{output}"
@@ -33,11 +35,11 @@ class ImageConverter(ConverterABC):
     def output_puid(self, output: str) -> str | None:
         if output == "jpeg":
             return "fmt/44"
-        if output in ("jp2", "jpeg2000"):
+        if output == "jpeg2000":
             return "x-fmt/392"
         if output == "tiff":
             return "fmt/353"
-        if output in ("png",):
+        if output == "png":
             return "fmt/12"
         return None
 
