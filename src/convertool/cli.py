@@ -260,7 +260,7 @@ def cmd_digiarch(
             Event.from_command(ctx, "compiling:end").log(INFO, logger)
 
             for n, file in enumerate(to_process_table):
-                output: list[ConvertedFile] | None
+                output_files: list[ConvertedFile] | None
                 src_table: Table[OriginalFile | MasterFile]
                 out_table: Table[ConvertedFile]
 
@@ -269,7 +269,7 @@ def cmd_digiarch(
                         if file.processed:
                             continue
 
-                        output = convert_original_file(
+                        output_files = convert_original_file(
                             ctx,
                             avid,
                             database,
@@ -291,7 +291,7 @@ def cmd_digiarch(
                         if file.processed & 0b01:
                             continue
 
-                        output = convert_master_file(
+                        output_files = convert_master_file(
                             ctx,
                             avid,
                             database,
@@ -314,7 +314,7 @@ def cmd_digiarch(
                         if file.processed & 0b10:
                             continue
 
-                        output = convert_master_file(
+                        output_files = convert_master_file(
                             ctx,
                             avid,
                             database,
@@ -346,16 +346,17 @@ def cmd_digiarch(
                     uncaught_exceptions.append(convert_exception.exception)
                     continue
 
-                if not output:
+                if not output_files:
                     if not dry_run:
                         Event.from_command(ctx, "skipped", file).log(INFO, logger)
                     continue
 
-                for outfile in output:
-                    Event.from_command(ctx, "out", outfile).log(INFO, logger)
-                    out_table.insert(outfile, on_exists="error")
+                for output_file in output_files:
+                    Event.from_command(ctx, "out", output_file).log(INFO, logger)
+                    out_table.insert(output_file, on_exists="error")
 
                 src_table.update(file)
+                database.log.insert(Event.from_command(ctx, "converted", file, {"files": len(output_files)}))
 
                 committer(database, n)
 
