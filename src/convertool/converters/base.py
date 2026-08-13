@@ -331,26 +331,26 @@ class ConvertersPath:
     def __init__(self, name: str, output: str, branch: list[ConvertersEdge]) -> None:
         self.name: str = name
         self.output: str = output
-        self.branch: list[ConvertersEdge] = branch
+        self.edges: list[ConvertersEdge] = branch
 
     def __repr__(self) -> str:
-        return " -> ".join(map(repr, self.branch))
+        return " -> ".join(map(repr, self.edges))
 
     def __hash__(self) -> int:
-        return hash(tuple(self.branch))
+        return hash(tuple(self.edges))
 
     def __len__(self) -> int:
-        return len(self.branch)
+        return len(self.edges)
 
     def __getitem__(self, item: int) -> ConvertersEdge:
-        return self.branch[item]
+        return self.edges[item]
 
     @property
     def dependencies(self) -> list[list[str]] | None:
         return (
             reduce(
                 lambda dss, ds: [*dss, _ds] if (_ds := [d for d in ds if not any(d in __ds for __ds in dss)]) else dss,
-                [ds for e in self.branch if e.dependencies is not None for ds in e.dependencies.values()],
+                [ds for e in self.edges if e.dependencies is not None for ds in e.dependencies.values()],
                 [],
             )
             or None
@@ -358,21 +358,21 @@ class ConvertersPath:
 
     @property
     def platforms(self) -> list[str] | None:
-        platforms = [set(e.platforms) for e in self.branch if e.platforms is not None]
+        platforms = [set(e.platforms) for e in self.edges if e.platforms is not None]
         if platforms:
             return list(reduce(lambda pss, ps: pss & ps, platforms))
         return None
 
     def test(self):
-        for c in self.branch:
+        for c in self.edges:
             c.converter.test()
 
     def has_step(self, step: str | tuple[str | None, str]) -> bool:
         if isinstance(step, str):
-            return any(e.name == step for e in self.branch)
+            return any(e.name == step for e in self.edges)
         if isinstance(step, tuple) and step[0] is None:
-            return any(e.output == step[1] for e in self.branch)
-        return any(e.name == step[0] and e.output == step[1] for e in self.branch)
+            return any(e.output == step[1] for e in self.edges)
+        return any(e.name == step[0] and e.output == step[1] for e in self.edges)
 
     def __call__(
         self,
@@ -401,7 +401,7 @@ class ConvertersPath:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         with TempDir(output_dir, delete=not keep_temporary_files) as temp_dir:
-            for n, edge in enumerate(self.branch):
+            for n, edge in enumerate(self.edges):
                 if on_edge:
                     on_edge(self, n)
 
@@ -563,7 +563,7 @@ class ConvertersGraph:
 
                 conv_paths.extend(
                     [
-                        ConvertersPath(_conv.name, b.output, [edge, *b.branch])
+                        ConvertersPath(_conv.name, b.output, [edge, *b.edges])
                         for c in converters
                         if (c.requires_file_classes is None or BaseFile in c.requires_file_classes)
                         and (_conv.requires_database or not c.requires_database)
@@ -601,14 +601,14 @@ class ConvertersGraph:
     ) -> Self:
         def _test_path(path: ConvertersPath) -> ConvertersPath | None:
             try:
-                if requires_database is False and any(e.converter.requires_database for e in path.branch):
+                if requires_database is False and any(e.converter.requires_database for e in path.edges):
                     if on_invalid:
                         on_invalid(path, "Requires database")
                     return None
                 if requires_file_classes and not all(
                     not e.converter.requires_file_classes
                     or any(c in e.converter.requires_file_classes for c in requires_file_classes)
-                    for e in path.branch
+                    for e in path.edges
                 ):
                     if on_invalid:
                         on_invalid(path, "Requires different classes")

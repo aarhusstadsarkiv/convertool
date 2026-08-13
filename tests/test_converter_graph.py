@@ -11,7 +11,7 @@ def test_converter_graph():
 
     for paths in graph.graph.values():
         for path in paths:
-            for edge in path.branch:
+            for edge in path.edges:
                 assert not edge.converter.requires_file_classes or BaseFile in edge.converter.requires_file_classes
 
     for [name, _], paths in graph["html":].graph.items():
