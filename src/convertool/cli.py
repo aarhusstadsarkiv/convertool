@@ -138,7 +138,6 @@ def app():
 @option("--tool-exclude", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
 @option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
-@option("--threads", type=IntRange(min=1), default=4, help="Set number of threads for async conversion.")
 @option(
     "--commit",
     metavar="INTEGER",
@@ -167,7 +166,6 @@ def cmd_digiarch(
     tool_exclude: tuple[str, ...],
     tool_include: tuple[str, ...],
     timeout: int | None,
-    threads: int,
     commit: int,
     hashed_names: bool,
     show_disabled_converters: bool,
