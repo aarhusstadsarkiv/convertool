@@ -73,7 +73,7 @@ class ConverterABC(ABC):
     platforms: ClassVar[list[str] | None] = None
     dependencies: ClassVar[dict[str, list[str]] | None] = None
     multithreading: ClassVar[bool] = False
-    requires_file_classes: ClassVar[list[type[BaseFile]]] = [BaseFile]
+    requires_file_classes: ClassVar[list[type[BaseFile]] | None] = None
     requires_database: ClassVar[bool] = False
 
     def __init__(
