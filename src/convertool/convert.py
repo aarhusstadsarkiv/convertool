@@ -21,7 +21,6 @@ from .converters import ConvertersGraph
 from .converters import ConvertersPath
 from .converters import dummy_base_file
 from .converters.exceptions import ConverterNotFound
-from .converters.exceptions import ConvertError
 from .util import AVID
 
 
@@ -100,23 +99,19 @@ def convert_original_file(
         Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(conversion_path))
         return None
 
-    try:
-        output_paths, converters = conversion_path(
-            file,
-            avid.path,
-            avid.dirs.master_documents,
-            avid.dirs.original_documents,
-            database,
-            options,
-            on_edge=lambda p, n: edge_logger(ctx, "step", logger, file, p, n),
-            timeout=timeout,
-            capture_output=capture_output,
-            hashed_output_name=hashed_output_name,
-            keep_temporary_files=keep_temporary_files,
-        )
-    except ConvertError as e:
-        Event.from_command(ctx, "error", file, reason=str(e.msg) if e.msg else None).log(ERROR, logger)
-        return None
+    output_paths, converters = conversion_path(
+        file,
+        avid.path,
+        avid.dirs.master_documents,
+        avid.dirs.original_documents,
+        database,
+        options,
+        on_edge=lambda p, n: edge_logger(ctx, "step", logger, file, p, n),
+        timeout=timeout,
+        capture_output=capture_output,
+        hashed_output_name=hashed_output_name,
+        keep_temporary_files=keep_temporary_files,
+    )
 
     output_files: list[MasterFile] = []
 
@@ -231,23 +226,19 @@ def convert_master_file(
         Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(conversion_path))
         return None
 
-    try:
-        output_paths, converters = conversion_path(
-            file,
-            avid.path,
-            output_dir,
-            avid.dirs.master_documents,
-            database,
-            options,
-            on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
-            timeout=timeout,
-            capture_output=capture_output,
-            hashed_output_name=hashed_output_name,
-            keep_temporary_files=keep_temporary_files,
-        )
-    except ConvertError as e:
-        Event.from_command(ctx, "error", file, reason=str(e.msg) if e.msg else None).log(ERROR, logger)
-        return None
+    output_paths, converters = conversion_path(
+        file,
+        avid.path,
+        output_dir,
+        avid.dirs.master_documents,
+        database,
+        options,
+        on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
+        timeout=timeout,
+        capture_output=capture_output,
+        hashed_output_name=hashed_output_name,
+        keep_temporary_files=keep_temporary_files,
+    )
 
     output_files: list[ConvertedFile] = []
 
