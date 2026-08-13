@@ -1,3 +1,4 @@
+from logging import ERROR
 from logging import INFO
 from pathlib import Path
 from typing import Any
@@ -14,13 +15,14 @@ from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
 from chardet import DetectionDict
 from click import Context
-from converters import ConvertersPath
-from converters import dummy_base_file
 from structlog.stdlib import BoundLogger
-from util import AVID
 
 from .converters import ConvertersGraph
+from .converters import ConvertersPath
+from .converters import dummy_base_file
 from .converters.exceptions import ConverterNotFound
+from .converters.exceptions import ConvertError
+from .util import AVID
 
 
 def edge_logger(
@@ -52,6 +54,7 @@ def convert_original_file(
     capture_output: bool = True,
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
+    dry_run: bool = False,
 ) -> list[MasterFile] | None:
     if file.processed:
         return None
@@ -63,11 +66,13 @@ def convert_original_file(
 
     if file.action == "ignore":
         if not file.action_data.ignore:
-            raise ConverterNotFound(None, None, "Missing ignore action data")
+            Event.from_command(ctx, "error", file, reason="Missing ignore action data").log(ERROR, logger)
+            return None
         tool, output = "template", file.action_data.ignore.template
     elif file.action == "convert":
         if not file.action_data.convert:
-            raise ConverterNotFound(None, None, "Missing convert action data")
+            Event.from_command(ctx, "error", file, reason="Missing convert action data").log(ERROR, logger)
+            return None
         tool, output = file.action_data.convert.tool, file.action_data.convert.output or file.action_data.convert.tool
     else:
         raise ConverterNotFound(None, None, f"File with {file.action!r} cannot be converted.")
@@ -75,21 +80,36 @@ def convert_original_file(
     conversion_path = graph.find(tool, output, via, shortest=True)
 
     if not conversion_path:
-        raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
+        Event.from_command(ctx, "error", file, reason="Cannot find converter").log(
+            ERROR,
+            logger,
+            tool=tool,
+            output=output,
+            via=via or None,
+        )
+        return None
 
-    output_paths, converters = conversion_path(
-        file,
-        avid.path,
-        avid.dirs.master_documents,
-        avid.dirs.original_documents,
-        database,
-        options,
-        on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
-        timeout=timeout,
-        capture_output=capture_output,
-        hashed_output_name=hashed_output_name,
-        keep_temporary_files=keep_temporary_files,
-    )
+    if dry_run:
+        Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(conversion_path))
+        return None
+
+    try:
+        output_paths, converters = conversion_path(
+            file,
+            avid.path,
+            avid.dirs.master_documents,
+            avid.dirs.original_documents,
+            database,
+            options,
+            on_edge=lambda p, n: edge_logger(ctx, "step", logger, file, p, n),
+            timeout=timeout,
+            capture_output=capture_output,
+            hashed_output_name=hashed_output_name,
+            keep_temporary_files=keep_temporary_files,
+        )
+    except ConvertError as e:
+        Event.from_command(ctx, "error", file, reason=str(e.msg) if e.msg else None).log(ERROR, logger)
+        return None
 
     output_files: list[MasterFile] = []
 
@@ -124,10 +144,10 @@ def convert_master_file(
     capture_output: bool = True,
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
+    dry_run: bool = False,
 ) -> list[StatutoryFile] | None: ...
 
 
-# noinspection overloads
 @overload
 def convert_master_file(
     ctx: Context,
@@ -135,12 +155,13 @@ def convert_master_file(
     database: FilesDB,
     file: MasterFile,
     target: Literal["access"],
-    logger: BoundLogger,
     graph: ConvertersGraph,
+    logger: BoundLogger,
     timeout: int | None = None,
     capture_output: bool = True,
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
+    dry_run: bool = False,
 ) -> list[AccessFile] | None: ...
 
 
@@ -156,6 +177,7 @@ def convert_master_file(
     capture_output: bool = True,
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
+    dry_run: bool = False,
 ) -> list[StatutoryFile] | list[AccessFile] | None:
     if file.processed:
         return None
@@ -187,19 +209,27 @@ def convert_master_file(
     if not conversion_path:
         raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
 
-    output_paths, converters = conversion_path(
-        file,
-        avid.path,
-        output_dir,
-        avid.dirs.master_documents,
-        database,
-        options,
-        on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
-        timeout=timeout,
-        capture_output=capture_output,
-        hashed_output_name=hashed_output_name,
-        keep_temporary_files=keep_temporary_files,
-    )
+    if dry_run:
+        Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(conversion_path))
+        return None
+
+    try:
+        output_paths, converters = conversion_path(
+            file,
+            avid.path,
+            output_dir,
+            avid.dirs.master_documents,
+            database,
+            options,
+            on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
+            timeout=timeout,
+            capture_output=capture_output,
+            hashed_output_name=hashed_output_name,
+            keep_temporary_files=keep_temporary_files,
+        )
+    except ConvertError as e:
+        Event.from_command(ctx, "error", file, reason=str(e.msg) if e.msg else None).log(ERROR, logger)
+        return None
 
     output_files: list[ConvertedFile] = []
 
