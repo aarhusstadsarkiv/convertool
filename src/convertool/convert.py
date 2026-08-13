@@ -62,8 +62,8 @@ def convert_original_file(
 
     tool: str
     output: str
-    via: list[str | tuple[str | None, str]] = []
-    options: dict[str, dict[str, Any]] = {}
+    via: list[str | tuple[str | None, str]] | None = None
+    options: dict[str, dict[str, Any]] | None = None
 
     if file.action == "ignore":
         if not file.action_data.ignore:
@@ -74,7 +74,12 @@ def convert_original_file(
         if not file.action_data.convert:
             Event.from_command(ctx, "error", file, reason="Missing convert action data").log(ERROR, logger)
             return None
-        tool, output = file.action_data.convert.tool, file.action_data.convert.output or file.action_data.convert.tool
+        tool, output, options, via = (
+            file.action_data.convert.tool,
+            file.action_data.convert.output,
+            file.action_data.convert.options,
+            file.action_data.convert.via,
+        )
     else:
         raise ConverterNotFound(None, None, f"File with {file.action!r} cannot be converted.")
 
@@ -192,21 +197,31 @@ def convert_master_file(
 
     tool: str
     output: str
-    via: list[str | tuple[str | None, str]] = []
-    options: dict[str, dict[str, Any]] = {}
+    via: list[str | tuple[str | None, str]] | None
+    options: dict[str, dict[str, Any]] | None
     output_dir: Path
     output_cls: type[StatutoryFile] | type[AccessFile]
 
     if target == "statutory":
         if not file.convert_statutory:
             raise ConverterNotFound(None, None, "Missing statutory convert data")
-        tool, output = file.convert_statutory.tool, file.convert_statutory.output or file.convert_statutory.tool
+        tool, output, options, via = (
+            file.convert_statutory.tool,
+            file.convert_statutory.output,
+            file.convert_statutory.options,
+            file.convert_statutory.via,
+        )
         output_dir = avid.dirs.documents
         output_cls = StatutoryFile
     elif target == "access":
         if not file.convert_access:
             raise ConverterNotFound(None, None, "Missing access convert data")
-        tool, output = file.convert_access.tool, file.convert_access.output or file.convert_access.tool
+        tool, output, options, via = (
+            file.convert_access.tool,
+            file.convert_access.output,
+            file.convert_access.options,
+            file.convert_access.via,
+        )
         output_dir = avid.dirs.access_documents
         output_cls = AccessFile
     else:
