@@ -135,8 +135,22 @@ def app():
         ["warning", "encoding", "action_data", "convert_access", "convert_statutory"],
     ),
 )
-@option("--tool-exclude", metavar="TOOL", type=str, multiple=True, help="Exclude specific tools.  [multiple]")
-@option("--tool-include", metavar="TOOL", type=str, multiple=True, help="Include only specific tools.  [multiple]")
+@option(
+    "--tool-include",
+    metavar="TOOL",
+    type=str,
+    multiple=True,
+    help="Include only specific tools.  [multiple]",
+    callback=lambda _c, _p, v: list(v),
+)
+@option(
+    "--tool-exclude",
+    metavar="TOOL",
+    type=str,
+    multiple=True,
+    help="Exclude specific tools.  [multiple]",
+    callback=lambda _c, _p, v: list(v),
+)
 @option("--timeout", metavar="SECONDS", type=IntRange(min=0), default=None, help="Override converters' timeout.")
 @option(
     "--commit",
@@ -163,8 +177,8 @@ def cmd_digiarch(
     avid_dir: str,
     target: Literal["original:master", "master:access", "master:statutory"],
     query: list[QueryToken],
-    tool_exclude: tuple[str, ...],
-    tool_include: tuple[str, ...],
+    tool_include: list[str],
+    tool_exclude: list[str],
     timeout: int | None,
     commit: int,
     hashed_names: bool,
@@ -267,6 +281,8 @@ def cmd_digiarch(
                             hashed_names,
                             False,
                             dry_run,
+                            tool_include,
+                            tool_exclude,
                         )
                         file.processed = True
                         src_table = database.original_files
@@ -288,6 +304,8 @@ def cmd_digiarch(
                             hashed_names,
                             False,
                             dry_run,
+                            tool_include,
+                            tool_exclude,
                         )
                         file.processed = file.processed | 0b01
                         src_table = database.master_files
@@ -309,6 +327,8 @@ def cmd_digiarch(
                             hashed_names,
                             False,
                             dry_run,
+                            tool_include,
+                            tool_exclude,
                         )
                         file.processed = file.processed | 0b10
                         src_table = database.master_files
