@@ -262,7 +262,7 @@ def convert_master_file(
 
 
 def convert_file(
-    ctx: Context,
+    ctx: Context | str,
     path: Path,
     root: str | Path | None,
     output_dir: str | Path,
