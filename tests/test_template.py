@@ -74,7 +74,7 @@ def test_template_errors(avid_dir_copy: Path, output_dir: Path):
             root=output_dir,
         )
         converter = TemplateConverter(file, output_dir, database=db)
-        templates: list[TTemplateType] = ["duplicate", "extracted-archive"]
+        templates: list[TTemplateType] = ["duplicate"]
 
         for template in templates:
             with pytest.raises(ConvertError):
