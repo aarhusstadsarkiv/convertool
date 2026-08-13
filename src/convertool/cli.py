@@ -7,6 +7,7 @@ from logging import INFO
 from logging import WARNING
 from pathlib import Path
 from shutil import copy2
+from traceback import format_tb
 from typing import Literal
 
 import structlog
@@ -41,6 +42,7 @@ from .convert import convert_master_file
 from .convert import convert_original_file
 from .converters import converters
 from .converters import ConvertersGraph
+from .converters.exceptions import ConvertError
 from .converters.exceptions import MissingDependency
 from .converters.exceptions import UnsupportedPlatform
 from .util import ctx_params
@@ -337,13 +339,29 @@ def cmd_digiarch(
                         raise TypeError(f"Unknown file type {file.__class__}")
 
                 if convert_exception.exception:
-                    Event.from_command(ctx, "error", file, reason=convert_exception.exception.__class__.__name__).log(
-                        ERROR,
-                        logger,
-                        show_args=["reason"],
-                        exc_info=exception.exception,
+                    error_event = Event.from_command(
+                        ctx,
+                        "error",
+                        file,
+                        reason="".join(format_tb(exception.traceback))
+                        if exception.traceback
+                        else convert_exception.exception.__class__.__name__,
                     )
-                    uncaught_exceptions.append(convert_exception.exception)
+
+                    if isinstance(convert_exception.exception, ConvertError):
+                        error_event.data = {"msg": convert_exception.exception.msg}
+                        if convert_exception.exception.process and convert_exception.exception.process.stdout:
+                            error_event.data["process"] = convert_exception.exception.process.stdout.decode()
+                        elif convert_exception.exception.process and convert_exception.exception.process.stderr:
+                            error_event.data["process"] = convert_exception.exception.process.stderr.decode()
+                        error_event.log(ERROR, logger, show_args=["uuid", "data"])
+                    else:
+                        error_event.log(ERROR, logger, show_args=["uuid", "reason"], exc_info=exception.exception)
+                        uncaught_exceptions.append(convert_exception.exception)
+
+                    if not dry_run:
+                        database.log.insert(error_event)
+
                     continue
 
                 if not output_files:
