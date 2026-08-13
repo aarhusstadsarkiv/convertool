@@ -56,11 +56,11 @@ class TemplateConverter(ConverterABC):
             template = "Den originale fil var kodeordsbeskyttet."
         elif output == "corrupted":
             template = "Den originale fil var korrumperet og kunne ikke åbnes."
-        elif output == "duplicate" and not self.database:
-            raise ConvertError(self.file, f"{output!r} template requires a database")
         elif output == "duplicate":
-            if isinstance(self.file, OriginalFile):
+            if not isinstance(self.file, OriginalFile):
                 raise ConvertError(self.file, f"{output!r} template requires OriginalFile")
+            if self.database is None:
+                raise ConvertError(self.file, f"{output!r} template requires a database")
 
             if not (
                 original := self.database.original_files.select(
