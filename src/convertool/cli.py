@@ -410,8 +410,14 @@ def cmd_standalone(
     The converted FILEs will be placed in the DESTINATION directory. To maintain the relative paths of the files, use
     the --root option to set their common parent directory.
 
-    To pass options to the given converter tool, use the --option option with a KEY and VALUE. VALUE must be in JSON
-    format.
+    The --via option allows to specify tools that must be included in the conversion path. It's value can be the name
+    of a tool, a specific tool/output combination in the format "<tool>:<output>", or a specific output in the format
+    ":<output>".
+
+    If more than one path matches the given TOOL, OUTPUT, and --via arguments, the shortest one will be used.
+
+    To pass options to the given converter tool, use --option with a TOOL, KEY and VALUE to pass options to specific
+    tools in the conversion path. VALUE must be in JSON format.
 
     Use the --timeout option to override the converters' timeout, set to 0 to disable timeouts altogether.
 
