@@ -264,7 +264,7 @@ def cmd_digiarch(
                 src_table: Table[OriginalFile | MasterFile]
                 out_table: Table[ConvertedFile]
 
-                with ExceptionManager(BaseException, allow=[KeyboardInterrupt]) as exception:
+                with ExceptionManager(BaseException, allow=[KeyboardInterrupt]) as convert_exception:
                     if isinstance(file, OriginalFile):
                         if file.processed:
                             continue
@@ -336,14 +336,14 @@ def cmd_digiarch(
                     else:
                         raise TypeError(f"Unknown file type {file.__class__}")
 
-                if exception.exception:
-                    Event.from_command(ctx, "error", file, reason=exception.exception.__class__.__name__).log(
+                if convert_exception.exception:
+                    Event.from_command(ctx, "error", file, reason=convert_exception.exception.__class__.__name__).log(
                         ERROR,
                         logger,
                         show_args=["reason"],
                         exc_info=exception.exception,
                     )
-                    uncaught_exceptions.append(exception.exception)
+                    uncaught_exceptions.append(convert_exception.exception)
                     continue
 
                 if not output:
