@@ -383,6 +383,17 @@ def cmd_digiarch(
 
                 committer(database, n)
 
+        if errors:
+            Event.from_command(ctx, "summary.errors", None).log(ERROR, logger, errors=len(errors))
+
+        if uncaught_exceptions:
+            Event.from_command(ctx, "summary.errors.unknown", None).log(
+                ERROR,
+                logger,
+                errors=len(errors),
+                exceptions=sorted({e.__class__.__name__ for e in uncaught_exceptions}),
+            )
+
         end_program(ctx, database, exception, dry_run, logger)
 
 
