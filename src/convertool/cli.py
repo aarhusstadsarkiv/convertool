@@ -524,9 +524,20 @@ def cmd_standalone(
 
 
 @app.command("list", help="List available converters and their dependencies.")
-@option("--show-disabled-converters", is_flag=True, default=True, help="Show converters that are not available.")
+@option(
+    "--only-available",
+    is_flag=True,
+    default=False,
+    help="Only show converters that can run on this system.",
+)
+@option(
+    "--show-warnings",
+    is_flag=True,
+    default=False,
+    help="Show warnings for converters that cannot run on this system.",
+)
 @pass_context
-def cmd_list(ctx: Context, show_disabled_converters: bool):
+def cmd_list(ctx: Context, only_available: bool, show_warnings: bool):
     graph = ConvertersGraph.from_conversers(converters)
     logger = structlog.stdlib.get_logger()
 
@@ -542,17 +553,19 @@ def cmd_list(ctx: Context, show_disabled_converters: bool):
                 ", ".join("/".join(d.split("/")[-1] for d in ds) for ds in path.dependencies or []),
             )
 
-            try:
-                path.test()
-            except (MissingDependency, UnsupportedPlatform) as e:
-                if show_disabled_converters:
-                    Event.from_command(ctx, "converter.disabled", None).log(
-                        WARNING,
-                        logger,
-                        path=str(path),
-                        reason=e,
-                    )
-                continue
+            if only_available or show_warnings:
+                try:
+                    path.test()
+                except (MissingDependency, UnsupportedPlatform) as e:
+                    if show_warnings:
+                        Event.from_command(ctx, "converter.disabled", None).log(
+                            WARNING,
+                            logger,
+                            path=str(path),
+                            reason=e,
+                        )
+                    if only_available:
+                        continue
 
             table.append(entry)
 
