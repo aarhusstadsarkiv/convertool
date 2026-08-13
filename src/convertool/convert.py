@@ -253,32 +253,37 @@ def convert_master_file(
 
 
 def convert_file(
+    ctx: Context,
     path: Path,
     root: str | Path | None,
     output_dir: str | Path,
-    tool: str,
-    output: str,
-    via: list[str | tuple[str | None, str]] | None,
+    conversion: ConvertersPath | tuple[ConvertersGraph, str, str, list[str | tuple[str | None, str]] | None],
     options: dict[str, dict[str, Any]] | None,
-    graph: ConvertersGraph,
     logger: BoundLogger,
     timeout: int | None = None,
     capture_output: bool = True,
-    hashed_output_name: bool = True,
+    hashed_output_name: bool = False,
     keep_temporary_files: bool = False,
 ) -> list[Path]:
-    graph = ConvertersGraph(graph.graph).filter_conversion_graph(
-        requires_database=False,
-        requires_file_classes=[BaseFile],
-    )
-
     path = path.absolute()
     file = dummy_base_file(path, root or path.root)
 
-    conversion_path = graph.find(tool, output, via, shortest=True)
+    if isinstance(conversion, tuple):
+        graph, tool, output, via = conversion
+        conversion_path = (
+            ConvertersGraph(graph.graph)
+            .filter_conversion_graph(requires_database=False, requires_file_classes=[BaseFile])
+            .find(tool, output, via, shortest=True)
+        )
 
-    if not conversion_path:
-        raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
+        if not conversion_path:
+            raise ConverterNotFound(
+                tool,
+                output,
+                f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}",
+            )
+    else:
+        conversion_path = conversion
 
     output_paths, _ = conversion_path(
         file,
@@ -287,11 +292,12 @@ def convert_file(
         root,
         None,
         options,
-        on_edge=lambda n, p: edge_logger("convert", "step", logger, None, p, n),
+        on_edge=lambda p, n: edge_logger(ctx, "step", logger, None, p, n),
         timeout=timeout,
         capture_output=capture_output,
         hashed_output_name=hashed_output_name,
         keep_temporary_files=keep_temporary_files,
+        keep_relative_path=root is not None,
     )
 
     return output_paths
