@@ -100,7 +100,7 @@ class ImageConverter(ConverterABC):
             args.extend(["-out", "jpeg", "-xall", "-o", "out-#"])
         elif output == "png":
             args.extend(["-out", "png", "-xall", "-o", "out-#"])
-        elif output == "jp2":
+        elif output == "jpeg2000":
             args.extend(["-out", "jp2", "-xall", "-o", "out-#"])
         elif output == "tiff":
             args.extend(["-out", "tiff", "-xall", "-multi", "-c", "2", "-o", "out"])
