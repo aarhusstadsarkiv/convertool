@@ -46,26 +46,23 @@ class VideoConverter(ConverterABC):
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        final_extension: str = ""
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
+        temp_extension: str | None = None
         arguments: list[str] = []
 
         if output == "mpeg2":
-            output = "mpg"
             arguments.extend(["-c:v", "mpeg2video", "-c:a", "mp3"])
         elif output == "h264":
-            output = "mp4"
             arguments.extend(["-c:v", "libx264", "-c:a", "aac"])
         elif output == "h264-mpg":
-            output = "mp4"
-            final_extension = "mpg"
+            temp_extension = "mp4"
             arguments.extend(["-c:v", "libx264", "-c:a", "aac"])
         elif output == "h265":
-            output = "mp4"
             arguments.extend(["-c:v", "libx265", "-c:a", "aac", "-vtag", "hvc1"])
 
-        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
-
         with TempDir(output_dir) as tmp_dir:
+            tmp_file = tmp_dir.joinpath(dest_file.with_suffix(temp_extension or dest_file.suffix))
+
             self.run_process(
                 self.dependencies["ffmpeg"][0],
                 "-i",
@@ -75,13 +72,11 @@ class VideoConverter(ConverterABC):
                 "error",
                 "-stats",
                 *arguments,
-                dest_file.name,
+                tmp_file.name,
                 cwd=tmp_dir,
             )
-            if final_extension:
-                tmp_file = tmp_dir.joinpath(dest_file.name)
-                dest_file = dest_file.with_name(tmp_file.replace(self.output_filename(tmp_dir, final_extension)).name)
+
             dest_dir.mkdir(parents=True, exist_ok=True)
-            tmp_dir.joinpath(dest_file.name).replace(dest_file)
+            tmp_file.replace(dest_file)
 
         return [dest_file]
