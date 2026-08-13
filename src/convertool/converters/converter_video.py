@@ -55,7 +55,7 @@ class VideoConverter(ConverterABC):
         elif output == "h264":
             arguments.extend(["-c:v", "libx264", "-c:a", "aac"])
         elif output == "h264-mpg":
-            temp_extension = "mp4"
+            temp_extension = ".mp4"
             arguments.extend(["-c:v", "libx264", "-c:a", "aac"])
         elif output == "h265":
             arguments.extend(["-c:v", "libx265", "-c:a", "aac", "-vtag", "hvc1"])
