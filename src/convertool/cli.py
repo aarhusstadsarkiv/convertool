@@ -356,10 +356,14 @@ def cmd_digiarch(
 
                     if isinstance(convert_exception.exception, ConvertError):
                         error_event.data = {"msg": convert_exception.exception.msg}
-                        if convert_exception.exception.process and convert_exception.exception.process.stdout:
-                            error_event.data["process"] = convert_exception.exception.process.stdout.decode()
-                        elif convert_exception.exception.process and convert_exception.exception.process.stderr:
-                            error_event.data["process"] = convert_exception.exception.process.stderr.decode()
+                        if convert_exception.exception.process and (
+                            stdout := convert_exception.exception.process.stdout
+                        ):
+                            error_event.data["stdout"] = stdout if isinstance(stdout, str) else stdout.decode()
+                        elif convert_exception.exception.process and (
+                            stderr := convert_exception.exception.process.stderr
+                        ):
+                            error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
                         error_event.log(ERROR, logger, show_args=["uuid", "data"])
                     else:
                         error_event.log(ERROR, logger, show_args=["uuid", "reason"], exc_info=exception.exception)
