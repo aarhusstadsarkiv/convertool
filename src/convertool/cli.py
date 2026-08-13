@@ -223,6 +223,8 @@ def cmd_digiarch(
     avid = get_avid(ctx, avid_dir, "avid_dir")
     committer: Callable[[FilesDB, int], FilesDB | None]
     graph = ConvertersGraph.from_conversers(converters)
+    total_files: int = 0
+    converted_files: int = 0
     errors: list[BaseException] = []
     uncaught_exceptions: list[BaseException] = []
 
@@ -263,6 +265,7 @@ def cmd_digiarch(
             Event.from_command(ctx, "compiling:end").log(INFO, logger)
 
             for n, file in enumerate(to_process_table):
+                total_files += 1
                 output_files: list[ConvertedFile] | None
                 src_table: Table[OriginalFile | MasterFile]
                 out_table: Table[ConvertedFile]
@@ -381,7 +384,12 @@ def cmd_digiarch(
                 src_table.update(file)
                 database.log.insert(Event.from_command(ctx, "converted", file, {"files": len(output_files)}))
 
+                converted_files += 1
+
                 committer(database, n)
+
+        Event.from_command(ctx, "summary.files", None).log(INFO, logger, total=total_files)
+        Event.from_command(ctx, "summary.files.converted", None).log(INFO, logger, total=converted_files)
 
         if errors:
             Event.from_command(ctx, "summary.errors", None).log(ERROR, logger, errors=len(errors))
