@@ -56,24 +56,27 @@ def test_template(test_files: dict[str, Path], reference_files: dict[str, Path],
                 assert output_files[0].read_text() == reference_files[output_files[0].name].read_text()
 
 
-def test_template_errors(output_dir: Path):
-    file = OriginalFile(
-        checksum="",
-        encoding=None,
-        relative_path=Path("template.jpg"),
-        original_path=Path("template.jpg"),
-        is_binary=False,
-        size=0,
-        puid=None,
-        signature=None,
-        action="ignore",
-        action_data=ActionData(),
-        root=output_dir,
-    )
-    converter = TemplateConverter(file, output_dir)
-    templates: list[TTemplateType] = ["duplicate", "extracted-archive"]
+def test_template_errors(avid_dir_copy: Path, output_dir: Path):
+    avid = AVID(avid_dir_copy)
 
-    for template in templates:
-        with pytest.raises(ConvertError):
-            converter.file.action_data.ignore = IgnoreAction(template=template)
-            converter.convert(output_dir, template)
+    with FilesDB(avid.database_path) as db:
+        file = OriginalFile(
+            checksum="",
+            encoding=None,
+            relative_path=Path("template.jpg"),
+            original_path=Path("template.jpg"),
+            is_binary=False,
+            size=0,
+            puid=None,
+            signature=None,
+            action="ignore",
+            action_data=ActionData(),
+            root=output_dir,
+        )
+        converter = TemplateConverter(file, output_dir, database=db)
+        templates: list[TTemplateType] = ["duplicate", "extracted-archive"]
+
+        for template in templates:
+            with pytest.raises(ConvertError):
+                converter.file.action_data.ignore = IgnoreAction(template=template)
+                converter.convert(output_dir, template)
