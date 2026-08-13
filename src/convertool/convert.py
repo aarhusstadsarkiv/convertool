@@ -55,6 +55,8 @@ def convert_original_file(
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
     dry_run: bool = False,
+    tool_include: list[str] | None = None,
+    tool_exclude: list[str] | None = None,
 ) -> list[MasterFile] | None:
     if file.processed:
         return None
@@ -76,6 +78,11 @@ def convert_original_file(
         tool, output = file.action_data.convert.tool, file.action_data.convert.output or file.action_data.convert.tool
     else:
         raise ConverterNotFound(None, None, f"File with {file.action!r} cannot be converted.")
+
+    if tool_include and tool not in tool_include:
+        return None
+    if tool_exclude and tool in tool_exclude:
+        return None
 
     conversion_path = graph.find(tool, output, via, shortest=True)
 
@@ -145,6 +152,8 @@ def convert_master_file(
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
     dry_run: bool = False,
+    tool_include: list[str] | None = None,
+    tool_exclude: list[str] | None = None,
 ) -> list[StatutoryFile] | None: ...
 
 
@@ -162,6 +171,8 @@ def convert_master_file(
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
     dry_run: bool = False,
+    tool_include: list[str] | None = None,
+    tool_exclude: list[str] | None = None,
 ) -> list[AccessFile] | None: ...
 
 
@@ -178,6 +189,8 @@ def convert_master_file(
     hashed_output_name: bool = True,
     keep_temporary_files: bool = False,
     dry_run: bool = False,
+    tool_include: list[str] | None = None,
+    tool_exclude: list[str] | None = None,
 ) -> list[StatutoryFile] | list[AccessFile] | None:
     if file.processed:
         return None
@@ -203,6 +216,11 @@ def convert_master_file(
         output_cls = AccessFile
     else:
         raise ValueError(f"Unknown target {target!r}")
+
+    if tool_include and tool not in tool_include:
+        return None
+    if tool_exclude and tool in tool_exclude:
+        return None
 
     conversion_path = graph.find(tool, output, via, shortest=True)
 
