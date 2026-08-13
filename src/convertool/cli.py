@@ -223,6 +223,7 @@ def cmd_digiarch(
     avid = get_avid(ctx, avid_dir, "avid_dir")
     committer: Callable[[FilesDB, int], FilesDB | None]
     graph = ConvertersGraph.from_conversers(converters)
+    errors: list[BaseException] = []
     uncaught_exceptions: list[BaseException] = []
 
     with open_database(ctx, avid, "avid_dir") as database:
@@ -339,6 +340,8 @@ def cmd_digiarch(
                         raise TypeError(f"Unknown file type {file.__class__}")
 
                 if convert_exception.exception:
+                    errors.append(convert_exception.exception)
+
                     error_event = Event.from_command(
                         ctx,
                         "error",
@@ -361,12 +364,14 @@ def cmd_digiarch(
 
                     if not dry_run:
                         database.log.insert(error_event)
+                        committer(database, n)
 
                     continue
 
                 if not output_files:
                     if not dry_run:
                         Event.from_command(ctx, "skipped", file).log(INFO, logger)
+                        committer(database, n)
                     continue
 
                 for output_file in output_files:
