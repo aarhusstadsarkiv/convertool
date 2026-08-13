@@ -284,7 +284,7 @@ class ConverterABC(ABC):
             return name
 
         if append:
-            return f"{name}.{extension}"
+            return f"{name}{extension}"
 
         return f"{name.removesuffix(self.file.suffixes)}{extension}"
 
