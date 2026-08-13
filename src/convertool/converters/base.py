@@ -401,7 +401,7 @@ class ConvertersPath:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         with TempDir(output_dir, delete=not keep_temporary_files) as temp_dir:
-            for n, edge in enumerate(self.branch, 1):
+            for n, edge in enumerate(self.branch):
                 if on_edge:
                     on_edge(self, n)
 
