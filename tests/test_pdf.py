@@ -3,8 +3,8 @@ from pathlib import Path
 from acacore.siegfried import Siegfried
 
 from convertool.converters.base import dummy_base_file
-from convertool.converters.converter_pdf import ConverterPDF
-from convertool.converters.converter_pdf import ConverterPDFToImage
+from convertool.converters.converter_pdf import PDFConverter
+from convertool.converters.converter_pdf import PDFToImageConverter
 
 from .test_image import MIMETYPES
 
@@ -12,7 +12,7 @@ from .test_image import MIMETYPES
 # noinspection DuplicatedCode
 def test_pdf_to_pdfa(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["pdf-to-pdfa.pdf"], test_files["pdf-to-pdfa.pdf"].parent)
-    converter = ConverterPDF(file, test_files["pdf-to-pdfa.pdf"].parent)
+    converter = PDFConverter(file, test_files["pdf-to-pdfa.pdf"].parent)
 
     for pdfa_ver in (1, 2, 3):
         output: str = f"pdfa-{pdfa_ver}"
@@ -27,7 +27,7 @@ def test_pdf_to_pdfa(test_files: dict[str, Path], output_dir: Path, siegfried: S
 # noinspection DuplicatedCode
 def test_pdf_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["pdf-to-img.pdf"], test_files["pdf-to-img.pdf"].parent)
-    converter = ConverterPDFToImage(file, test_files["pdf-to-img.pdf"].parent)
+    converter = PDFToImageConverter(file, test_files["pdf-to-img.pdf"].parent)
 
     for output in converter.outputs:
         print(output)

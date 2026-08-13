@@ -8,7 +8,7 @@ from acacore.models.reference_files import IgnoreAction
 from acacore.models.reference_files import TemplateTypeEnum
 from acacore.models.reference_files import TTemplateType
 
-from convertool.converters import ConverterTemplate
+from convertool.converters import TemplateConverter
 from convertool.converters.exceptions import ConvertError
 
 
@@ -26,9 +26,9 @@ def test_template(test_files: dict[str, Path], reference_files: dict[str, Path],
         action_data=ActionData(),
         root=output_dir,
     )
-    converter = ConverterTemplate(file, output_dir, hashed_output_name=False)
+    converter = TemplateConverter(file, output_dir, hashed_output_name=False)
     templates: list[TTemplateType] = [
-        t for t in TemplateTypeEnum if t in ConverterTemplate.outputs and t not in ["duplicate", "extracted-archive"]
+        t for t in TemplateTypeEnum if t in TemplateConverter.outputs and t not in ["duplicate", "extracted-archive"]
     ]
 
     for template in templates:
@@ -63,7 +63,7 @@ def test_template_errors(output_dir: Path):
         action_data=ActionData(),
         root=output_dir,
     )
-    converter = ConverterTemplate(file, output_dir)
+    converter = TemplateConverter(file, output_dir)
     templates: list[TTemplateType] = ["duplicate", "extracted-archive"]
 
     for template in templates:

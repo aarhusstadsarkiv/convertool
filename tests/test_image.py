@@ -3,7 +3,7 @@ from pathlib import Path
 from acacore.siegfried import Siegfried
 
 from convertool.converters.base import dummy_base_file
-from convertool.converters.converter_image import ConverterImage
+from convertool.converters.converter_image import ImageConverter
 
 MIMETYPES = {
     "jpg": "image/jpeg",
@@ -19,7 +19,7 @@ MIMETYPES = {
 # noinspection DuplicatedCode
 def test_img_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     file = dummy_base_file(test_files["img-to-img.webp"], test_files["img-to-img.webp"].parent)
-    converter = ConverterImage(file, test_files["img-to-img.webp"].parent)
+    converter = ImageConverter(file, test_files["img-to-img.webp"].parent)
 
     for output in converter.outputs:
         print(output)
