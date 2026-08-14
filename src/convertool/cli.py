@@ -323,7 +323,7 @@ def cmd_digiarch(
                         file.processed = file.processed | 0b01
                         src_table = database.master_files
                         out_table = database.access_files
-                    elif isinstance(file, MasterFile) and target == "master:access":
+                    elif isinstance(file, MasterFile) and target == "master:statutory":
                         if file.processed & 0b10:
                             continue
 
