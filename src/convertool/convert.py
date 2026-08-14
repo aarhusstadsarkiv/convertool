@@ -192,7 +192,9 @@ def convert_master_file(
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
 ) -> list[StatutoryFile] | list[AccessFile] | None:
-    if file.processed:
+    if target == "access" and file.processed & 0b01:
+        return None
+    if target == "statutory" and file.processed & 0b10:
         return None
 
     tool: str
@@ -248,7 +250,7 @@ def convert_master_file(
         avid.dirs.master_documents,
         database,
         options,
-        on_edge=lambda n, p: edge_logger(ctx, "step", logger, file, p, n),
+        on_edge=lambda p, n: edge_logger(ctx, "step", logger, file, p, n),
         timeout=timeout,
         capture_output=capture_output,
         hashed_output_name=hashed_output_name,
