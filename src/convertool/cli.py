@@ -373,7 +373,12 @@ def cmd_digiarch(
                             error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
                         error_event.log(ERROR, logger, show_args=["uuid", "data"])
                     else:
-                        error_event.log(ERROR, logger, show_args=["uuid", "reason"], exc_info=exception.exception)
+                        error_event.log(
+                            ERROR,
+                            logger,
+                            show_args=["uuid", "reason"],
+                            exc_info=convert_exception.exception,
+                        )
                         uncaught_exceptions.append(convert_exception.exception)
 
                     if not dry_run:
