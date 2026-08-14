@@ -169,6 +169,12 @@ def app():
     show_default=True,
     help="Use hashed names instead of filenames.",
 )
+@option(
+    "--keep-temporary-files",
+    is_flag=True,
+    default=False,
+    help="Keep temporary files and folders created by each converter.",
+)
 @option("--show-disabled-converters", is_flag=True, default=False, help="Show converters that are not available.")
 @option("--dry-run", is_flag=True, default=False, help="Show changes without committing them.")
 @option("--backup/--no-backup", is_flag=True, default=False, help="Create a backup of the database at start.")
@@ -184,6 +190,7 @@ def cmd_digiarch(
     timeout: int | None,
     commit: int,
     hashed_names: bool,
+    keep_temporary_files: bool,
     show_disabled_converters: bool,
     dry_run: bool,
     backup: bool,
@@ -285,7 +292,7 @@ def cmd_digiarch(
                             timeout,
                             not verbose,
                             hashed_names,
-                            False,
+                            keep_temporary_files,
                             dry_run,
                             tool_include,
                             tool_exclude,
@@ -308,7 +315,7 @@ def cmd_digiarch(
                             timeout,
                             not verbose,
                             hashed_names,
-                            False,
+                            keep_temporary_files,
                             dry_run,
                             tool_include,
                             tool_exclude,
@@ -331,7 +338,7 @@ def cmd_digiarch(
                             timeout,
                             not verbose,
                             hashed_names,
-                            False,
+                            keep_temporary_files,
                             dry_run,
                             tool_include,
                             tool_exclude,
@@ -438,6 +445,12 @@ def cmd_digiarch(
     default=None,
     help="Set a root for the given files to keep the relative paths in the output.",
 )
+@option(
+    "--keep-temporary-files",
+    is_flag=True,
+    default=False,
+    help="Keep temporary files and folders created by each converter.",
+)
 @pass_context
 def cmd_standalone(
     ctx: Context,
@@ -450,6 +463,7 @@ def cmd_standalone(
     timeout: int | None,
     verbose: bool,
     root: str | None,
+    keep_temporary_files: bool,
 ):
     """
     Convert FILEs to OUTPUT with the given TOOL.
@@ -516,7 +530,8 @@ def cmd_standalone(
             logger,
             timeout,
             not verbose,
-            hashed_output_name=False,
+            False,
+            keep_temporary_files,
         )
 
         for output_file in output_files:
