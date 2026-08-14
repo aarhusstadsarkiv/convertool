@@ -56,7 +56,7 @@ def convert_original_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[MasterFile] | None:
+) -> list[MasterFile] | str | None:
     if file.processed:
         return None
 
@@ -154,7 +154,7 @@ def convert_master_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[StatutoryFile] | None: ...
+) -> list[StatutoryFile] | str | None: ...
 
 
 @overload
@@ -173,7 +173,7 @@ def convert_master_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[AccessFile] | None: ...
+) -> list[AccessFile] | str | None: ...
 
 
 def convert_master_file(
@@ -191,7 +191,7 @@ def convert_master_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[StatutoryFile] | list[AccessFile] | None:
+) -> list[StatutoryFile] | list[AccessFile] | str | None:
     if target == "access" and file.processed & 0b01:
         return None
     if target == "statutory" and file.processed & 0b10:
