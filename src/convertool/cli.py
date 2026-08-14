@@ -273,7 +273,7 @@ def cmd_digiarch(
 
             for n, file in enumerate(to_process_table):
                 total_files += 1
-                output_files: list[ConvertedFile] | None
+                output_files: list[ConvertedFile] | str | None
                 src_table: Table[OriginalFile | MasterFile]
                 out_table: Table[ConvertedFile]
 
@@ -387,9 +387,14 @@ def cmd_digiarch(
 
                     continue
 
-                if not output_files:
+                if isinstance(output_files, str):
+                    Event.from_command(ctx, "skipped", file, reason=output_files).log(INFO, logger)
                     if not dry_run:
-                        Event.from_command(ctx, "skipped", file).log(INFO, logger)
+                        committer(database, n)
+                    continue
+
+                if output_files is None:
+                    if not dry_run:
                         committer(database, n)
                     continue
 
