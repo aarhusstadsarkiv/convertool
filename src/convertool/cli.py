@@ -403,7 +403,7 @@ def cmd_digiarch(
 
         Event.from_command(ctx, "summary.files", None).log(INFO, logger, total=total_files)
         Event.from_command(ctx, "summary.files.converted", None).log(INFO, logger, total=total_converted_files)
-        Event.from_command(ctx, "summary.files.output", None).log(INFO, logger, total=total_converted_files)
+        Event.from_command(ctx, "summary.files.output", None).log(INFO, logger, total=total_output_files)
 
         if errors:
             Event.from_command(ctx, "summary.errors", None).log(ERROR, logger, errors=len(errors))
