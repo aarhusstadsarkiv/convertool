@@ -37,7 +37,13 @@ class ConverterNotFound(Exception):
 class BadOption(Exception): ...
 
 
-class BadFile(Exception): ...
+class BadFile(Exception):
+    def __init__(self, file: BaseFile, *args: object) -> None:
+        self.file: BaseFile = file
+        super().__init__(*args)
+
+
+class BadDatabase(Exception): ...
 
 
 class ConvertError(Exception):

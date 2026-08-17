@@ -24,6 +24,7 @@ from chardet import DetectionDict
 from convertool.util import run_process
 from convertool.util import TempDir
 
+from .exceptions import BadDatabase
 from .exceptions import BadFile
 from .exceptions import ConvertError
 from .exceptions import ConvertTimeoutError
@@ -101,10 +102,10 @@ class ConverterABC(ABC):
         self.timeout: int | None = timeout
 
         if self.requires_file_classes and type(self.file) not in self.requires_file_classes:
-            raise BadFile(f"File is not of class {self.requires_file_classes}")
+            raise BadFile(file, f"File is not of class {self.requires_file_classes}")
 
         if self.requires_database and self.database is None:
-            raise BadFile("Database is not provided")
+            raise BadDatabase("Database is not provided")
 
         self.test_options()
 
