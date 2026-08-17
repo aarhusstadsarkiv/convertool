@@ -15,13 +15,13 @@ from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
 from chardet import DetectionDict
 from click import Context
-from converters.exceptions import ConvertError
 from structlog.stdlib import BoundLogger
 
 from .converters import ConvertersGraph
 from .converters import ConvertersPath
 from .converters import dummy_base_file
 from .converters.exceptions import ConverterNotFound
+from .converters.exceptions import ConvertError
 from .util import AVID
 
 

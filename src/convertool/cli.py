@@ -34,12 +34,12 @@ from click import option
 from click import pass_context
 from click import Path as ClickPath
 from click import version_option
-from convert import ConvertResult
 
 from .__version__ import __version__
 from .convert import convert_file
 from .convert import convert_master_file
 from .convert import convert_original_file
+from .convert import ConvertResult
 from .converters import converters
 from .converters import ConvertersGraph
 from .converters.exceptions import ConvertError
