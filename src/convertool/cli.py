@@ -7,6 +7,7 @@ from logging import INFO
 from logging import WARNING
 from pathlib import Path
 from shutil import copy2
+from traceback import format_exc
 from typing import Literal
 
 import structlog
@@ -355,6 +356,7 @@ def cmd_digiarch(
                     errors.append(error)
                     error_event = Event.from_command(ctx, "error", file)
                     error_event.data = {}
+                    error_event.reason = format_exc()
                     if error.msg:
                         error_event.data["msg"] = error.msg
                     if error.process and (stdout := error.process.stdout):
@@ -370,6 +372,7 @@ def cmd_digiarch(
                     errors.append(error)
                     uncaught_exceptions.append(error)
                     error_event = Event.from_command(ctx, "error", file)
+                    error_event.reason = format_exc()
                     error_event.log(ERROR, logger, show_args=["uuid"], exc_info=error)
                     if not dry_run:
                         database.log.insert(error_event)
