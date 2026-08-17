@@ -1,4 +1,4 @@
-from logging import ERROR
+from dataclasses import dataclass
 from logging import INFO
 from pathlib import Path
 from typing import Any
@@ -15,6 +15,7 @@ from acacore.models.file import OriginalFile
 from acacore.models.file import StatutoryFile
 from chardet import DetectionDict
 from click import Context
+from converters.exceptions import ConvertError
 from structlog.stdlib import BoundLogger
 
 from .converters import ConvertersGraph
@@ -22,6 +23,14 @@ from .converters import ConvertersPath
 from .converters import dummy_base_file
 from .converters.exceptions import ConverterNotFound
 from .util import AVID
+
+
+@dataclass
+class ConvertResult[F: BaseFile, R: ConvertedFile]:
+    file: F
+    converter: ConvertersPath | None = None
+    files: list[R] | None = None
+    message: str | None = None
 
 
 def edge_logger(
@@ -56,9 +65,9 @@ def convert_original_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[MasterFile] | str | None:
+) -> ConvertResult[OriginalFile, MasterFile]:
     if file.processed:
-        return None
+        return ConvertResult(file, message="File is already processed")
 
     tool: str
     output: str
@@ -67,13 +76,11 @@ def convert_original_file(
 
     if file.action == "ignore":
         if not file.action_data.ignore:
-            Event.from_command(ctx, "error", file, reason="Missing ignore action data").log(ERROR, logger)
-            return None
+            raise ConvertError(file, "Missing ignore action data")
         tool, output = "template", file.action_data.ignore.template
     elif file.action == "convert":
         if not file.action_data.convert:
-            Event.from_command(ctx, "error", file, reason="Missing convert action data").log(ERROR, logger)
-            return None
+            raise ConvertError(file, "Missing convert action data")
         tool, output, options, via = (
             file.action_data.convert.tool,
             file.action_data.convert.output,
@@ -81,28 +88,20 @@ def convert_original_file(
             file.action_data.convert.via,
         )
     else:
-        raise ConverterNotFound(None, None, f"File with {file.action!r} cannot be converted.")
+        raise ConvertError(file, f"File with {file.action!r} cannot be converted.")
 
     if tool_include and tool not in tool_include:
-        return None
+        return ConvertResult(file, message=f"Tool {tool!r} is not included")
     if tool_exclude and tool in tool_exclude:
-        return None
+        return ConvertResult(file, message=f"Tool {tool!r} is excluded")
 
     conversion_path = graph.find(tool, output, via, shortest=True)
 
     if not conversion_path:
-        Event.from_command(ctx, "error", file, reason="Cannot find converter").log(
-            ERROR,
-            logger,
-            tool=tool,
-            output=output,
-            via=via or None,
-        )
-        return None
+        raise ConverterNotFound(tool, output, via)
 
     if dry_run:
-        Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(conversion_path))
-        return None
+        return ConvertResult(file, conversion_path)
 
     output_paths, converters = conversion_path(
         file,
@@ -135,7 +134,7 @@ def convert_original_file(
         )
         output_file.puid = puid
 
-    return output_files
+    return ConvertResult(file, conversion_path, output_files)
 
 
 @overload
@@ -154,7 +153,7 @@ def convert_master_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[StatutoryFile] | str | None: ...
+) -> ConvertResult[MasterFile, StatutoryFile]: ...
 
 
 @overload
@@ -173,7 +172,7 @@ def convert_master_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[AccessFile] | str | None: ...
+) -> ConvertResult[MasterFile, AccessFile]: ...
 
 
 def convert_master_file(
@@ -191,11 +190,11 @@ def convert_master_file(
     dry_run: bool = False,
     tool_include: list[str] | None = None,
     tool_exclude: list[str] | None = None,
-) -> list[StatutoryFile] | list[AccessFile] | str | None:
+) -> ConvertResult[MasterFile, StatutoryFile | AccessFile]:
     if target == "access" and file.processed & 0b01:
-        return None
+        return ConvertResult(file, message="File is already processed")
     if target == "statutory" and file.processed & 0b10:
-        return None
+        return ConvertResult(file, message="File is already processed")
 
     tool: str
     output: str
@@ -206,7 +205,7 @@ def convert_master_file(
 
     if target == "statutory":
         if not file.convert_statutory:
-            raise ConverterNotFound(None, None, "Missing statutory convert data")
+            raise ConvertError(file, "Missing statutory convert data")
         tool, output, options, via = (
             file.convert_statutory.tool,
             file.convert_statutory.output,
@@ -217,7 +216,7 @@ def convert_master_file(
         output_cls = StatutoryFile
     elif target == "access":
         if not file.convert_access:
-            raise ConverterNotFound(None, None, "Missing access convert data")
+            raise ConvertError(file, "Missing access convert data")
         tool, output, options, via = (
             file.convert_access.tool,
             file.convert_access.output,
@@ -230,18 +229,17 @@ def convert_master_file(
         raise ValueError(f"Unknown target {target!r}")
 
     if tool_include and tool not in tool_include:
-        return None
+        return ConvertResult(file, message=f"Tool {tool!r} is not included")
     if tool_exclude and tool in tool_exclude:
-        return None
+        return ConvertResult(file, message=f"Tool {tool!r} is excluded")
 
     conversion_path = graph.find(tool, output, via, shortest=True)
 
     if not conversion_path:
-        raise ConverterNotFound(tool, output, f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}")
+        raise ConverterNotFound(tool, output, via)
 
     if dry_run:
-        Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(conversion_path))
-        return None
+        return ConvertResult(file, conversion_path)
 
     output_paths, converters = conversion_path(
         file,
@@ -275,7 +273,7 @@ def convert_master_file(
         output_file.puid = puid
 
     # noinspection bad-return
-    return output_files
+    return ConvertResult(file, conversion_path, output_files)
 
 
 def convert_file(
@@ -303,11 +301,7 @@ def convert_file(
         )
 
         if not conversion_path:
-            raise ConverterNotFound(
-                tool,
-                output,
-                f"Cannot find converter for {tool}:{output}{f':{via}' if via else ''}",
-            )
+            raise ConverterNotFound(tool, output, via)
     else:
         conversion_path = conversion
 

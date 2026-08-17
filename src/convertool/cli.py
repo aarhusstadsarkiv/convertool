@@ -7,7 +7,6 @@ from logging import INFO
 from logging import WARNING
 from pathlib import Path
 from shutil import copy2
-from traceback import format_tb
 from typing import Literal
 
 import structlog
@@ -35,6 +34,7 @@ from click import option
 from click import pass_context
 from click import Path as ClickPath
 from click import version_option
+from convert import ConvertResult
 
 from .__version__ import __version__
 from .convert import convert_file
@@ -231,7 +231,8 @@ def cmd_digiarch(
     committer: Callable[[FilesDB, int], FilesDB | None]
     graph = ConvertersGraph.from_conversers(converters)
     total_files: int = 0
-    converted_files: int = 0
+    total_converted_files: int = 0
+    total_output_files: int = 0
     errors: list[BaseException] = []
     uncaught_exceptions: list[BaseException] = []
 
@@ -273,16 +274,16 @@ def cmd_digiarch(
 
             for n, file in enumerate(to_process_table):
                 total_files += 1
-                output_files: list[ConvertedFile] | str | None
+                result: ConvertResult[OriginalFile | MasterFile, ConvertedFile]
                 src_table: Table[OriginalFile | MasterFile]
                 out_table: Table[ConvertedFile]
 
-                with ExceptionManager(BaseException, allow=[KeyboardInterrupt]) as convert_exception:
+                try:
                     if isinstance(file, OriginalFile):
                         if file.processed:
                             continue
 
-                        output_files = convert_original_file(
+                        result = convert_original_file(
                             ctx,
                             avid,
                             database,
@@ -304,7 +305,7 @@ def cmd_digiarch(
                         if file.processed & 0b01:
                             continue
 
-                        output_files = convert_master_file(
+                        result = convert_master_file(
                             ctx,
                             avid,
                             database,
@@ -327,7 +328,7 @@ def cmd_digiarch(
                         if file.processed & 0b10:
                             continue
 
-                        output_files = convert_master_file(
+                        result = convert_master_file(
                             ctx,
                             avid,
                             database,
@@ -348,69 +349,58 @@ def cmd_digiarch(
                         out_table = database.statutory_files
                     else:
                         raise TypeError(f"Unknown file type {file.__class__}")
-
-                if convert_exception.exception:
-                    errors.append(convert_exception.exception)
-
-                    error_event = Event.from_command(
-                        ctx,
-                        "error",
-                        file,
-                        reason="".join(format_tb(exception.traceback))
-                        if exception.traceback
-                        else convert_exception.exception.__class__.__name__,
-                    )
-
-                    if isinstance(convert_exception.exception, ConvertError):
-                        error_event.data = {"msg": convert_exception.exception.msg}
-                        if convert_exception.exception.process and (
-                            stdout := convert_exception.exception.process.stdout
-                        ):
-                            error_event.data["stdout"] = stdout if isinstance(stdout, str) else stdout.decode()
-                        elif convert_exception.exception.process and (
-                            stderr := convert_exception.exception.process.stderr
-                        ):
-                            error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
-                        error_event.log(ERROR, logger, show_args=["uuid", "data"])
-                    else:
-                        error_event.log(
-                            ERROR,
-                            logger,
-                            show_args=["uuid", "reason"],
-                            exc_info=convert_exception.exception,
-                        )
-                        uncaught_exceptions.append(convert_exception.exception)
-
+                except KeyboardInterrupt:
+                    raise
+                except ConvertError as error:
+                    errors.append(error)
+                    error_event = Event.from_command(ctx, "error", file)
+                    error_event.data = {}
+                    if error.msg:
+                        error_event.data["msg"] = error.msg
+                    if error.process and (stdout := error.process.stdout):
+                        error_event.data["stdout"] = stdout if isinstance(stdout, str) else stdout.decode()
+                    elif error.process and (stderr := error.process.stderr):
+                        error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
+                    error_event.log(ERROR, logger, show_args=["uuid"], **error_event.data)
                     if not dry_run:
                         database.log.insert(error_event)
                         committer(database, n)
-
                     continue
-
-                if isinstance(output_files, str):
-                    Event.from_command(ctx, "skipped", file, reason=output_files).log(INFO, logger)
+                except BaseException as error:
+                    errors.append(error)
+                    uncaught_exceptions.append(error)
+                    error_event = Event.from_command(ctx, "error", file)
+                    error_event.log(ERROR, logger, show_args=["uuid"], exc_info=error)
                     if not dry_run:
+                        database.log.insert(error_event)
                         committer(database, n)
                     continue
 
-                if output_files is None:
-                    if not dry_run:
-                        committer(database, n)
+                if dry_run:
+                    Event.from_command(ctx, "converter", file).log(INFO, logger, path=str(result.converter))
                     continue
 
-                for output_file in output_files:
+                if result.files is None:
+                    Event.from_command(ctx, "skipped", file, reason=result.message).log(INFO, logger)
+                    continue
+
+                for output_file in result.files:
                     Event.from_command(ctx, "out", output_file).log(INFO, logger)
                     out_table.insert(output_file, on_exists="error")
 
                 src_table.update(file)
-                database.log.insert(Event.from_command(ctx, "converted", file, {"files": len(output_files)}))
+                database.log.insert(Event.from_command(ctx, "converted", file, {"files": len(result.files)}))
 
-                converted_files += 1
+                total_converted_files += 1
+                total_output_files += len(result.files)
 
                 committer(database, n)
 
+            database.commit()
+
         Event.from_command(ctx, "summary.files", None).log(INFO, logger, total=total_files)
-        Event.from_command(ctx, "summary.files.converted", None).log(INFO, logger, total=converted_files)
+        Event.from_command(ctx, "summary.files.converted", None).log(INFO, logger, total=total_converted_files)
+        Event.from_command(ctx, "summary.files.output", None).log(INFO, logger, total=total_converted_files)
 
         if errors:
             Event.from_command(ctx, "summary.errors", None).log(ERROR, logger, errors=len(errors))

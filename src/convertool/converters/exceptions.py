@@ -24,9 +24,16 @@ class UnsupportedOutput(Exception):
 
 
 class ConverterNotFound(Exception):
-    def __init__(self, tool: str | None, output: str | None, *args: Any) -> None:  # noqa: ANN401
+    def __init__(
+        self,
+        tool: str | None,
+        output: str | None,
+        via: list[str | tuple[str | None, str]] | None,
+        *args,
+    ) -> None:
         self.tool: str | None = tool
         self.output: str | None = output
+        self.via: list[str | tuple[str | None, str]] | None = via
         super().__init__(*args)
 
     @property
