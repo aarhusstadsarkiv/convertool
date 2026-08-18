@@ -90,10 +90,10 @@ def compile_convert_targets(
     )
     database.execute(
         f"""
-                insert into {to_process_table.name}
-                select {",".join(to_process_table.columns.keys())} from {src_table.name}
-                where {where or "true"}
-                """,
+        insert into {to_process_table.name}
+        select {",".join(to_process_table.columns.keys())} from {src_table.name}
+        where {where or "true"}
+        """,
         params,
     )
     database.commit()
