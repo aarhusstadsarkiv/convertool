@@ -594,6 +594,8 @@ def cmd_list(ctx: Context, only_available: bool, show_warnings: bool):
 
             table.append(entry)
 
+    table = [table[0], *sorted(table[1:])]
+
     max_columns = max(map(len, table))
     column_widths = [max(len(r[c]) for r in table) for c in range(max_columns)]
 
