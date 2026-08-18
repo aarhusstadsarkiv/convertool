@@ -541,15 +541,7 @@ def cmd_standalone(
         except (KeyboardInterrupt, ConverterNotFound):
             raise
         except ConvertError as error:
-            error_event = Event.from_command(ctx, "error")
-            error_event.data = {}
-            if error.msg:
-                error_event.data["msg"] = error.msg
-            if error.process and (stdout := error.process.stdout):
-                error_event.data["stdout"] = stdout if isinstance(stdout, str) else stdout.decode()
-            elif error.process and (stderr := error.process.stderr):
-                error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
-            error_event.log(ERROR, logger, show_args=["uuid"], **error_event.data, exc_info=error)
+            Event.from_command(ctx, "error").log(ERROR, logger, exc_info=error)
             continue
 
         for output_file in output_files:
