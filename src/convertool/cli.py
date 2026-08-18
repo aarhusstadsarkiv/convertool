@@ -35,6 +35,7 @@ from click import option
 from click import pass_context
 from click import Path as ClickPath
 from click import version_option
+from converters.exceptions import ConverterNotFound
 
 from .__version__ import __version__
 from .convert import convert_file
@@ -523,19 +524,33 @@ def cmd_standalone(
 
     for file in map(Path, files_paths):
         Event.from_command(ctx, "convert", None).log(INFO, logger, file=str(file.relative_to(root) if root else file))
-        output_files = convert_file(
-            ctx,
-            file,
-            root,
-            destination,
-            conversion_path,
-            options_dict,
-            logger,
-            timeout,
-            not verbose,
-            False,
-            keep_temporary_files,
-        )
+        try:
+            output_files = convert_file(
+                ctx,
+                file,
+                root,
+                destination,
+                conversion_path,
+                options_dict,
+                logger,
+                timeout,
+                not verbose,
+                False,
+                keep_temporary_files,
+            )
+        except (KeyboardInterrupt, ConverterNotFound):
+            raise
+        except ConvertError as error:
+            error_event = Event.from_command(ctx, "error")
+            error_event.data = {}
+            if error.msg:
+                error_event.data["msg"] = error.msg
+            if error.process and (stdout := error.process.stdout):
+                error_event.data["stdout"] = stdout if isinstance(stdout, str) else stdout.decode()
+            elif error.process and (stderr := error.process.stderr):
+                error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
+            error_event.log(ERROR, logger, show_args=["uuid"], **error_event.data, exc_info=error)
+            continue
 
         for output_file in output_files:
             Event.from_command(ctx, "output", None).log(INFO, logger, file=str(output_file.relative_to(destination)))
