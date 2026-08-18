@@ -2,12 +2,9 @@ from pathlib import Path
 
 from acacore.siegfried import Siegfried
 
-from convertool.converters.base import _hashed_file_name
 from convertool.converters.base import dummy_base_file
-from convertool.converters.converter_document import ConverterDocument
-from convertool.converters.converter_document import ConverterDocumentToImage
-
-from .test_image import MIMETYPES
+from convertool.converters.base import hashed_file_name
+from convertool.converters.converter_document import DocumentConverter
 
 
 # noinspection DuplicatedCode
@@ -16,10 +13,10 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file, path.parent, hashed_output_name=True)
+        converter = DocumentConverter(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "odt")
-        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".odt").name)
+        expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".odt").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
@@ -33,10 +30,10 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file, path.parent, hashed_output_name=True)
+        converter = DocumentConverter(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "pdf")
-        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
+        expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
@@ -50,23 +47,12 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterDocument(file, path.parent, hashed_output_name=True)
+        converter = DocumentConverter(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "html")
-        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
+        expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
         assert sf_match is not None
         assert sf_match.mime == "text/html"
-
-
-def test_document_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
-    file = dummy_base_file(test_files["document.docx"], test_files["document.docx"].parent)
-    converter = ConverterDocumentToImage(file, test_files["document.docx"].parent)
-
-    for output in converter.outputs:
-        print(output)
-        output_files = converter.convert(output_dir, output)
-        assert len(output_files) >= 1
-        assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from acacore.siegfried import Siegfried
 
-from convertool.converters import ConverterAudio
+from convertool.converters import AudioConverter
 from convertool.converters.base import dummy_base_file
 
 MIMETYPES: dict[str, list[str]] = {
@@ -15,7 +15,7 @@ MIMETYPES: dict[str, list[str]] = {
 def test_audio(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfried):
     for path in [f for n, f in test_files.items() if n.startswith("audio.")]:
         file = dummy_base_file(path, path.parent)
-        converter = ConverterAudio(file, path.parent)
+        converter = AudioConverter(file, path.parent)
 
         for output, mimetypes in MIMETYPES.items():
             output_files = converter.convert(output_dir, output)

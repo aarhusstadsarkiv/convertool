@@ -1,93 +1,71 @@
 from pathlib import Path
+from types import ModuleType
 from typing import ClassVar
 
 from convertool.util import TempDir
 
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
-from .base import dummy_base_file
-from .converter_pdf import ConverterPDFToImage
 from .exceptions import MissingDependency
 
-try:
-    import weasyprint
 
-    weasyprint_error: Exception | None = None
-except (ImportError, OSError) as e:
-    weasyprint = None
-    weasyprint_error: Exception | None = e
-
-
-class ConverterHTML(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["html", "browser"]
-    outputs: ClassVar[list[str]] = ["pdf"]
+class HTMLConverter(ConverterABC):
+    name: ClassVar[str] = "html"
+    outputs: ClassVar[list[str]] = ["pdf", "pdfa-1", "pdfa-2", "pdfa-3", "pdfa-4"]
+    _weasyprint: ModuleType | None = None
+    _weasyprint_error: Exception | None = None
 
     @classmethod
     def test_dependencies(cls):
-        if weasyprint is None:
-            raise MissingDependency(["weasyprint"], weasyprint_error or "missing system dependencies")
+        cls._import_weasyprint()
+
+        if cls._weasyprint is None:
+            raise MissingDependency(["weasyprint"], cls._weasyprint_error or "missing system dependencies")
+
         super().test_dependencies()
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        assert weasyprint is not None
+    @classmethod
+    def _import_weasyprint(cls):
+        if cls._weasyprint or cls._weasyprint_error:
+            return
 
-        output = self.output(output)
+        try:
+            import weasyprint
+
+            cls._weasyprint = weasyprint
+            cls._weasyprint_error = None
+        except (ImportError, OSError) as e:
+            cls._weasyprint = None
+            cls._weasyprint_error = e
+
+    @classmethod
+    def _variant(cls, output: str) -> str | None:
+        return {
+            "pdf": None,
+            "pdfa-1": "pdf/a-1b",
+            "pdfa-2": "pdf/a-2b",
+            "pdfa-3": "pdf/a-3b",
+            "pdfa-4": "pdf/a-4f",
+        }.get(output)
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        self.test_output(output)
+
+        if self._weasyprint is None:
+            raise MissingDependency(["weasyprint"], self._weasyprint_error or "missing system dependencies")
+
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
-            html = weasyprint.HTML(
+            html = self._weasyprint.HTML(
                 filename=self.file.get_absolute_path(),
                 encoding=(self.file.encoding["encoding"] or "") if self.file.encoding else "",
             )
 
-            html.write_pdf(tmp_file := tmp_dir.joinpath(dest_file.name))
+            html.write_pdf(tmp_file := tmp_dir.joinpath(dest_file.name), options={"pdf_variant": self._variant(output)})
 
             dest_dir.mkdir(parents=True, exist_ok=True)
 
             tmp_file.replace(dest_file)
 
         return [dest_file]
-
-
-class ConverterHTMLToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["html"]
-    outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
-    platforms: ClassVar[list[str] | None] = _shared_platforms(ConverterHTML, ConverterPDFToImage)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterHTML, ConverterPDFToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterHTML, ConverterPDFToImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            pdfs = ConverterHTML(
-                self.file,
-                self.root,
-                self.relative_root,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                tmp_dir,
-                "pdf",
-            )
-            if not pdfs:
-                return []
-
-            pdf = pdfs[0]
-
-            return ConverterPDFToImage(
-                dummy_base_file(pdf, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )

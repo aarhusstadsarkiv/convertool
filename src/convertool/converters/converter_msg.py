@@ -18,15 +18,7 @@ from extract_msg.msg_classes import MessageBase
 from extract_msg.msg_classes import MessageSigned
 from striprtf.striprtf import rtf_to_text
 
-from convertool.util import TempDir
-
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
-from .base import dummy_base_file
-from .converter_html import ConverterHTML
-from .converter_pdf import ConverterPDFToImage
 from .exceptions import ConvertError
 
 
@@ -180,15 +172,30 @@ def msg_plain_body(msg: MessageBase) -> str:
     return f"{msg_front_matter(msg)}\n\n{plain.strip()}"
 
 
-class ConverterMSG(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["msg"]
+class MSGConverter(ConverterABC):
+    name: ClassVar[str] = "msg"
     outputs: ClassVar[list[str]] = ["html", "txt"]
 
-    def output_puid(self, output: str) -> str | None:
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "html":
+            return "html"
         if output == "txt":
-            return "x-fmt/111"
+            return "text"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "html":
+            return ".html"
+        if output == "txt":
+            return ".txt"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
         if output == "html":
             return "fmt/471"
+        if output == "txt":
+            return "x-fmt/111"
         return None
 
     def output_encoding(self, output: str) -> DetectionDict | None:
@@ -199,9 +206,9 @@ class ConverterMSG(ConverterABC):
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
         msg: Message | MessageSigned = validate_msg(self.file)
 
         try:
@@ -218,81 +225,3 @@ class ConverterMSG(ConverterABC):
             return [dest_file]
         except Exception as e:
             raise ConvertError(self.file, repr(e))
-
-
-class ConverterMSGToPDF(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["msg"]
-    outputs: ClassVar[list[str]] = ["pdf"]
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterPDFToImage)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterMSG, ConverterPDFToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterPDFToImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            if not (
-                htmls := ConverterMSG(
-                    self.file,
-                    self.root,
-                    self.relative_root,
-                    self.database,
-                    timeout=self.timeout,
-                    hashed_output_name=self.hashed_output_name,
-                ).convert(tmp_dir, "html")
-            ):
-                return []
-
-            html = htmls[0]
-
-            return ConverterHTML(
-                dummy_base_file(html, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )
-
-
-class ConverterMSGToImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["msg"]
-    outputs: ClassVar[list[str]] = ConverterPDFToImage.outputs
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMSG, ConverterPDFToImage)
-    dependencies: ClassVar[dict[str, list[str]] | None] = _shared_dependencies(ConverterMSG, ConverterPDFToImage)
-    process_timeout: ClassVar[float | None] = _shared_process_timeout(ConverterMSG, ConverterPDFToImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-
-        with TempDir(output_dir) as tmp_dir:
-            if not (
-                pdfs := ConverterMSGToPDF(
-                    self.file,
-                    self.root,
-                    self.relative_root,
-                    self.database,
-                    timeout=self.timeout,
-                    hashed_output_name=self.hashed_output_name,
-                ).convert(tmp_dir, "pdf")
-            ):
-                return []
-
-            pdf = pdfs[0]
-
-            return ConverterPDFToImage(
-                dummy_base_file(pdf, tmp_dir),
-                tmp_dir,
-                tmp_dir,
-                self.database,
-                timeout=self.timeout,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(
-                output_dir,
-                output,
-                keep_relative_path=keep_relative_path,
-            )

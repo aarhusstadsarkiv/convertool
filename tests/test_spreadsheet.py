@@ -2,9 +2,9 @@ from pathlib import Path
 
 from acacore.siegfried import Siegfried
 
-from convertool.converters.base import _hashed_file_name
 from convertool.converters.base import dummy_base_file
-from convertool.converters.converter_spreadsheet import ConverterSpreadsheet
+from convertool.converters.base import hashed_file_name
+from convertool.converters.converter_spreadsheet import SpreadsheetConverter
 
 
 # noinspection DuplicatedCode
@@ -13,10 +13,10 @@ def test_spreadsheet_to_ods(test_files: dict[str, Path], output_dir: Path, siegf
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterSpreadsheet(file, path.parent, hashed_output_name=True)
+        converter = SpreadsheetConverter(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "ods")
-        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".ods").name)
+        expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".ods").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
@@ -30,10 +30,10 @@ def test_spreadsheet_to_pdf(test_files: dict[str, Path], output_dir: Path, siegf
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterSpreadsheet(file, path.parent, hashed_output_name=True)
+        converter = SpreadsheetConverter(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "pdf")
-        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
+        expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()
@@ -47,10 +47,10 @@ def test_spreadsheet_to_html(test_files: dict[str, Path], output_dir: Path, sieg
         print(path.name)
 
         file = dummy_base_file(path, path.parent)
-        converter = ConverterSpreadsheet(file, path.parent, hashed_output_name=True)
+        converter = SpreadsheetConverter(file, path.parent, hashed_output_name=True)
 
         output_files = converter.convert(output_dir, "html")
-        expected_output_file = _hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
+        expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
         sf_match = siegfried.identify(output_dir / expected_output_file).files[0].best_match()

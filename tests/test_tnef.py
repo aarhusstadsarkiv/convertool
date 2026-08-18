@@ -1,13 +1,13 @@
 from pathlib import Path
 
 from convertool.converters.base import dummy_base_file
-from convertool.converters.converter_tnef import ConverterTNEF
+from convertool.converters.converter_tnef import TNEFConverter
 
 
 # noinspection DuplicatedCode
 def test_tnef(test_files: dict[str, Path], reference_files: dict[str, Path], output_dir: Path):
     file = dummy_base_file(test_files["winmail.dat"], test_files["winmail.dat"].parent)
-    converter = ConverterTNEF(file, test_files["winmail.dat"].parent, hashed_output_name=False)
+    converter = TNEFConverter(file, test_files["winmail.dat"].parent, hashed_output_name=False)
 
     for output in converter.outputs:
         print(output)

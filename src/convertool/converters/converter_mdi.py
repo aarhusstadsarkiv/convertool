@@ -4,31 +4,31 @@ from typing import ClassVar
 
 from convertool.util import TempDir
 
-from .base import _shared_dependencies
-from .base import _shared_platforms
-from .base import _shared_process_timeout
 from .base import ConverterABC
-from .base import dummy_base_file
-from .converter_image import ConverterImage
 from .exceptions import ConvertError
 
 
-class ConverterMDI(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["mdi"]
-    outputs: ClassVar[list[str]] = ["tif", "tiff"]
-    process_timeout: ClassVar[float] = 120
+class MDIConverter(ConverterABC):
+    name: ClassVar[str] = "mdi"
+    outputs: ClassVar[list[str]] = ["tiff"]
+    process_timeout: ClassVar[int] = 120
     platforms: ClassVar[list[str]] = ["win32"]
     dependencies: ClassVar[dict[str, list[str]]] = {"mdi2tif": ["mdi2tif"]}
 
-    def output(self, output: str) -> str:
-        if output == "tiff":
-            output = "tif"
-        return super().output(output)
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        return "image"
+
+    def output_extension(self, output: str) -> str:
+        return ".tif"
+
+    def output_puid(self, output: str) -> str | None:
+        return "fmt/353"
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
             tmp_file: Path = tmp_dir.joinpath(dest_file.name)
@@ -46,46 +46,8 @@ class ConverterMDI(ConverterABC):
             if not self.capture_output and tmp_log.is_file() and (log := tmp_log.read_text().strip()):
                 print(log, file=stderr)
 
-            if tmp_file.is_file():
-                dest_dir.mkdir(parents=True, exist_ok=True)
-                return [tmp_file.replace(dest_file)]
+            if not tmp_file.is_file():
+                raise ConvertError(self.file, "Could not convert file.")
 
-            raise ConvertError(self.file, "Could not convert file.")
-
-
-class ConverterMDIToPDF(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["mdi"]
-    outputs: ClassVar[list[str]] = ["pdf"]
-    process_timeout: ClassVar[float] = _shared_process_timeout(ConverterMDI, ConverterImage)
-    platforms: ClassVar[list[str]] = _shared_platforms(ConverterMDI, ConverterImage)
-    dependencies: ClassVar[dict[str, list[str]]] = _shared_dependencies(ConverterMDI, ConverterImage)
-
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
-        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
-
-        with TempDir(output_dir) as tmp_dir:
-            tiff: Path = ConverterMDI(
-                self.file,
-                self.database,
-                self.file.root,
-                timeout=self.timeout,
-                capture_output=self.capture_output,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(tmp_dir, "tif", keep_relative_path=False)[0]
-
-            pdfs: list[Path] = ConverterImage(
-                dummy_base_file(tiff, tmp_dir),
-                None,
-                tmp_dir,
-                timeout=self.timeout,
-                capture_output=self.capture_output,
-                hashed_output_name=self.hashed_output_name,
-            ).convert(tmp_dir, output, keep_relative_path=False)
-
-            if pdfs:
-                dest_file.parent.mkdir(parents=True, exist_ok=True)
-                return [pdfs[0].replace(dest_file)]
-
-        raise ConvertError(self.file, "Could not convert file.")
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            return [tmp_file.replace(dest_file)]

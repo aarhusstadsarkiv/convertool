@@ -1,9 +1,9 @@
 [project]
 name = "convertool"
-version = "4.5.37"
+version = "5.0.0"
 description = ""
 authors = [{ name = "Aarhus City Archive", email = "stadsarkiv@aarhus.dk" }]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 readme = "README.md"
 dependencies = [
     "acacore",
@@ -34,7 +34,7 @@ dev = [
 ]
 
 [tool.uv.sources]
-acacore = { git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v5.6.2" }
+acacore = { git = "https://github.com/aarhusstadsarkiv/acacore.git", tag = "v5.6.4" }
 
 [build-system]
 requires = ["hatchling"]
@@ -91,6 +91,8 @@ ignore = [
     "ANN202",  # missing return type
     "ANN206",  # missing return type
     "ARG001",  # missing type anotattion for args
+    "ARG002",
+    "ARG003",
     "BLE001",  # catching general exceptions
     "C901",    # complexity check
     "D100",    # missing docstring

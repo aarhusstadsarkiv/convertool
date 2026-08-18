@@ -25,11 +25,30 @@ def copypaste(string: str):
     pyautogui.press("enter")
 
 
-class ConverterSymphovert(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["symphovert"]
+class SymphovertConverter(ConverterABC):
+    name: ClassVar[str] = "symphovert"
     platforms: ClassVar[list[str]] = ["win32"]
     dependencies: ClassVar[dict[str, list[str]]] = {"symphony": ["symphony"]}
     outputs: ClassVar[list[str]] = ["odt", "ods", "odp"]
+
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "odt":
+            return "document"
+        if output == "ods":
+            return "spreadsheet"
+        if output == "odp":
+            return "presentation"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "odt":
+            return ".odt"
+        if output == "ods":
+            return ".ods"
+        if output == "odp":
+            return ".odp"
+        return f".{output}"
 
     @classmethod
     def test_dependencies(cls):
@@ -37,10 +56,10 @@ class ConverterSymphovert(ConverterABC):
             raise MissingDependency(["pyautogui"])
         super().test_dependencies()
 
-    def output_file(self, output_dir: Path, output: str, *, append: bool = False) -> Path:
+    def output_filename(self, output: str, *, append: bool = False) -> str:
         if append:
-            return output_dir / (self.file.name + f".{output}")
-        return output_dir / self.file.relative_path.with_suffix(f".{output}").name
+            return self.file.name + f".{output}"
+        return self.file.relative_path.with_suffix(f".{output}").name
 
     def convert_file(self, src: Path, dst: Path):
         if pyautogui is None:
@@ -79,9 +98,9 @@ class ConverterSymphovert(ConverterABC):
         self.run_process(self.dependencies["symphony"][0])
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         if dest_file.is_file():
             return [dest_file]

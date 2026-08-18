@@ -165,8 +165,8 @@ def get_encoding(path: Path, bof_length: int = 2048) -> str | None:
 class TempDir(TemporaryDirectory):
     prefix: str = ".tmp_convertool_"
 
-    def __init__(self, parent_dir: str | PathLike) -> None:
-        super().__init__(dir=parent_dir, prefix=self.prefix)
+    def __init__(self, parent_dir: str | PathLike, *, delete: bool = True) -> None:
+        super().__init__(dir=parent_dir, prefix=self.prefix, delete=delete)
 
     def __enter__(self) -> Path:
         return Path(self.name)

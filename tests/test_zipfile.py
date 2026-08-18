@@ -2,14 +2,14 @@ from pathlib import Path
 
 import pytest
 
-from convertool.converters import ConverterZIPFile
+from convertool.converters import ZIPFileConverter
 from convertool.converters.base import dummy_base_file
 from convertool.converters.exceptions import BadOption
 
 
 def test_zipfile(test_files: dict[str, Path], test_files_dir: Path, output_dir: Path):
     file = dummy_base_file(test_files["presentation.pptx"], test_files_dir)
-    converter = ConverterZIPFile(
+    converter = ZIPFileConverter(
         file,
         test_files_dir,
         options={"path": "ppt/media/image1.jpeg"},
@@ -26,4 +26,4 @@ def test_zipfile_errors():
     file = dummy_base_file(__file__, Path("/"))
 
     with pytest.raises(BadOption):
-        ConverterZIPFile(file, Path("/"), options=None)
+        ZIPFileConverter(file, Path("/"), options=None)

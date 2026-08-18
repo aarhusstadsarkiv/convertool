@@ -148,15 +148,30 @@ def tnef_to_html(tnef: TNEF, headers: TNEFHeaders):
     return html.decode_contents()
 
 
-class ConverterTNEF(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["tnef"]
+class TNEFConverter(ConverterABC):
+    name: ClassVar[str] = "tnef"
     outputs: ClassVar[list[str]] = ["html", "txt"]
 
-    def output_puid(self, output: str) -> str | None:
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "html":
+            return "html"
         if output == "txt":
-            return "x-fmt/111"
+            return "text"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "html":
+            return ".html"
+        if output == "txt":
+            return ".txt"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
         if output == "html":
             return "fmt/471"
+        if output == "txt":
+            return "x-fmt/111"
         return None
 
     def output_encoding(self, output: str) -> DetectionDict | None:
@@ -167,9 +182,9 @@ class ConverterTNEF(ConverterABC):
         return None
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         try:
             with self.file.get_absolute_path().open("rb") as fh:
@@ -182,6 +197,7 @@ class ConverterTNEF(ConverterABC):
             obj_receiver_name = tnef_property(tnef, tnefprops.MAPI_RECEIVED_BY_NAME)
             obj_receiver_email = tnef_property(tnef, tnefprops.MAPI_RECEIVED_BY_EMAIL_ADDRESS)
 
+            # noinspection bad-argument-type
             headers = TNEFHeaders(
                 subject=obj_subject.data if obj_subject else "",
                 from_name=obj_sender_name.data if obj_sender_name else "",

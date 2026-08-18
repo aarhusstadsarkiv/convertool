@@ -7,17 +7,10 @@ from .base import ConverterABC
 from .exceptions import BadOption
 
 
-class ConverterImage(ConverterABC):
-    tool_names: ClassVar[list[str]] = ["image"]
-    outputs: ClassVar[list[str]] = [
-        "jpg",
-        "jpeg",
-        "jp2",
-        "png",
-        "tif",
-        "tiff",
-    ]
-    process_timeout: ClassVar[float] = 180.0
+class ImageConverter(ConverterABC):
+    name: ClassVar[str] = "image"
+    outputs: ClassVar[list[str]] = ["jpeg", "jpeg2000", "png", "tiff"]
+    process_timeout: ClassVar[int] = 180
     dependencies: ClassVar[dict[str, list[str]]] = {"nconvert": ["nconvert"], "imagemagick": ["magick", "convert"]}
 
     def test_options(self):
@@ -26,12 +19,29 @@ class ConverterImage(ConverterABC):
         if (v := self.options.get("layers")) not in ("true", True, None):
             raise BadOption(f"Invalid value {v!r} for 'layers' option.")
 
-    def output(self, output: str) -> str:
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        return "image"
+
+    def output_extension(self, output: str) -> str:
         if output == "jpeg":
-            output = "jpg"
-        elif output == "tiff":
-            output = "tif"
-        return super().output(output)
+            return ".jpg"
+        if output == "jpeg2000":
+            return ".jp2"
+        if output == "tiff":
+            return ".tif"
+        return f".{output}"
+
+    def output_puid(self, output: str) -> str | None:
+        if output == "jpeg":
+            return "fmt/44"
+        if output == "jpeg2000":
+            return "x-fmt/392"
+        if output == "tiff":
+            return "fmt/353"
+        if output == "png":
+            return "fmt/12"
+        return None
 
     def image_dpi(self, file: Path, default_density: int = 150) -> tuple[int, int]:
         """
@@ -55,9 +65,9 @@ class ConverterImage(ConverterABC):
         return density, pages
 
     def convert_imagemagick(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
         args: list[str] = []
         filename: Path = self.file.get_absolute_path()
 
@@ -75,24 +85,24 @@ class ConverterImage(ConverterABC):
                 dest_file.name,
                 cwd=tmp_dir,
             )
-            dest_dir.mkdir(parents=True, exist_ok=True)
-            tmp_dir.joinpath(dest_file.name).replace(dest_file)
 
-        return [dest_file]
+            dest_dir.mkdir(parents=True, exist_ok=True)
+
+            return [f.replace(dest_dir.joinpath(dest_file.name)) for f in sorted(tmp_dir.iterdir()) if f.is_file()]
 
     def convert_nconvert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        output = self.output(output)
+        self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
-        dest_file: Path = self.output_file(dest_dir, output)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
         args: list[str] = []
 
-        if output in ("jpg", "jpeg"):
+        if output == "jpeg":
             args.extend(["-out", "jpeg", "-xall", "-o", "out-#"])
         elif output == "png":
             args.extend(["-out", "png", "-xall", "-o", "out-#"])
-        elif output == "jp2":
+        elif output == "jpeg2000":
             args.extend(["-out", "jp2", "-xall", "-o", "out-#"])
-        elif output in ("tif", "tiff"):
+        elif output == "tiff":
             args.extend(["-out", "tiff", "-xall", "-multi", "-c", "2", "-o", "out"])
         else:
             args.extend(["-out", output, "-xall", "-o", "out"])
