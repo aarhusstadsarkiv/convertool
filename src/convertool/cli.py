@@ -568,7 +568,8 @@ def cmd_list(ctx: Context, only_available: bool, show_warnings: bool):
 
     table: list[tuple[str, str, str, str, str]] = [("Tool", "Output", "Path", "Platform", "Dependencies")]
 
-    for [tool, output], paths in graph.graph.items():
+    for [tool, output], paths in sorted(graph.graph.items(), key=lambda item: item[0]):
+        paths.sort(key=lambda p: (len(p), str(p)))
         for path in paths:
             entry = (
                 tool,
