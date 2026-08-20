@@ -228,4 +228,4 @@ class MSGConverter(ConverterABC):
 
             return [dest_file]
         except Exception as e:
-            raise ConvertError(self.file, repr(e))
+            raise ConvertError(self.file, repr(e), exception=e)
