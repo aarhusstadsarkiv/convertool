@@ -169,9 +169,7 @@ class EMLConverter(ConverterABC):
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
-        eml = ParsedEmail(
-            self.file.get_absolute_path().read_text(self.file.encoding["encoding"] if self.file.encoding else None)
-        )
+        eml = ParsedEmail(self.read_text())
 
         body: str
 
