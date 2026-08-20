@@ -57,10 +57,7 @@ class HTMLConverter(ConverterABC):
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 
         with TempDir(output_dir) as tmp_dir:
-            html = self._weasyprint.HTML(
-                filename=self.file.get_absolute_path(),
-                encoding=(self.file.encoding["encoding"] or "") if self.file.encoding else "",
-            )
+            html = self._weasyprint.HTML(string=self.read_text())
 
             html.write_pdf(tmp_file := tmp_dir.joinpath(dest_file.name), options={"pdf_variant": self._variant(output)})
 
