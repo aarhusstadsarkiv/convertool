@@ -541,7 +541,7 @@ def cmd_standalone(
         except (KeyboardInterrupt, ConverterNotFound):
             raise
         except ConvertError as error:
-            Event.from_command(ctx, "error").log(ERROR, logger, exc_info=error)
+            Event.from_command(ctx, "error").log(ERROR, logger, exc_info=error.exception or error)
             continue
 
         for output_file in output_files:
