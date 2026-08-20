@@ -289,6 +289,26 @@ class ConverterABC(ABC):
 
         return f"{name.removesuffix(self.file.suffixes)}{extension}"
 
+    def read_text(self, encoding: str | None = None) -> str:
+        """
+        Read text from the file.
+
+        :param encoding: Optionally, the encoding to use. If unset, then the encoding stored in `BaseFile.encoding`
+            is used instead.
+        :return: The content of the file as a string.
+        """
+        return self.file.get_absolute_path().read_text(
+            encoding or (self.file.encoding["encoding"] if self.file.encoding else None)
+        )
+
+    def read_bytes(self) -> bytes:
+        """
+        Read bytes from the file.
+
+        :return: The content of the file as a string.
+        """
+        return self.file.get_absolute_path().read_bytes()
+
     @abstractmethod
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
 
