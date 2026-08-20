@@ -12,6 +12,7 @@ from chardet import DetectionDict
 from extract_msg import Message
 from extract_msg import MSGFile
 from extract_msg import openMsg
+from extract_msg.attachments import WebAttachment
 from extract_msg.enums import ErrorBehavior
 from extract_msg.exceptions import ExMsgBaseException
 from extract_msg.msg_classes import MessageBase
@@ -141,11 +142,14 @@ def msg_html_body(msg: MessageBase) -> str:
         p.string = "No readable content available."
         html.select_one("body").append(p)
 
-    cids: dict[str, tuple[str, bytes]] = {
-        f"cid:{cid}": (a.mimetype or "", a.data)
-        for a in msg.attachments
-        if (cid := getattr(a, "cid", None)) and isinstance(a.data, bytes)
-    }
+    cids: dict[str, tuple[str, bytes]] = {}
+
+    for a in msg.attachments:
+        if isinstance(a, WebAttachment):
+            continue
+        if not (cid := getattr(a, "cid", None)) or not isinstance(a.data, bytes):
+            continue
+        cids[f"cid:{cid}"] = (a.mimetype or "", a.data)
 
     if cids:
         for tag in html.select("*"):
