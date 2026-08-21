@@ -353,6 +353,19 @@ def cmd_digiarch(
                         raise TypeError(f"Unknown file type {file.__class__}")
                 except KeyboardInterrupt:
                     raise
+                except ConverterNotFound as error:
+                    errors.append(error)
+                    error_event = Event.from_command(ctx, "error", file)
+                    error_event.log(
+                        ERROR,
+                        logger,
+                        show_args=["uuid"],
+                        reason=error.__class__.__name__,
+                        tool=error.tool,
+                        output=error.tool_output,
+                        via=error.via,
+                    )
+                    continue
                 except ConvertError as error:
                     errors.append(error)
                     error_event = Event.from_command(ctx, "error", file)
