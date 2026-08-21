@@ -503,8 +503,6 @@ def cmd_standalone(
     printed in case of an error.
     """
     logger = structlog.stdlib.get_logger()
-    graph = ConvertersGraph.from_conversers(converters)
-    graph.filter_conversion_graph(requires_database=False, requires_file_classes=[BaseFile])
 
     if root and any(not Path(f).is_relative_to(root) for f in files_paths):
         raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
@@ -520,7 +518,11 @@ def cmd_standalone(
         v if not (vp := v.partition(":"))[1] else (vp[0] or None, vp[2]) for v in via_arg
     ]
 
-    conversion_path = graph.find(tool, output, via, shortest=True)
+    conversion_path = (
+        ConvertersGraph.from_conversers(converters)
+        .filter_conversion_graph(requires_database=False, requires_file_classes=[BaseFile])
+        .find(tool, output, via, shortest=True)
+    )
 
     if not conversion_path:
         Event.from_command(ctx, "error", None).log(
