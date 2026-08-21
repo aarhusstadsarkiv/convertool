@@ -231,7 +231,7 @@ def cmd_digiarch(
     """
     avid = get_avid(ctx, avid_dir, "avid_dir")
     committer: Callable[[FilesDB, int], FilesDB | None]
-    graph = ConvertersGraph.from_conversers(converters)
+    __graph = ConvertersGraph.from_conversers(converters)
     total_files: int = 0
     total_converted_files: int = 0
     total_output_files: int = 0
@@ -242,7 +242,7 @@ def cmd_digiarch(
         logger, _ = start_program(ctx, database, __version__, dry_run)
 
         if show_disabled_converters:
-            graph.filter_conversion_graph(
+            __graph.filter_conversion_graph(
                 on_invalid=lambda p, r: Event.from_command(ctx, "converter.disabled", None).log(
                     WARNING,
                     logger,
@@ -251,7 +251,7 @@ def cmd_digiarch(
                 )
             )
         else:
-            graph.filter_conversion_graph()
+            __graph.filter_conversion_graph()
 
         if backup and not dry_run:
             backup_path: Path = avid.database_path.with_name(f"{datetime.now():%Y%m%d%H%M%S}-{avid.database_path.name}")
@@ -286,12 +286,12 @@ def cmd_digiarch(
                             continue
 
                         result = convert_original_file(
+                            __graph,
                             ctx,
                             avid,
                             database,
                             file,
                             logger,
-                            graph,
                             timeout,
                             not verbose,
                             hashed_names,
@@ -308,12 +308,12 @@ def cmd_digiarch(
                             continue
 
                         result = convert_master_file(
+                            __graph,
                             ctx,
                             avid,
                             database,
                             file,
                             "access",
-                            graph,
                             logger,
                             timeout,
                             not verbose,
@@ -331,12 +331,12 @@ def cmd_digiarch(
                             continue
 
                         result = convert_master_file(
+                            __graph,
                             ctx,
                             avid,
                             database,
                             file,
                             "statutory",
-                            graph,
                             logger,
                             timeout,
                             not verbose,
