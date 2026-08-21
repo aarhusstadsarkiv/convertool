@@ -17,6 +17,7 @@ from chardet import DetectionDict
 from click import Context
 from structlog.stdlib import BoundLogger
 
+from .converters import converters as converters_list
 from .converters import ConvertersGraph
 from .converters import ConvertersPath
 from .converters import dummy_base_file
@@ -52,12 +53,12 @@ def edge_logger(
 
 
 def convert_original_file(
+    __graph: ConvertersGraph | None,
     ctx: Context,
     avid: AVID,
     database: FilesDB,
     file: OriginalFile,
     logger: BoundLogger,
-    graph: ConvertersGraph,
     timeout: int | None = None,
     capture_output: bool = True,
     hashed_output_name: bool = True,
@@ -95,7 +96,14 @@ def convert_original_file(
     if tool_exclude and tool in tool_exclude:
         return ConvertResult(file, message=f"Tool {tool!r} is excluded")
 
-    conversion_path = graph.find(tool, output, via, shortest=True)
+    if __graph:
+        conversion_path = __graph.find(tool, output, via, shortest=True)
+    else:
+        conversion_path = (
+            ConvertersGraph.from_conversers(converters_list)
+            .filter_conversion_graph()
+            .find(tool, output, via, shortest=True)
+        )
 
     if not conversion_path:
         raise ConverterNotFound(tool, output, via)
@@ -139,12 +147,12 @@ def convert_original_file(
 
 @overload
 def convert_master_file(
+    __graph: ConvertersGraph | None,
     ctx: Context,
     avid: AVID,
     database: FilesDB,
     file: MasterFile,
     target: Literal["statutory"],
-    graph: ConvertersGraph,
     logger: BoundLogger,
     timeout: int | None = None,
     capture_output: bool = True,
@@ -158,12 +166,12 @@ def convert_master_file(
 
 @overload
 def convert_master_file(
+    __graph: ConvertersGraph | None,
     ctx: Context,
     avid: AVID,
     database: FilesDB,
     file: MasterFile,
     target: Literal["access"],
-    graph: ConvertersGraph,
     logger: BoundLogger,
     timeout: int | None = None,
     capture_output: bool = True,
@@ -176,12 +184,12 @@ def convert_master_file(
 
 
 def convert_master_file(
+    __graph: ConvertersGraph | None,
     ctx: Context,
     avid: AVID,
     database: FilesDB,
     file: MasterFile,
     target: Literal["statutory", "access"],
-    graph: ConvertersGraph,
     logger: BoundLogger,
     timeout: int | None = None,
     capture_output: bool = True,
@@ -233,7 +241,14 @@ def convert_master_file(
     if tool_exclude and tool in tool_exclude:
         return ConvertResult(file, message=f"Tool {tool!r} is excluded")
 
-    conversion_path = graph.find(tool, output, via, shortest=True)
+    if __graph:
+        conversion_path = __graph.find(tool, output, via, shortest=True)
+    else:
+        conversion_path = (
+            ConvertersGraph.from_conversers(converters_list)
+            .filter_conversion_graph()
+            .find(tool, output, via, shortest=True)
+        )
 
     if not conversion_path:
         raise ConverterNotFound(tool, output, via)
