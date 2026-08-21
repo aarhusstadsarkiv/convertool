@@ -56,6 +56,20 @@ def _timeout_expired(_sig: int, frame: FrameType | None) -> None:
     raise TimeoutError(frame)
 
 
+def _timeout_wrapper[**P, R](func: Callable[P, R], timeout: int | None, *args: P.args, **kwargs: P.kwargs) -> R:
+    if platform not in ("linux", "darwin") or not timeout or timeout <= 0:
+        return func(*args, **kwargs)
+
+    signal.signal(signal.SIGALRM, _timeout_expired)
+    signal.alarm(timeout)
+
+    result = func(*args, **kwargs)
+
+    signal.alarm(0)
+
+    return result
+
+
 def hashed_file_name(path: str | Path) -> str:
     return md5(str(path).encode("utf-8")).hexdigest() + dummy_base_file(path).suffixes
 
@@ -320,24 +334,19 @@ class ConverterABC(ABC):
     def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
 
     def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
-        timeout = (
-            self.process_timeout if self.timeout is None or self.process_timeout is None else (self.timeout or None)
-        )
-        timeout = int(timeout) if timeout is not None else None
+        timeout: int | None = None
+
+        if self.use_process:
+            timeout = None
+        elif self.timeout:
+            timeout = int(self.timeout)
+        elif self.process_timeout:
+            timeout = int(self.process_timeout)
 
         try:
-            if not self.use_process and timeout:
-                signal.signal(signal.SIGALRM, _timeout_expired)
-                signal.alarm(int(timeout))
-
-            outputs = self.converter(output_dir, output, keep_relative_path=keep_relative_path)
-
-            if not self.use_process and timeout:
-                signal.alarm(0)
+            return _timeout_wrapper(self.converter, timeout, output_dir, output, keep_relative_path=keep_relative_path)
         except TimeoutError as e:
             raise ConvertError(self.file, "Timeout exceeded", exception=e)
-
-        return outputs
 
 
 class ConvertersEdge:
