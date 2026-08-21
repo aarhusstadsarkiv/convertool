@@ -11,7 +11,7 @@ def test_html_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfried: S
         file = dummy_base_file(path, path.parent)
         converter = HTMLConverter(file, path.parent)
 
-        output_files = converter.convert(output_dir, "pdf")
+        output_files = converter.converter(output_dir, "pdf")
         assert len(output_files) == 1
         assert output_files[0].suffix == ".pdf"
         assert siegfried.identify(output_files[0]).files[0].best_match().mime == "application/pdf"

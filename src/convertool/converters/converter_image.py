@@ -125,7 +125,7 @@ class ImageConverter(ConverterABC):
                 if f.is_file()
             ]
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         if self.options.get("program") == "imagemagick":
             return self.convert_imagemagick(output_dir, output, keep_relative_path=keep_relative_path)
         else:

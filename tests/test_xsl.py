@@ -9,7 +9,7 @@ def test_xml_to_html(test_files: dict[str, Path], reference_files: dict[str, Pat
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = XSLConverter(file, test_files["medcom.xml"].parent, hashed_output_name=False)
 
-    output_files = converter.convert(output_dir, "html")
+    output_files = converter.converter(output_dir, "html")
     assert len(output_files) == 1
     assert output_files[0].is_file()
     assert output_files[0].name in reference_files
@@ -20,7 +20,7 @@ def test_medcom_to_html(test_files: dict[str, Path], reference_files: dict[str, 
     file = dummy_base_file(test_files["medcom.xml"], test_files["medcom.xml"].parent)
     converter = MedComConverter(file, test_files["medcom.xml"].parent, hashed_output_name=False)
 
-    output_files = converter.convert(output_dir, "html")
+    output_files = converter.converter(output_dir, "html")
     assert len(output_files) == 1
     assert output_files[0].is_file()
     assert output_files[0].name in reference_files

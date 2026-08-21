@@ -51,7 +51,7 @@ class PresentationConverter(ConverterABC):
         return ""
 
     # noinspection DuplicatedCode
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         output_filter: str = self.output_filter(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)

@@ -18,7 +18,7 @@ def test_audio(test_files: dict[str, Path], output_dir: Path, siegfried: Siegfri
         converter = AudioConverter(file, path.parent)
 
         for output, mimetypes in MIMETYPES.items():
-            output_files = converter.convert(output_dir, output)
+            output_files = converter.converter(output_dir, output)
             assert len(output_files) == 1
             sf_match = siegfried.identify(output_files[0]).files[0].best_match()
             assert sf_match is not None

@@ -1,3 +1,4 @@
+import signal
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
@@ -10,6 +11,7 @@ from subprocess import CalledProcessError
 from subprocess import CompletedProcess
 from subprocess import TimeoutExpired
 from sys import platform
+from types import FrameType
 from typing import Any
 from typing import ClassVar
 from typing import Literal
@@ -50,6 +52,10 @@ def test_platforms(*platforms: str):
         raise UnsupportedPlatform(platform, f"Not one of {set(platforms)}.")
 
 
+def _timeout_expired(_sig: int, frame: FrameType | None) -> None:
+    raise TimeoutError(frame)
+
+
 def hashed_file_name(path: str | Path) -> str:
     return md5(str(path).encode("utf-8")).hexdigest() + dummy_base_file(path).suffixes
 
@@ -71,6 +77,7 @@ class ConverterABC(ABC):
     name: ClassVar[str]
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[int | float | None] = None
+    use_process: ClassVar[bool] = False
     platforms: ClassVar[list[str] | None] = None
     dependencies: ClassVar[dict[str, list[str]] | None] = None
     multithreading: ClassVar[bool] = False
@@ -310,7 +317,27 @@ class ConverterABC(ABC):
         return self.file.get_absolute_path().read_bytes()
 
     @abstractmethod
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        timeout = (
+            self.process_timeout if self.timeout is None or self.process_timeout is None else (self.timeout or None)
+        )
+        timeout = int(timeout) if timeout is not None else None
+
+        try:
+            if not self.use_process and timeout:
+                signal.signal(signal.SIGALRM, _timeout_expired)
+                signal.alarm(int(timeout))
+
+            outputs = self.converter(output_dir, output, keep_relative_path=keep_relative_path)
+
+            if not self.use_process and timeout:
+                signal.alarm(0)
+        except TimeoutError as e:
+            raise ConvertError(self.file, "Timeout exceeded", exception=e)
+
+        return outputs
 
 
 class ConvertersEdge:

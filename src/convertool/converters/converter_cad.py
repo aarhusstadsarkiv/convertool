@@ -38,7 +38,7 @@ class CADConverter(ConverterABC):
             return "fmt/413"
         return None
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         output_files: list[Path] = []

@@ -12,7 +12,7 @@ def test_gis_to_gml(test_files: dict[str, Path], reference_files: dict[str, Path
     file = dummy_base_file(test_files["gis.tab"], test_files["gis.tab"].parent)
     converter = GISConverter(file, test_files["gis.tab"].parent, hashed_output_name=False)
 
-    output_files = converter.convert(output_dir, "gml")
+    output_files = converter.converter(output_dir, "gml")
     assert len(output_files) == 2
     assert all(of.name in reference_files for of in output_files)
     for of in output_files:
@@ -25,5 +25,5 @@ def test_gis_to_gml_database(avid_dir_copy: Path, output_dir: Path):
     with FilesDB(avid.database_path) as db:
         for file in db.original_files.select("gis_main is not null and action = 'convert'"):
             converter = GISConverter(file, avid.path, avid.dirs.original_documents, db, hashed_output_name=False)
-            output_files = converter.convert(output_dir, "gml")
+            output_files = converter.converter(output_dir, "gml")
             assert len(output_files) == 2

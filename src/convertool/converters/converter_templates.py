@@ -33,7 +33,7 @@ class TemplateConverter(ConverterABC):
             return None
         return DetectionDict(encoding="utf-8", confidence=1.0, language=None, mime_type="text/plain")
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
 
         if not isinstance(self.file, OriginalFile):

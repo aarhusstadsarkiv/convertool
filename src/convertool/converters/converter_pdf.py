@@ -20,7 +20,7 @@ class PDFConverter(ConverterABC):
     def output_extension(self, output: str) -> str:
         return ".pdf"
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))
@@ -83,7 +83,7 @@ class PDFToImageConverter(ConverterABC):
             if isinstance(dpi, int) and dpi <= 0:
                 raise BadOption(f"Invalid value {dpi} for 'dpi' option.")
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))

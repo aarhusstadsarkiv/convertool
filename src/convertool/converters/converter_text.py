@@ -35,7 +35,7 @@ class TextConverter(ConverterABC):
         if self.options.get("stripnull") not in (None, True, False):
             raise BadOption(f"Invalid value {self.options.get('stripnull')!r} for 'stripnull' option")
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))
