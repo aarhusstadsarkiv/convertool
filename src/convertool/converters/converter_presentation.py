@@ -13,6 +13,7 @@ class PresentationConverter(ConverterABC):
     name: ClassVar[str] = "presentation"
     outputs: ClassVar[list[str]] = ["odp", "pdf", "html"]
     process_timeout: ClassVar[float] = 60.0
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"libreoffice": ["libreoffice", "soffice"]}
 
     @classmethod

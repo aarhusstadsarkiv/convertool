@@ -11,6 +11,7 @@ class ImageConverter(ConverterABC):
     name: ClassVar[str] = "image"
     outputs: ClassVar[list[str]] = ["jpeg", "jpeg2000", "png", "tiff"]
     process_timeout: ClassVar[int] = 180
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"nconvert": ["nconvert"], "imagemagick": ["magick", "convert"]}
 
     def test_options(self):

@@ -12,6 +12,7 @@ class MDIConverter(ConverterABC):
     name: ClassVar[str] = "mdi"
     outputs: ClassVar[list[str]] = ["tiff"]
     process_timeout: ClassVar[int] = 120
+    use_process: ClassVar[bool] = True
     platforms: ClassVar[list[str]] = ["win32"]
     dependencies: ClassVar[dict[str, list[str]]] = {"mdi2tif": ["mdi2tif"]}
 

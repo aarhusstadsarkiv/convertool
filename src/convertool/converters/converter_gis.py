@@ -16,6 +16,7 @@ class GISConverter(ConverterABC):
     name: ClassVar[str] = "gis"
     outputs: ClassVar[list[str]] = ["gml", "gml3", "shp", "geojson"]
     process_timeout: ClassVar[float] = 120
+    use_process: ClassVar[bool] = True
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
 

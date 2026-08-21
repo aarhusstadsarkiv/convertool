@@ -10,6 +10,8 @@ from .base import ConverterABC
 class HTMLConverter(ConverterABC):
     name: ClassVar[str] = "html"
     outputs: ClassVar[list[str]] = ["pdf", "pdfa-1", "pdfa-2", "pdfa-3", "pdfa-4"]
+    process_timeout: ClassVar[int] = 60
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"weasyprint": ["weasyprint"]}
     _weasyprint: ModuleType | None = None
     _weasyprint_error: Exception | None = None

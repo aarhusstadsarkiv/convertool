@@ -15,6 +15,7 @@ class VideoConverter(ConverterABC):
         "h265",
     ]
     process_timeout: ClassVar[float] = 7200
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"ffmpeg": ["ffmpeg"]}
 
     @classmethod

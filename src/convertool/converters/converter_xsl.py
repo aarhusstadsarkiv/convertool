@@ -13,6 +13,7 @@ class XSLConverter(ConverterABC):
     name: ClassVar[str] = "xslt"
     outputs: ClassVar[list[str]] = ["html", "xml"]
     process_timeout: ClassVar[float] = 10
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"xmlstarlet": ["xmlstarlet"]}
 
     @classmethod

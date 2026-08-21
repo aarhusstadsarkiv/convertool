@@ -10,6 +10,8 @@ from .exceptions import BadOption
 
 class PDFConverter(ConverterABC):
     name: ClassVar[str] = "pdf"
+    process_timeout: ClassVar[int] = 120
+    use_process: ClassVar[bool] = True
     outputs: ClassVar[list[str]] = ["pdfa-1", "pdfa-2", "pdfa-3"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ghostscript": ["gs"]}
 
