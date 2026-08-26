@@ -26,4 +26,4 @@ class PowershellConverterABC(ConverterABC, ABC):
             args.append(f"-{key}")
             args.append(value)
 
-        return self.run_process(self.dependencies["powershell"][0], script_file, *args, cwd=cwd)
+        return self.run_process(self.dependencies["powershell"][0], "-file", script_file, *args, cwd=cwd)
