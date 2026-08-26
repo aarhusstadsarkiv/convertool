@@ -157,7 +157,7 @@ class MSPowerPointConverter(MSOfficeConverter):
 
 
 class MSOutlookConverter(PowershellConverterABC):
-    name: ClassVar[str] = "outlook"
+    name: ClassVar[str] = "msoutlook"
     outputs: ClassVar[list[str]] = ["doc", "pdf"]
     use_process: ClassVar[bool] = True
     process_timeout: ClassVar[int] = 30
