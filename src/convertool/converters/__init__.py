@@ -14,6 +14,7 @@ from .converter_image import ImageConverter
 from .converter_mdi import MDIConverter
 from .converter_msg import MSGConverter
 from .converter_msoffice import MSExcelConverter
+from .converter_msoffice import MSOutlookConverter
 from .converter_msoffice import MSPowerPointConverter
 from .converter_msoffice import MSWordConverter
 from .converter_notebook import IPYNBConverter
@@ -47,6 +48,7 @@ converters: list[type[ConverterABC]] = [
     MDIConverter,
     MSExcelConverter,
     MSGConverter,
+    MSOutlookConverter,
     MSPowerPointConverter,
     MSWordConverter,
     MedComConverter,
@@ -84,6 +86,7 @@ __all__ = [
     "MDIConverter",
     "MSExcelConverter",
     "MSGConverter",
+    "MSOutlookConverter",
     "MSPowerPointConverter",
     "MSWordConverter",
     "MedComConverter",
