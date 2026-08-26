@@ -159,10 +159,6 @@ class MSPowerPointConverter(MSOfficeConverter):
 class MSOutlookConverter(PowershellConverterABC):
     name: ClassVar[str] = "outlook"
     outputs: ClassVar[list[str]] = ["doc", "pdf"]
-    dependencies: ClassVar[dict[str, list[str]]] = PowershellConverterABC.dependencies | {
-        "outlook": ["outlook"],
-        "word": ["msword"],
-    }
     use_process: ClassVar[bool] = True
     process_timeout: ClassVar[int] = 30
     _scripts: ClassVar[dict[str, str]] = {
