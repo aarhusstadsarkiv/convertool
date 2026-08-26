@@ -63,11 +63,10 @@ def _timeout_wrapper[**P, R](func: Callable[P, R], timeout: int | None, *args: P
     signal.signal(signal.SIGALRM, _timeout_expired)
     signal.alarm(timeout)
 
-    result = func(*args, **kwargs)
-
-    signal.alarm(0)
-
-    return result
+    try:
+        return func(*args, **kwargs)
+    finally:
+        signal.alarm(0)
 
 
 def hashed_file_name(path: str | Path) -> str:
