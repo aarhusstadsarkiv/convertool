@@ -1,3 +1,4 @@
+import signal
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
@@ -10,6 +11,7 @@ from subprocess import CalledProcessError
 from subprocess import CompletedProcess
 from subprocess import TimeoutExpired
 from sys import platform
+from types import FrameType
 from typing import Any
 from typing import ClassVar
 from typing import Literal
@@ -50,6 +52,23 @@ def test_platforms(*platforms: str):
         raise UnsupportedPlatform(platform, f"Not one of {set(platforms)}.")
 
 
+def _timeout_expired(_sig: int, frame: FrameType | None) -> None:
+    raise TimeoutError(frame)
+
+
+def _timeout_wrapper[**P, R](func: Callable[P, R], timeout: int | None, *args: P.args, **kwargs: P.kwargs) -> R:
+    if platform not in ("linux", "darwin") or not timeout or timeout <= 0:
+        return func(*args, **kwargs)
+
+    signal.signal(signal.SIGALRM, _timeout_expired)
+    signal.alarm(timeout)
+
+    try:
+        return func(*args, **kwargs)
+    finally:
+        signal.alarm(0)
+
+
 def hashed_file_name(path: str | Path) -> str:
     return md5(str(path).encode("utf-8")).hexdigest() + dummy_base_file(path).suffixes
 
@@ -71,6 +90,7 @@ class ConverterABC(ABC):
     name: ClassVar[str]
     outputs: ClassVar[list[str]]
     process_timeout: ClassVar[int | float | None] = None
+    use_process: ClassVar[bool] = False
     platforms: ClassVar[list[str] | None] = None
     dependencies: ClassVar[dict[str, list[str]] | None] = None
     multithreading: ClassVar[bool] = False
@@ -289,8 +309,43 @@ class ConverterABC(ABC):
 
         return f"{name.removesuffix(self.file.suffixes)}{extension}"
 
+    def read_text(self, encoding: str | None = None) -> str:
+        """
+        Read text from the file.
+
+        :param encoding: Optionally, the encoding to use. If unset, then the encoding stored in `BaseFile.encoding`
+            is used instead.
+        :return: The content of the file as a string.
+        """
+        return self.file.get_absolute_path().read_text(
+            encoding or (self.file.encoding["encoding"] if self.file.encoding else None)
+        )
+
+    def read_bytes(self) -> bytes:
+        """
+        Read bytes from the file.
+
+        :return: The content of the file as a string.
+        """
+        return self.file.get_absolute_path().read_bytes()
+
     @abstractmethod
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]: ...
+
+    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        timeout: int | None = None
+
+        if self.use_process:
+            timeout = None
+        elif self.timeout:
+            timeout = int(self.timeout)
+        elif self.process_timeout:
+            timeout = int(self.process_timeout)
+
+        try:
+            return _timeout_wrapper(self.converter, timeout, output_dir, output, keep_relative_path=keep_relative_path)
+        except TimeoutError as e:
+            raise ConvertError(self.file, "Timeout exceeded", exception=e)
 
 
 class ConvertersEdge:

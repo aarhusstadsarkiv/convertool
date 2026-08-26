@@ -28,7 +28,7 @@ class CopyConverter(ConverterABC):
         )
         return name
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path, mkdir=True)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))
 

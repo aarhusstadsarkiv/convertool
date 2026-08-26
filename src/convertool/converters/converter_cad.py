@@ -11,6 +11,7 @@ class CADConverter(ConverterABC):
     name: ClassVar[str] = "cad"
     outputs: ClassVar[list[str]] = ["dxf", "pdf", "svg"]
     process_timeout: ClassVar[float] = 120
+    use_process: ClassVar[bool] = True
     platforms: ClassVar[list[str]] = ["win32"]
     dependencies: ClassVar[dict[str, list[str]]] = {"abviewer": ["ABViewer"]}
 
@@ -38,7 +39,7 @@ class CADConverter(ConverterABC):
             return "fmt/413"
         return None
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         output_files: list[Path] = []

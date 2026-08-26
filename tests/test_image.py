@@ -24,6 +24,6 @@ def test_img_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
     for output in converter.outputs:
         print(output)
-        output_files = converter.convert(output_dir, output)
+        output_files = converter.converter(output_dir, output)
         assert len(output_files) == 1
         assert siegfried.identify(output_files[0]).files[0].best_match().mime == MIMETYPES[output]

@@ -17,7 +17,7 @@ def test_pdf_to_pdfa(test_files: dict[str, Path], output_dir: Path, siegfried: S
     for pdfa_ver in (1, 2, 3):
         output: str = f"pdfa-{pdfa_ver}"
         print(output)
-        output_files = converter.convert(output_dir, output)
+        output_files = converter.converter(output_dir, output)
         assert len(output_files) == 1
         assert output_files[0].is_file()
         match = siegfried.identify(output_files[0]).files[0]
@@ -31,6 +31,6 @@ def test_pdf_to_img(test_files: dict[str, Path], output_dir: Path, siegfried: Si
 
     for output in converter.outputs:
         print(output)
-        output_files = converter.convert(output_dir, output)
+        output_files = converter.converter(output_dir, output)
         assert len(output_files) >= 1
         assert all(sf.best_match().mime == MIMETYPES[output] for sf in siegfried.identify(*output_files).files)

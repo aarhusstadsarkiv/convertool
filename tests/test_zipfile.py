@@ -16,7 +16,7 @@ def test_zipfile(test_files: dict[str, Path], test_files_dir: Path, output_dir: 
         hashed_output_name=False,
     )
 
-    output_files = converter.convert(output_dir, "")
+    output_files = converter.converter(output_dir, "")
     assert len(output_files) == 1
     assert output_files[0].is_file()
     assert output_files[0].name == "image1.jpeg"

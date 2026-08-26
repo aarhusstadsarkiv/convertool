@@ -12,6 +12,7 @@ class MDIConverter(ConverterABC):
     name: ClassVar[str] = "mdi"
     outputs: ClassVar[list[str]] = ["tiff"]
     process_timeout: ClassVar[int] = 120
+    use_process: ClassVar[bool] = True
     platforms: ClassVar[list[str]] = ["win32"]
     dependencies: ClassVar[dict[str, list[str]]] = {"mdi2tif": ["mdi2tif"]}
 
@@ -25,7 +26,7 @@ class MDIConverter(ConverterABC):
     def output_puid(self, output: str) -> str | None:
         return "fmt/353"
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))

@@ -231,7 +231,7 @@ def cmd_digiarch(
     """
     avid = get_avid(ctx, avid_dir, "avid_dir")
     committer: Callable[[FilesDB, int], FilesDB | None]
-    graph = ConvertersGraph.from_conversers(converters)
+    __graph = ConvertersGraph.from_conversers(converters)
     total_files: int = 0
     total_converted_files: int = 0
     total_output_files: int = 0
@@ -242,7 +242,7 @@ def cmd_digiarch(
         logger, _ = start_program(ctx, database, __version__, dry_run)
 
         if show_disabled_converters:
-            graph.filter_conversion_graph(
+            __graph.filter_conversion_graph(
                 on_invalid=lambda p, r: Event.from_command(ctx, "converter.disabled", None).log(
                     WARNING,
                     logger,
@@ -251,7 +251,7 @@ def cmd_digiarch(
                 )
             )
         else:
-            graph.filter_conversion_graph()
+            __graph.filter_conversion_graph()
 
         if backup and not dry_run:
             backup_path: Path = avid.database_path.with_name(f"{datetime.now():%Y%m%d%H%M%S}-{avid.database_path.name}")
@@ -286,12 +286,12 @@ def cmd_digiarch(
                             continue
 
                         result = convert_original_file(
+                            __graph,
                             ctx,
                             avid,
                             database,
                             file,
                             logger,
-                            graph,
                             timeout,
                             not verbose,
                             hashed_names,
@@ -308,12 +308,12 @@ def cmd_digiarch(
                             continue
 
                         result = convert_master_file(
+                            __graph,
                             ctx,
                             avid,
                             database,
                             file,
                             "access",
-                            graph,
                             logger,
                             timeout,
                             not verbose,
@@ -331,12 +331,12 @@ def cmd_digiarch(
                             continue
 
                         result = convert_master_file(
+                            __graph,
                             ctx,
                             avid,
                             database,
                             file,
                             "statutory",
-                            graph,
                             logger,
                             timeout,
                             not verbose,
@@ -353,6 +353,19 @@ def cmd_digiarch(
                         raise TypeError(f"Unknown file type {file.__class__}")
                 except KeyboardInterrupt:
                     raise
+                except ConverterNotFound as error:
+                    errors.append(error)
+                    error_event = Event.from_command(ctx, "error", file)
+                    error_event.log(
+                        ERROR,
+                        logger,
+                        show_args=["uuid"],
+                        reason=error.__class__.__name__,
+                        tool=error.tool,
+                        output=error.tool_output,
+                        via=error.via,
+                    )
+                    continue
                 except ConvertError as error:
                     errors.append(error)
                     error_event = Event.from_command(ctx, "error", file)
@@ -490,8 +503,6 @@ def cmd_standalone(
     printed in case of an error.
     """
     logger = structlog.stdlib.get_logger()
-    graph = ConvertersGraph.from_conversers(converters)
-    graph.filter_conversion_graph(requires_database=False, requires_file_classes=[BaseFile])
 
     if root and any(not Path(f).is_relative_to(root) for f in files_paths):
         raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
@@ -507,7 +518,11 @@ def cmd_standalone(
         v if not (vp := v.partition(":"))[1] else (vp[0] or None, vp[2]) for v in via_arg
     ]
 
-    conversion_path = graph.find(tool, output, via, shortest=True)
+    conversion_path = (
+        ConvertersGraph.from_conversers(converters)
+        .filter_conversion_graph(requires_database=False, requires_file_classes=[BaseFile])
+        .find(tool, output, via, shortest=True)
+    )
 
     if not conversion_path:
         Event.from_command(ctx, "error", None).log(
@@ -541,7 +556,7 @@ def cmd_standalone(
         except (KeyboardInterrupt, ConverterNotFound):
             raise
         except ConvertError as error:
-            Event.from_command(ctx, "error").log(ERROR, logger, exc_info=error)
+            Event.from_command(ctx, "error").log(ERROR, logger, exc_info=error.exception or error)
             continue
 
         for output_file in output_files:
@@ -568,7 +583,8 @@ def cmd_list(ctx: Context, only_available: bool, show_warnings: bool):
 
     table: list[tuple[str, str, str, str, str]] = [("Tool", "Output", "Path", "Platform", "Dependencies")]
 
-    for [tool, output], paths in graph.graph.items():
+    for [tool, output], paths in sorted(graph.graph.items(), key=lambda item: item[0]):
+        paths.sort(key=lambda p: (len(p), str(p)))
         for path in paths:
             entry = (
                 tool,

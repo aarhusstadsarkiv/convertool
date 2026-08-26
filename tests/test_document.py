@@ -15,7 +15,7 @@ def test_document_to_odt(test_files: dict[str, Path], output_dir: Path, siegfrie
         file = dummy_base_file(path, path.parent)
         converter = DocumentConverter(file, path.parent, hashed_output_name=True)
 
-        output_files = converter.convert(output_dir, "odt")
+        output_files = converter.converter(output_dir, "odt")
         expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".odt").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
@@ -32,7 +32,7 @@ def test_document_to_pdf(test_files: dict[str, Path], output_dir: Path, siegfrie
         file = dummy_base_file(path, path.parent)
         converter = DocumentConverter(file, path.parent, hashed_output_name=True)
 
-        output_files = converter.convert(output_dir, "pdf")
+        output_files = converter.converter(output_dir, "pdf")
         expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".pdf").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]
@@ -49,7 +49,7 @@ def test_document_to_html(test_files: dict[str, Path], output_dir: Path, siegfri
         file = dummy_base_file(path, path.parent)
         converter = DocumentConverter(file, path.parent, hashed_output_name=True)
 
-        output_files = converter.convert(output_dir, "html")
+        output_files = converter.converter(output_dir, "html")
         expected_output_file = hashed_file_name(file.relative_path / file.relative_path.with_suffix(".html").name)
         assert len(output_files) == 1
         assert expected_output_file in [f.name for f in output_files]

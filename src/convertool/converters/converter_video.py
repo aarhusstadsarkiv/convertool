@@ -15,6 +15,7 @@ class VideoConverter(ConverterABC):
         "h265",
     ]
     process_timeout: ClassVar[float] = 7200
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"ffmpeg": ["ffmpeg"]}
 
     @classmethod
@@ -43,7 +44,7 @@ class VideoConverter(ConverterABC):
             return "fmt/199"
         return None
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))

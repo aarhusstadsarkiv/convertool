@@ -7,6 +7,7 @@ from chardet import DetectionDict
 from convertool.util import TempDir
 
 from .base import ConverterABC
+from .converter_powershell import PowershellConverterABC
 from .exceptions import ConvertError
 
 
@@ -23,7 +24,7 @@ class MSOfficeConverter(ConverterABC):
         """  # noqa: D205
         ...
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         file_format, arguments = self._file_format(output)
@@ -153,3 +154,50 @@ class MSPowerPointConverter(MSOfficeConverter):
             return "ppSaveAsOpenDocumentPresentation", []
 
         raise KeyError(f"Unknown output {output}")
+
+
+class MSOutlookConverter(PowershellConverterABC):
+    name: ClassVar[str] = "msoutlook"
+    outputs: ClassVar[list[str]] = ["doc", "pdf"]
+    use_process: ClassVar[bool] = True
+    process_timeout: ClassVar[int] = 30
+    _scripts: ClassVar[dict[str, str]] = {
+        "doc": "outlook_msg2doc.ps1",
+        "pdf": "outlook_msg2pdf.ps1",
+    }
+
+    @classmethod
+    def output_name(cls, output: str) -> str:
+        if output == "doc":
+            return "document"
+        if output == "pdf":
+            return "pdf"
+        return output
+
+    def output_extension(self, output: str) -> str:
+        if output == "doc":
+            return ".doc"
+        if output == "pdf":
+            return ".pdf"
+        return super().output_extension(output)
+
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+        self.test_output(output)
+        dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
+        dest_file: Path = dest_dir.joinpath(self.output_filename(output))
+        script: str = self._scripts[output]
+
+        with TempDir(output_dir) as tmp_dir:
+            self.run_script(
+                script,
+                tmp_dir,
+                ifile=self.file.get_absolute_path(),
+                ofile=(tmp_file := tmp_dir.joinpath(dest_file.name)),
+            )
+
+            if not tmp_file.is_file():
+                raise ConvertError(self.file, f"Output file {tmp_file.name} was not created.")
+
+            dest_file.parent.mkdir(parents=True, exist_ok=True)
+
+            return [tmp_file.replace(dest_file)]

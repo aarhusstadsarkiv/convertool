@@ -11,6 +11,7 @@ class ImageConverter(ConverterABC):
     name: ClassVar[str] = "image"
     outputs: ClassVar[list[str]] = ["jpeg", "jpeg2000", "png", "tiff"]
     process_timeout: ClassVar[int] = 180
+    use_process: ClassVar[bool] = True
     dependencies: ClassVar[dict[str, list[str]]] = {"nconvert": ["nconvert"], "imagemagick": ["magick", "convert"]}
 
     def test_options(self):
@@ -125,7 +126,7 @@ class ImageConverter(ConverterABC):
                 if f.is_file()
             ]
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         if self.options.get("program") == "imagemagick":
             return self.convert_imagemagick(output_dir, output, keep_relative_path=keep_relative_path)
         else:

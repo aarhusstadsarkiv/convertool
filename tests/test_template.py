@@ -41,7 +41,7 @@ def test_template(test_files: dict[str, Path], reference_files: dict[str, Path],
             reason: str = f"Template {template} test at {datetime.now().isoformat()}"
             converter.file.relative_path = Path(f"template-{template}.jpg")
             converter.file.action_data.ignore = IgnoreAction(template=template, reason=reason)
-            output_files = converter.convert(output_dir, template)
+            output_files = converter.converter(output_dir, template)
             if template == "temporary-file":
                 assert not output_files
                 continue
@@ -77,4 +77,4 @@ def test_template_errors(avid_dir_copy: Path, output_dir: Path):
         for template in templates:
             with pytest.raises(ConvertError):
                 converter.file.action_data.ignore = IgnoreAction(template=template)
-                converter.convert(output_dir, template)
+                converter.converter(output_dir, template)

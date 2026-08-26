@@ -9,7 +9,7 @@ def test_sas_to_csv(test_files: dict[str, Path], output_dir: Path):
         file = dummy_base_file(path, path.parent)
         converter = SASConverter(file, path.parent)
 
-        output_files = converter.convert(output_dir, "csv")
+        output_files = converter.converter(output_dir, "csv")
         assert len(output_files) == 1
         assert output_files[0].suffix == ".csv"
 
@@ -19,6 +19,6 @@ def test_sas_to_tsv(test_files: dict[str, Path], output_dir: Path):
         file = dummy_base_file(path, path.parent)
         converter = SASConverter(file, path.parent)
 
-        output_files = converter.convert(output_dir, "tsv")
+        output_files = converter.converter(output_dir, "tsv")
         assert len(output_files) == 1
         assert output_files[0].suffix == ".tsv"

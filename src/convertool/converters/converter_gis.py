@@ -16,6 +16,7 @@ class GISConverter(ConverterABC):
     name: ClassVar[str] = "gis"
     outputs: ClassVar[list[str]] = ["gml", "gml3", "shp", "geojson"]
     process_timeout: ClassVar[float] = 120
+    use_process: ClassVar[bool] = True
     platforms: ClassVar[list[str]] = ["linux"]
     dependencies: ClassVar[dict[str, list[str]]] = {"ogr2ogr": ["ogr2ogr"]}
 
@@ -91,7 +92,7 @@ class GISConverter(ConverterABC):
 
         return files
 
-    def convert(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
+    def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
         dest_dir: Path = self.output_dir(output_dir, keep_relative_path=keep_relative_path)
         dest_file: Path = dest_dir.joinpath(self.output_filename(output))

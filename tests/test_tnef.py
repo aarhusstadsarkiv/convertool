@@ -11,7 +11,7 @@ def test_tnef(test_files: dict[str, Path], reference_files: dict[str, Path], out
 
     for output in converter.outputs:
         print(output)
-        output_files = converter.convert(output_dir, output)
+        output_files = converter.converter(output_dir, output)
         assert len(output_files) == 1
         assert output_files[0].name in reference_files
         assert reference_files[output_files[0].name].read_text() == output_files[0].read_text()
