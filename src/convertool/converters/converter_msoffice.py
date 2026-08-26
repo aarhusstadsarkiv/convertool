@@ -198,6 +198,6 @@ class MSOutlookConverter(PowershellConverterABC):
             if not tmp_file.is_file():
                 raise ConvertError(self.file, f"Output file {tmp_file.name} was not created.")
 
-            dest_file.mkdir(parents=True, exist_ok=True)
+            dest_file.parent.mkdir(parents=True, exist_ok=True)
 
             return [tmp_file.replace(dest_file)]
