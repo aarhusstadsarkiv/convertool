@@ -3,7 +3,6 @@ param(
     [ValidateScript({ Test-Path $_ })]
     [String]$ifile,
     [Parameter(Mandatory=$true)]
-    [ValidateScript({ Test-Path $_ })]
     [String]$ofile
 )
 
