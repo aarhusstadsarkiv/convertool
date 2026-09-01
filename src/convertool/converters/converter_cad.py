@@ -1,5 +1,4 @@
 from pathlib import Path
-from subprocess import CalledProcessError
 from typing import ClassVar
 
 from convertool.util import TempDir
@@ -65,10 +64,6 @@ class CADConverter(ConverterABC):
                     output_files.append(f.replace(dest_dir / f.name))
 
             if not output_files:
-                raise ConvertError(
-                    self.file,
-                    "No output files found.",
-                    CalledProcessError(process.returncode, process.args, process.stdout, process.stderr),
-                )
+                raise ConvertError(self.file, "No output files found.", process)
 
         return output_files
