@@ -10,47 +10,17 @@ from .exceptions import ConvertError
 
 
 def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -> str:
-    xml: list[str] = [
-        '<?xml version="1.0" encoding="utf-8"?>',
-        '<cadsofttools version="2">',
-        f'<load file="{escape(str(file))}"/>',
-    ]
-
-    if output_extension == ".dxf":
-        xml.extend(
-            [
-                "<save>",
-                f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}">',
-                "<Version>AutoCAD2000</Version>",
-                "<IsConvertImageToOLE>true</IsConvertImageToOLE>",
-                "</ExportParams>",
-                "</save>",
-            ]
-        )
-    elif output_extension == ".pdf":
-        xml.extend(
-            [
-                "<save>",
-                f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}">',
-                "</ExportParams>",
-                "</save>",
-            ]
-        )
-    elif output_extension == ".svg":
-        xml.extend(
-            [
-                "<save>",
-                f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}">',
-                "</ExportParams>",
-                "</save>",
-            ]
-        )
-    else:
-        raise NotImplementedError(output_extension)
-
-    xml.append("</cadsofttools>")
-
-    return "\n".join(xml)
+    return "\n".join(
+        [
+            '<?xml version="1.0" encoding="utf-8"?>',
+            '<cadsofttools version="2">',
+            f'<load file="{escape(str(file))}"/>',
+            "<save>",
+            f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}"></ExportParams>',
+            "</save>",
+            "</cadsofttools>",
+        ]
+    )
 
 
 class CADConverter(ConverterABC):
@@ -91,9 +61,11 @@ class CADConverter(ConverterABC):
         output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
-            tmp_file = tmp_dir.joinpath("output").with_suffix(self.output_extension(output))
             cmd_file = tmp_dir.joinpath("export.xml")
-            cmd_file.write_text(export_xml(self.file.get_absolute_path(), tmp_file.suffix, tmp_file), "utf-8")
+            cmd_file.write_text(
+                export_xml(self.file.get_absolute_path(), self.output_extension(output), tmp_dir.joinpath("output")),
+                "utf-8",
+            )
 
             _, _, process = self.run_process(self.dependencies["abviewer"][0], "-processxml", cmd_file)
 
