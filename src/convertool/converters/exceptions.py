@@ -1,4 +1,5 @@
 from subprocess import CalledProcessError
+from subprocess import CompletedProcess
 from subprocess import TimeoutExpired
 from typing import Any
 
@@ -58,12 +59,12 @@ class ConvertError(Exception):
         self,
         file: BaseFile,
         msg: str | BaseException | None = None,
-        process: CalledProcessError | TimeoutExpired | None = None,
+        process: CompletedProcess | CalledProcessError | TimeoutExpired | None = None,
         exception: Exception | None = None,
     ) -> None:
         self.file: BaseFile = file
         self.msg: str | BaseException | None = msg
-        self.process: CalledProcessError | TimeoutExpired | None = process
+        self.process: CompletedProcess | CalledProcessError | TimeoutExpired | None = process
         self.exception: Exception | None = exception
         super().__init__(msg)
 
