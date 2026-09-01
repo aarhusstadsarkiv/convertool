@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import ClassVar
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import quoteattr
 
 from convertool.util import TempDir
 
@@ -14,9 +14,9 @@ def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -
         [
             '<?xml version="1.0" encoding="utf-8"?>',
             '<cadsofttools version="2">',
-            f'<load file="{escape(str(file))}"/>',
+            f'<load file="{quoteattr(str(file))}"/>',
             "<save>",
-            f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}"></ExportParams>',
+            f"<ExportParams FileName={quoteattr(str(Path(dest_file).with_suffix('')))} Format={quoteattr(output_extension)}></ExportParams>",
             "</save>",
             "</cadsofttools>",
         ]
