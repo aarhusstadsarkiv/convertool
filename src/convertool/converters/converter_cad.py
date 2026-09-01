@@ -14,7 +14,7 @@ def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -
         [
             '<?xml version="1.0" encoding="utf-8"?>',
             '<cadsofttools version="2">',
-            f'<load file="{quoteattr(str(file))}"/>',
+            f"<load file={quoteattr(str(file))}/>",
             "<save>",
             f"<ExportParams FileName={quoteattr(str(Path(dest_file).with_suffix('')))} Format={quoteattr(output_extension)}></ExportParams>",
             "</save>",
