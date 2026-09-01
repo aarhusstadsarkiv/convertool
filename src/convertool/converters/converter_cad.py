@@ -5,6 +5,7 @@ from convertool.util import TempDir
 
 from .base import ConverterABC
 from .base import hashed_file_name
+from .exceptions import ConvertError
 
 
 class CADConverter(ConverterABC):
@@ -45,7 +46,7 @@ class CADConverter(ConverterABC):
         output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
-            self.run_process(
+            _, _, process = self.run_process(
                 self.dependencies["abviewer"][0],
                 "/c",
                 output,
@@ -61,5 +62,8 @@ class CADConverter(ConverterABC):
                     output_files.append(f.replace(dest_dir / hashed_file_name(self.file.relative_path / f.name)))
                 else:
                     output_files.append(f.replace(dest_dir / f.name))
+
+            if not output_files:
+                raise ConvertError(self.file, "No output files found.", process)
 
         return output_files
