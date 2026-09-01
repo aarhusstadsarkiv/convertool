@@ -472,7 +472,7 @@ class ConvertersPath:
                     hashed_output_name=hashed_output_name,
                 )
 
-                edge_dir = temp_dir.joinpath(f"{n:02}_{edge.name}_{edge.output}")
+                edge_dir = temp_dir.joinpath(f"{n:02} {edge.name} {edge.output}")
                 edge_dir.mkdir(parents=True, exist_ok=True)
 
                 working_outputs = converter.convert(edge_dir, edge.output, keep_relative_path=keep_relative_path)
