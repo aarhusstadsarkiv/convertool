@@ -51,7 +51,7 @@ class CADConverter(ConverterABC):
                 self.dependencies["abviewer"][0],
                 "/c",
                 output,
-                f"dir={shlex.quote(str(tmp_dir))}",
+                shlex.quote(f"dir={tmp_dir}"),
                 self.file.get_absolute_path(),
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
