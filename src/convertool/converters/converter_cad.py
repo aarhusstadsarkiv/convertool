@@ -27,6 +27,24 @@ def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -
                 "</save>",
             ]
         )
+    elif output_extension == ".pdf":
+        xml.extend(
+            [
+                "<save>",
+                f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}">',
+                "</ExportParams>",
+                "</save>",
+            ]
+        )
+    elif output_extension == ".svg":
+        xml.extend(
+            [
+                "<save>",
+                f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}">',
+                "</ExportParams>",
+                "</save>",
+            ]
+        )
     else:
         raise NotImplementedError(output_extension)
 
