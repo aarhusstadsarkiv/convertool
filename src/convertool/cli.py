@@ -377,6 +377,10 @@ def cmd_digiarch(
                         error_event.data["stdout"] = stdout if isinstance(stdout, str) else stdout.decode()
                     elif error.process and (stderr := error.process.stderr):
                         error_event.data["stderr"] = stderr if isinstance(stderr, str) else stderr.decode()
+                    if verbose and error.process:
+                        error_event.data["process"] = error.process
+                    if verbose and error.exception:
+                        error_event.data["exc_info"] = error.exception
                     error_event.log(ERROR, logger, show_args=["uuid"], **error_event.data)
                     if not dry_run:
                         database.log.insert(error_event)

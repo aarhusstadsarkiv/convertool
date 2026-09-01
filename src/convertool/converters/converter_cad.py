@@ -1,10 +1,26 @@
 from pathlib import Path
 from typing import ClassVar
+from xml.sax.saxutils import quoteattr
 
 from convertool.util import TempDir
 
 from .base import ConverterABC
 from .base import hashed_file_name
+from .exceptions import ConvertError
+
+
+def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -> str:
+    return "\n".join(
+        [
+            '<?xml version="1.0" encoding="utf-8"?>',
+            '<cadsofttools version="2">',
+            f"<load file={quoteattr(str(file))}/>",
+            "<save>",
+            f"<ExportParams FileName={quoteattr(str(Path(dest_file).with_suffix('')))} Format={quoteattr(output_extension)}></ExportParams>",
+            "</save>",
+            "</cadsofttools>",
+        ]
+    )
 
 
 class CADConverter(ConverterABC):
@@ -45,21 +61,27 @@ class CADConverter(ConverterABC):
         output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
-            self.run_process(
-                self.dependencies["abviewer"][0],
-                "/c",
-                output,
-                f"dir={tmp_dir}",
-                self.file.get_absolute_path(),
+            cmd_file = tmp_dir.joinpath("export.xml")
+            cmd_file.write_text(
+                export_xml(self.file.get_absolute_path(), self.output_extension(output), tmp_dir.joinpath("output")),
+                "utf-8",
             )
+
+            _, _, process = self.run_process(self.dependencies["abviewer"][0], "-processxml", cmd_file)
+
             dest_dir.mkdir(parents=True, exist_ok=True)
 
             for f in tmp_dir.iterdir():
                 if not f.is_file():
                     continue
+                if f == cmd_file:
+                    continue
                 if self.hashed_output_name:
                     output_files.append(f.replace(dest_dir / hashed_file_name(self.file.relative_path / f.name)))
                 else:
                     output_files.append(f.replace(dest_dir / f.name))
+
+            if not output_files:
+                raise ConvertError(self.file, "No output files found.", process)
 
         return output_files

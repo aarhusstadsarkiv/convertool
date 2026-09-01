@@ -477,6 +477,9 @@ class ConvertersPath:
 
                 working_outputs = converter.convert(edge_dir, edge.output, keep_relative_path=keep_relative_path)
 
+                if not working_outputs:
+                    raise ConvertError(file, "No output from converter.")
+
                 working_file = dummy_base_file(working_outputs[0], edge_dir)
                 working_root = edge_dir
                 working_relative_root = edge_dir
