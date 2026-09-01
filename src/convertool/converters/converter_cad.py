@@ -1,3 +1,4 @@
+import shlex
 from pathlib import Path
 from typing import ClassVar
 
@@ -50,7 +51,7 @@ class CADConverter(ConverterABC):
                 self.dependencies["abviewer"][0],
                 "/c",
                 output,
-                f"dir={tmp_dir}",
+                f"dir={shlex.quote(str(tmp_dir))}",
                 self.file.get_absolute_path(),
             )
             dest_dir.mkdir(parents=True, exist_ok=True)
