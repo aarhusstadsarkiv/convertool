@@ -1,12 +1,38 @@
-import shlex
 from pathlib import Path
 from typing import ClassVar
+from xml.sax.saxutils import escape
 
 from convertool.util import TempDir
 
 from .base import ConverterABC
 from .base import hashed_file_name
 from .exceptions import ConvertError
+
+
+def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -> str:
+    xml: list[str] = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        '<cadsofttools version="2">',
+        f'<load file="{escape(str(file))}"/>',
+    ]
+
+    if output_extension == ".dxf":
+        xml.extend(
+            [
+                "<save>",
+                f'<ExportParams FileName="{escape(str(Path(dest_file).with_suffix("")))}" Format="{escape(output_extension)}">',
+                "<Version>AutoCAD2000</Version>",
+                "<IsConvertImageToOLE>true</IsConvertImageToOLE>",
+                "</ExportParams>",
+                "</save>",
+            ]
+        )
+    else:
+        raise NotImplementedError(output_extension)
+
+    xml.append("</cadsofttools>")
+
+    return "\n".join(xml)
 
 
 class CADConverter(ConverterABC):
@@ -47,17 +73,18 @@ class CADConverter(ConverterABC):
         output_files: list[Path] = []
 
         with TempDir(output_dir) as tmp_dir:
-            _, _, process = self.run_process(
-                self.dependencies["abviewer"][0],
-                "/c",
-                output,
-                shlex.quote(f"dir={tmp_dir}"),
-                self.file.get_absolute_path(),
-            )
+            tmp_file = tmp_dir.joinpath("output").with_suffix(self.output_extension(output))
+            cmd_file = tmp_dir.joinpath("export.xml")
+            cmd_file.write_text(export_xml(self.file.get_absolute_path(), tmp_file.suffix, tmp_file), "utf-8")
+
+            _, _, process = self.run_process(self.dependencies["abviewer"][0], "-processxml", cmd_file)
+
             dest_dir.mkdir(parents=True, exist_ok=True)
 
             for f in tmp_dir.iterdir():
                 if not f.is_file():
+                    continue
+                if f == cmd_file:
                     continue
                 if self.hashed_output_name:
                     output_files.append(f.replace(dest_dir / hashed_file_name(self.file.relative_path / f.name)))
