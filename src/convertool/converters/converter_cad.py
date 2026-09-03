@@ -68,6 +68,10 @@ class CADConverter(ConverterABC):
         return f".{output}"
 
     def output_puid(self, output: str) -> str | None:
+        if output == "dxf":
+            return "fmt/433"
+        if output == "pdf":
+            return "fmt/19"
         if output == "svg":
             return "fmt/413"
         return None
