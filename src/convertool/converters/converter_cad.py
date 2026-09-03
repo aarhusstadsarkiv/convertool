@@ -10,17 +10,34 @@ from .exceptions import ConvertError
 
 
 def export_xml(file: str | Path, output_extension: str, dest_file: str | Path) -> str:
-    return "\n".join(
-        [
-            '<?xml version="1.0" encoding="utf-8"?>',
-            '<cadsofttools version="2">',
-            f"<load file={quoteattr(str(file))}/>",
-            "<save>",
-            f"<ExportParams FileName={quoteattr(str(Path(dest_file).with_suffix('')))} Format={quoteattr(output_extension)}></ExportParams>",
-            "</save>",
-            "</cadsofttools>",
-        ]
-    )
+    xml: list[str] = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        '<cadsofttools version="2">',
+        f"<load file={quoteattr(str(file))}/>",
+    ]
+
+    if output_extension == ".dxf":
+        xml.extend(
+            [
+                "<save>",
+                f"<ExportParams FileName={quoteattr(str(Path(dest_file).with_suffix('')))} Format={quoteattr(output_extension)}>",
+                "<Version>AutoCAD2007</Version>",
+                "</ExportParams>",
+                "</save>",
+            ]
+        )
+    else:
+        xml.extend(
+            [
+                "<save>",
+                f"<ExportParams FileName={quoteattr(str(Path(dest_file).with_suffix('')))} Format={quoteattr(output_extension)}></ExportParams>",
+                "</save>",
+            ]
+        )
+
+    xml.append("</cadsofttools>")
+
+    return "\n".join(xml)
 
 
 class CADConverter(ConverterABC):
