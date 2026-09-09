@@ -294,7 +294,7 @@ def convert_master_file(
 def convert_file(
     ctx: Context | str,
     path: Path,
-    root: str | Path | None,
+    root: str | Path,
     output_dir: str | Path,
     conversion: ConvertersPath | tuple[ConvertersGraph, str, str, list[str | tuple[str | None, str]] | None],
     options: dict[str, dict[str, Any]] | None,
@@ -302,10 +302,11 @@ def convert_file(
     timeout: int | None = None,
     capture_output: bool = True,
     hashed_output_name: bool = False,
+    keep_relative_path: bool = False,
     keep_temporary_files: bool = False,
 ) -> list[Path]:
     path = path.absolute()
-    file = dummy_base_file(path, root or path.root)
+    file = dummy_base_file(path, root)
 
     if isinstance(conversion, tuple):
         graph, tool, output, via = conversion
@@ -322,7 +323,7 @@ def convert_file(
 
     output_paths, _ = conversion_path(
         file,
-        root or path.root,
+        root,
         output_dir,
         root,
         None,
