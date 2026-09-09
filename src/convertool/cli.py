@@ -547,15 +547,16 @@ def cmd_standalone(
             output_files = convert_file(
                 ctx,
                 file,
-                root,
+                root or (file.drive + file.root),
                 destination,
                 conversion_path,
                 options_dict,
                 logger,
-                timeout,
-                not verbose,
-                False,
-                keep_temporary_files,
+                timeout=timeout,
+                capture_output=not verbose,
+                hashed_output_name=False,
+                keep_relative_path=root is not None,
+                keep_temporary_files=keep_temporary_files,
             )
         except (KeyboardInterrupt, ConverterNotFound):
             raise
