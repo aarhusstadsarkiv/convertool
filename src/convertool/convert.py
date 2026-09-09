@@ -333,7 +333,7 @@ def convert_file(
         capture_output=capture_output,
         hashed_output_name=hashed_output_name,
         keep_temporary_files=keep_temporary_files,
-        keep_relative_path=root is not None,
+        keep_relative_path=keep_relative_path,
     )
 
     return output_paths
