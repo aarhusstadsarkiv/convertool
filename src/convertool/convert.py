@@ -141,6 +141,7 @@ def convert_original_file(
             encoding=encoding["encoding"] if encoding else None,
         )
         output_file.puid = puid
+        output_files.append(output_file)
 
     return ConvertResult(file, conversion_path, output_files)
 
@@ -286,6 +287,7 @@ def convert_master_file(
             encoding=encoding["encoding"] if encoding else None,
         )
         output_file.puid = puid
+        output_files.append(output_file)
 
     # noinspection bad-return
     return ConvertResult(file, conversion_path, output_files)
