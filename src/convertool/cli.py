@@ -24,6 +24,7 @@ from acacore.models.file import OriginalFile
 from acacore.utils.click import end_program
 from acacore.utils.click import param_callback_query
 from acacore.utils.click import start_program
+from acacore.utils.functions import find_files
 from acacore.utils.helpers import ExceptionManager
 from click import argument
 from click import BadParameter
@@ -445,9 +446,10 @@ def cmd_digiarch(
     "files_paths",
     metavar="FILE...",
     nargs=-1,
-    type=ClickPath(exists=True, dir_okay=False, readable=True, resolve_path=True),
+    type=ClickPath(exists=True, readable=True, resolve_path=True),
     required=True,
 )
+@option("--recursive", is_flag=True, default=False, help="Recursively find files in directories.")
 @option("--via", "via_arg", type=str, multiple=True, help="Specify steps to include in the conversion path.")
 @option(
     "--option",
@@ -479,6 +481,7 @@ def cmd_standalone(
     output: str,
     destination: str,
     files_paths: tuple[str, ...],
+    recursive: bool,
     via_arg: tuple[str, ...],
     options: tuple[tuple[str, str, str], ...],
     timeout: int | None,
@@ -507,9 +510,16 @@ def cmd_standalone(
     printed in case of an error.
     """
     logger = structlog.stdlib.get_logger()
+    files: list[Path] = []
 
-    if root and any(not Path(f).is_relative_to(root) for f in files_paths):
+    if root and any(not f.is_relative_to(root) for f in files):
         raise BadParameter("not a parent path for all files.", ctx, ctx_params(ctx)["root"])
+
+    for path in files_paths:
+        if (path := Path(path)).is_dir() and recursive:
+            files.extend(find_files(path))
+        elif path.is_file():
+            files.append(path)
 
     try:
         options_dict = {}
@@ -541,7 +551,7 @@ def cmd_standalone(
 
     Event.from_command(ctx, "converter", None).log(INFO, logger, path=str(conversion_path))
 
-    for file in map(Path, files_paths):
+    for file in files:
         Event.from_command(ctx, "convert", None).log(INFO, logger, file=str(file.relative_to(root) if root else file))
         try:
             output_files = convert_file(
