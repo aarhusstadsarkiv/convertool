@@ -1,3 +1,4 @@
+import contextlib
 from functools import lru_cache
 from pathlib import Path
 from shutil import which
@@ -10,6 +11,7 @@ from convertool.util import TempDir
 
 from .base import ConverterABC
 from .exceptions import ConvertError
+from .exceptions import ConvertTimeoutError
 from .exceptions import MissingDependency
 
 # noinspection PyBroadException
@@ -116,7 +118,13 @@ class SymphovertConverter(ConverterABC):
                 sleep(1)
         finally:
             # Kill Symphony
-            self.run_process(self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name)
+            with contextlib.suppress(ConvertError, ConvertTimeoutError):
+                self.run_process(
+                    self.dependencies["taskkill"][0],
+                    "/f",
+                    "/im",
+                    Path(self.dependencies["symphony"][0]).name,
+                )
 
             sleep(2)
 
