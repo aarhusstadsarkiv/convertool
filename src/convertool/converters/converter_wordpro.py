@@ -8,7 +8,7 @@ from convertool.util import TempDir
 
 class WordProConverter(PowershellConverterABC):
     name: ClassVar[str] = "wordpro"
-    outputs: ClassVar[list[str]] = ["rtf"]
+    outputs: ClassVar[list[str]] = ["rtf", "doc"]
     use_process: ClassVar[bool] = True
     process_timeout: ClassVar[int] = 30
     _scripts: ClassVar[dict[str, str]] = {
@@ -17,14 +17,24 @@ class WordProConverter(PowershellConverterABC):
 
     @classmethod
     def output_name(cls, output: str) -> str:
-        if output == "rtf":
+        if output in ("rtf", "doc"):
             return "document"
         return output
 
     def output_extension(self, output: str) -> str:
         if output == "rtf":
             return ".rtf"
+        if output == "doc":
+            return ".rtf"
         return super().output_extension(output)
+
+    @classmethod
+    def _output_format(cls, output: str) -> str:
+        if output == "rtf":
+            return "Rich Text Format"
+        if output == "doc":
+            return "MS Word 2000"
+        raise ValueError(f"Invalid output format: {output!r}")
 
     def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
@@ -38,6 +48,7 @@ class WordProConverter(PowershellConverterABC):
                 tmp_dir,
                 ifile=self.file.get_absolute_path(),
                 ofile=(tmp_file := tmp_dir.joinpath(dest_file.name)),
+                oformat=self._output_format(output),
             )
 
             if not tmp_file.is_file():
