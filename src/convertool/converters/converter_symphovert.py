@@ -102,10 +102,7 @@ class SymphovertConverter(ConverterABC):
             pyautogui.press("escape")
             sleep(2)
 
-            check_result_attempt: int = 0
-
-            while True:
-                check_result_attempt += 1
+            for _ in range(10):
                 if dst.is_file():
                     break
                 sleep(1)
