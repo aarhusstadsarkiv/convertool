@@ -12,7 +12,8 @@ class WordProConverter(PowershellConverterABC):
     use_process: ClassVar[bool] = True
     process_timeout: ClassVar[int] = 30
     _scripts: ClassVar[dict[str, str]] = {
-        "rtf": "wordpro_lwp2rtf.ps1",
+        "rtf": "wordpro_lwp2doc.ps1",
+        "doc": "wordpro_lwp2doc.ps1",
     }
 
     @classmethod
