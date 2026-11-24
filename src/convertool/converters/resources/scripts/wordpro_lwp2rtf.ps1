@@ -7,7 +7,7 @@ param(
 )
 
 $ofileDir = Split-Path -Path $ofile
-$ofileName = Split-Path -Name $ofile -Leaf
+$ofileName = Split-Path -Path $ofile -Leaf
 
 $app = New-Object -ComObject WordPro.Application
 
@@ -17,7 +17,8 @@ if (-not $openResult)
     throw "OpenDocument rejected '$ifile'."
 }
 
-$app.SaveAs($ofileName, $ofileDir, 'Rich Text Format', $false, $false, $true)
+$wait = [Diagnostics.Stopwatch]::StartNew()
+$notified = $false
 
 while ($true)
 {
