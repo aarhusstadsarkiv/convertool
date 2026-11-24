@@ -82,7 +82,6 @@ class SymphovertConverter(ConverterABC):
                     "/nh",
                     "/fi",
                     f"IMAGENAME eq {Path(self.dependencies['symphony'][0]).name}",
-                    shell=True,
                 )
                 if Path(self.dependencies["symphony"][0]).name in out:
                     break
@@ -132,7 +131,6 @@ class SymphovertConverter(ConverterABC):
                     "/f",
                     "/im",
                     Path(self.dependencies["symphony"][0]).name,
-                    shell=True,
                 )
 
             sleep(2)
