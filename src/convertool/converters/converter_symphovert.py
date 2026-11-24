@@ -116,8 +116,6 @@ class SymphovertConverter(ConverterABC):
                 check_result_attempt += 1
                 if dst.is_file():
                     break
-                if check_result_attempt >= 10:
-                    raise ConvertError(self.file, "Symphony did not save the file")
                 sleep(1)
         finally:
             # Kill Symphony
