@@ -1,8 +1,8 @@
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [ValidateScript({ Test-Path $_ })]
     [String]$ifile,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [String]$ofile
 )
 

@@ -1,8 +1,8 @@
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [ValidateScript({ Test-Path $_ })]
     [String]$ifile,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [String]$ofile
 )
 
@@ -17,3 +17,4 @@ $msg.SaveAs($docname, 4)
 $doc = $word.Documents.Open($docname)
 $doc.SaveAs($ofile, 17)
 $doc.close()
+
