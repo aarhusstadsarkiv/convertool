@@ -2,14 +2,11 @@ import contextlib
 from functools import lru_cache
 from pathlib import Path
 from shutil import which
-from subprocess import CalledProcessError
-from subprocess import TimeoutExpired
 from time import sleep
 from typing import ClassVar
 
 import pyperclip
 
-from convertool.util import run_process
 from convertool.util import TempDir
 
 from .base import ConverterABC
@@ -80,11 +77,11 @@ class SymphovertConverter(ConverterABC):
         while True:
             check_running_attempt += 1
             try:
-                run_process("Get-Process", "-Name", "symphony", shell=True)
+                self.run_process("Get-Process", "-Name", "symphony", shell=True)
                 break
-            except (CalledProcessError, TimeoutExpired) as e:
+            except (ConvertError, ConvertTimeoutError):
                 if check_running_attempt >= 5:
-                    raise ConvertError(self.file, "Symphony could not be started", e)
+                    raise
                 sleep(1)
 
         try:
@@ -122,8 +119,8 @@ class SymphovertConverter(ConverterABC):
                 sleep(1)
         finally:
             # Kill Symphony
-            with contextlib.suppress(CalledProcessError, TimeoutExpired):
-                run_process(
+            with contextlib.suppress(ConvertError, ConvertTimeoutError):
+                self.run_process(
                     "taskkill",
                     "/f",
                     "/im",
