@@ -1,4 +1,6 @@
+from functools import lru_cache
 from pathlib import Path
+from shutil import which
 from subprocess import run as run_process
 from time import sleep
 from typing import ClassVar
@@ -51,9 +53,13 @@ class SymphovertConverter(ConverterABC):
         return f".{output}"
 
     @classmethod
+    @lru_cache
     def test_dependencies(cls):
         if pyautogui is None:
             raise MissingDependency(["pyautogui"])
+        if not (taskkill_which := which("taskkill")):
+            raise MissingDependency(["taskkill"])
+        cls.dependencies["taskkill"] = [taskkill_which]
         super().test_dependencies()
 
     def output_filename(self, output: str, *, append: bool = False) -> str:
@@ -64,6 +70,11 @@ class SymphovertConverter(ConverterABC):
     def convert_file(self, src: Path, dst: Path):
         if pyautogui is None:
             raise MissingDependency(["pyautogui"])
+
+        self.run_process(self.dependencies["symphony"][0])
+        sleep(2)
+
+        self.run_process("Get-Process", "-Name", "symphony")
 
         pyautogui.PAUSE = 1
         pyautogui.FAILSAFE = False
@@ -86,16 +97,13 @@ class SymphovertConverter(ConverterABC):
 
         # Kill Symphony
         run_process(
-            ["taskkill", "/f", "/im", self.dependencies["symphony"][0] + "*"],
+            [self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name],
             shell=True,
             capture_output=True,
             check=False,
         )
 
-        sleep(0.5)
-
-    def run_symphony(self):
-        self.run_process(self.dependencies["symphony"][0])
+        sleep(2)
 
     def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
@@ -104,9 +112,6 @@ class SymphovertConverter(ConverterABC):
 
         if dest_file.is_file():
             return [dest_file]
-
-        self.run_symphony()
-        sleep(2)
 
         with TempDir(output_dir) as tmp_dir:
             temp_file: Path = tmp_dir.joinpath(dest_file.name)
