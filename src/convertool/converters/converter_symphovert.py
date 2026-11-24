@@ -1,7 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
 from shutil import which
-from subprocess import run as run_process
 from time import sleep
 from typing import ClassVar
 
@@ -96,12 +95,7 @@ class SymphovertConverter(ConverterABC):
         sleep(2)
 
         # Kill Symphony
-        run_process(
-            [self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name],
-            shell=True,
-            capture_output=True,
-            check=False,
-        )
+        self.run_process(self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name)
 
         sleep(2)
 
