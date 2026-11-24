@@ -3,7 +3,8 @@ param(
     [ValidateScript({ Test-Path $_ })]
     [String]$ifile,
     [Parameter(Mandatory = $true)]
-    [String]$ofile
+    [String]$ofile,
+    [String]$oformat
 )
 
 $ofileDir = Split-Path -Path $ofile
@@ -24,7 +25,7 @@ while ($true)
 {
     try
     {
-        $saveResult = $app.SaveAs($ofileName, $ofileDir, 'Rich Text Format', $false, $false, $true)
+        $saveResult = $app.SaveAs($ofileName, $ofileDir, $oformat, $false, $false, $true)
         break
     }
     catch
