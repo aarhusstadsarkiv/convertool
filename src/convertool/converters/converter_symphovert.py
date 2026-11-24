@@ -72,24 +72,6 @@ class SymphovertConverter(ConverterABC):
         self.run_process(self.dependencies["symphony"][0])
         sleep(2)
 
-        check_running_attempt: int = 0
-
-        while True:
-            check_running_attempt += 1
-            try:
-                stdout, stderr, _ = self.run_process(
-                    "tasklist",
-                    "/nh",
-                    "/fi",
-                    f"IMAGENAME eq {Path(self.dependencies['symphony'][0]).name}",
-                )
-                if Path(self.dependencies["symphony"][0]).name in (stdout or stderr or ""):
-                    break
-            except (ConvertError, ConvertTimeoutError):
-                if check_running_attempt >= 5:
-                    raise
-                sleep(1)
-
         try:
             pyautogui.PAUSE = 1
             pyautogui.FAILSAFE = False
