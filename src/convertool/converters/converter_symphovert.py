@@ -67,37 +67,58 @@ class SymphovertConverter(ConverterABC):
         self.run_process(self.dependencies["symphony"][0])
         sleep(2)
 
-        self.run_process("Get-Process", "-Name", "symphony")
+        check_running_attempt: int = 0
 
-        pyautogui.PAUSE = 1
-        pyautogui.FAILSAFE = False
+        while True:
+            check_running_attempt += 1
+            try:
+                self.run_process("Get-Process", "-Name", "symphony")
+                break
+            except ConvertError:
+                if check_running_attempt >= 5:
+                    raise
+                sleep(1)
 
-        pyautogui.hotkey("ctrl", "o", interval=0.5)
-        sleep(1)
-        pyperclip.copy(str(src))
-        pyautogui.hotkey("ctrl", "v")
-        sleep(0.5)
-        pyautogui.press("enter")
-        sleep(2)
+        try:
+            pyautogui.PAUSE = 1
+            pyautogui.FAILSAFE = False
 
-        # Symphony opens an extra menu when ctrl+o is used, Escape closes it
-        pyautogui.press("escape")
-        sleep(2)
+            pyautogui.hotkey("ctrl", "o", interval=0.5)
+            sleep(1)
+            pyperclip.copy(str(src))
+            pyautogui.hotkey("ctrl", "v")
+            sleep(0.5)
+            pyautogui.press("enter")
+            sleep(2)
 
-        dst.parent.mkdir(parents=True, exist_ok=True)
+            # Symphony opens an extra menu when ctrl+o is used, Escape closes it
+            pyautogui.press("escape")
+            sleep(2)
 
-        # Save the file
-        pyautogui.hotkey("ctrl", "shift", "s", interval=0.1)
-        pyperclip.copy(str(dst))
-        pyautogui.hotkey("ctrl", "v")
-        sleep(0.5)
-        pyautogui.press("enter")
-        sleep(2)
+            dst.parent.mkdir(parents=True, exist_ok=True)
 
-        # Kill Symphony
-        self.run_process(self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name)
+            # Save the file
+            pyautogui.hotkey("ctrl", "shift", "s", interval=0.1)
+            pyperclip.copy(str(dst))
+            pyautogui.hotkey("ctrl", "v")
+            sleep(0.5)
+            pyautogui.press("enter")
+            sleep(2)
 
-        sleep(2)
+            check_result_attempt: int = 0
+
+            while True:
+                check_result_attempt += 1
+                if dst.is_file():
+                    break
+                if check_result_attempt >= 10:
+                    raise ConvertError(self.file, "Symphony did not save the file")
+                sleep(1)
+        finally:
+            # Kill Symphony
+            self.run_process(self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name)
+
+            sleep(2)
 
     def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
