@@ -26,7 +26,7 @@ class WordProConverter(PowershellConverterABC):
         if output == "rtf":
             return ".rtf"
         if output == "doc":
-            return ".rtf"
+            return ".doc"
         return super().output_extension(output)
 
     @classmethod
