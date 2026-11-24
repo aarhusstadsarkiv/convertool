@@ -82,9 +82,9 @@ class SymphovertConverter(ConverterABC):
             try:
                 run_process("Get-Process", "-Name", "symphony", shell=True)
                 break
-            except ConvertError:
+            except (CalledProcessError, TimeoutExpired) as e:
                 if check_running_attempt >= 5:
-                    raise
+                    raise ConvertError(self.file, "Symphony could not be started", e)
                 sleep(1)
 
         try:
