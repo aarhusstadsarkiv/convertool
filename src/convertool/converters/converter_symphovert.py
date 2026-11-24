@@ -20,12 +20,6 @@ except:  # noqa: E722
     pyautogui = None
 
 
-def copypaste(string: str):
-    pyperclip.copy(string)
-    pyautogui.hotkey("ctrl", "v")
-    pyautogui.press("enter")
-
-
 class SymphovertConverter(ConverterABC):
     name: ClassVar[str] = "symphovert"
     platforms: ClassVar[list[str]] = ["win32"]
@@ -80,8 +74,11 @@ class SymphovertConverter(ConverterABC):
 
         pyautogui.hotkey("ctrl", "o", interval=0.5)
         sleep(1)
-        copypaste(str(src))
+        pyperclip.copy(str(src))
+        pyautogui.hotkey("ctrl", "v")
         sleep(0.5)
+        pyautogui.press("enter")
+        sleep(2)
 
         # Symphony opens an extra menu when ctrl+o is used, Escape closes it
         pyautogui.press("escape")
@@ -91,7 +88,10 @@ class SymphovertConverter(ConverterABC):
 
         # Save the file
         pyautogui.hotkey("ctrl", "shift", "s", interval=0.1)
-        copypaste(str(dst))
+        pyperclip.copy(str(dst))
+        pyautogui.hotkey("ctrl", "v")
+        sleep(0.5)
+        pyautogui.press("enter")
         sleep(2)
 
         # Kill Symphony
