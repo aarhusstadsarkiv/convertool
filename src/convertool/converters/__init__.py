@@ -31,6 +31,7 @@ from .converter_text import TextToDocumentConverter
 from .converter_tnef import TNEFConverter
 from .converter_vector import VectorConverter
 from .converter_video import VideoConverter
+from .converter_wordpro import WordProConverter
 from .converter_xsl import MedComConverter
 from .converter_xsl import XSLConverter
 from .converter_zipfile import ZIPFileConverter
@@ -65,6 +66,7 @@ converters: list[type[ConverterABC]] = [
     TNEFConverter,
     VectorConverter,
     VideoConverter,
+    WordProConverter,
     XSLConverter,
     ZIPFileConverter,
 ]
@@ -103,6 +105,7 @@ __all__ = [
     "TextToDocumentConverter",
     "VectorConverter",
     "VideoConverter",
+    "WordProConverter",
     "XSLConverter",
     "ZIPFileConverter",
     "converters",

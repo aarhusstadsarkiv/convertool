@@ -1,5 +1,7 @@
+import contextlib
+from functools import lru_cache
 from pathlib import Path
-from subprocess import run as run_process
+from shutil import which
 from time import sleep
 from typing import ClassVar
 
@@ -9,6 +11,7 @@ from convertool.util import TempDir
 
 from .base import ConverterABC
 from .exceptions import ConvertError
+from .exceptions import ConvertTimeoutError
 from .exceptions import MissingDependency
 
 # noinspection PyBroadException
@@ -17,12 +20,6 @@ try:
 # Bare except because there are other errors than ImportError that can be raised when importing pyautogui depending on the system
 except:  # noqa: E722
     pyautogui = None
-
-
-def copypaste(string: str):
-    pyperclip.copy(string)
-    pyautogui.hotkey("ctrl", "v")
-    pyautogui.press("enter")
 
 
 class SymphovertConverter(ConverterABC):
@@ -51,9 +48,13 @@ class SymphovertConverter(ConverterABC):
         return f".{output}"
 
     @classmethod
+    @lru_cache
     def test_dependencies(cls):
         if pyautogui is None:
             raise MissingDependency(["pyautogui"])
+        if not (taskkill_which := which("taskkill")):
+            raise MissingDependency(["taskkill"])
+        cls.dependencies["taskkill"] = [taskkill_which]
         super().test_dependencies()
 
     def output_filename(self, output: str, *, append: bool = False) -> str:
@@ -65,37 +66,57 @@ class SymphovertConverter(ConverterABC):
         if pyautogui is None:
             raise MissingDependency(["pyautogui"])
 
-        pyautogui.PAUSE = 1
-        pyautogui.FAILSAFE = False
+        with contextlib.suppress(ConvertError, ConvertTimeoutError):
+            self.run_process(self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name)
 
-        pyautogui.hotkey("ctrl", "o", interval=0.5)
-        sleep(1)
-        copypaste(str(src))
-        sleep(0.5)
-
-        # Symphony opens an extra menu when ctrl+o is used, Escape closes it
-        pyautogui.press("escape")
-        sleep(2)
-
-        dst.parent.mkdir(parents=True, exist_ok=True)
-
-        # Save the file
-        pyautogui.hotkey("ctrl", "shift", "s", interval=0.1)
-        copypaste(str(dst))
-        sleep(2)
-
-        # Kill Symphony
-        run_process(
-            ["taskkill", "/f", "/im", self.dependencies["symphony"][0] + "*"],
-            shell=True,
-            capture_output=True,
-            check=False,
-        )
-
-        sleep(0.5)
-
-    def run_symphony(self):
         self.run_process(self.dependencies["symphony"][0])
+        sleep(2)
+
+        try:
+            pyautogui.PAUSE = 1
+            pyautogui.FAILSAFE = False
+
+            pyautogui.hotkey("ctrl", "o", interval=0.5)
+            sleep(1)
+            pyperclip.copy(str(src))
+            pyautogui.hotkey("ctrl", "v")
+            sleep(0.5)
+            pyautogui.press("enter")
+            sleep(2)
+
+            # Symphony opens an extra menu when ctrl+o is used, Escape closes it
+            pyautogui.press("escape")
+            sleep(2)
+
+            dst.parent.mkdir(parents=True, exist_ok=True)
+
+            # Save the file
+            pyautogui.hotkey("ctrl", "shift", "s", interval=0.1)
+            pyperclip.copy(str(dst))
+            pyautogui.hotkey("ctrl", "v")
+            sleep(0.5)
+            pyautogui.press("enter")
+            sleep(2)
+
+            # Symphony opens an extra menu when ctrl+shift+s is used, Escape closes it
+            pyautogui.press("escape")
+            sleep(2)
+
+            for _ in range(10):
+                if dst.is_file():
+                    break
+                sleep(1)
+        finally:
+            # Kill Symphony
+            with contextlib.suppress(ConvertError, ConvertTimeoutError):
+                self.run_process(
+                    "taskkill",
+                    "/f",
+                    "/im",
+                    Path(self.dependencies["symphony"][0]).name,
+                )
+
+            sleep(2)
 
     def converter(self, output_dir: Path, output: str, *, keep_relative_path: bool = True) -> list[Path]:
         self.test_output(output)
@@ -104,9 +125,6 @@ class SymphovertConverter(ConverterABC):
 
         if dest_file.is_file():
             return [dest_file]
-
-        self.run_symphony()
-        sleep(2)
 
         with TempDir(output_dir) as tmp_dir:
             temp_file: Path = tmp_dir.joinpath(dest_file.name)

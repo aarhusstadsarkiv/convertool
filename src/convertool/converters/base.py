@@ -192,6 +192,7 @@ class ConverterABC(ABC):
         command: str,
         *args: str | int | Path,
         cwd: str | Path | None = None,
+        shell: bool = False,
     ) -> tuple[str, str, CompletedProcess[str]]:
         """
         Run process and capture output.
@@ -201,6 +202,7 @@ class ConverterABC(ABC):
         :param command: The command to run.
         :param args: The arguments for the given command. Non-string arguments are cast to string.
         :param cwd: Optionally, the working directory to use.
+        :param shell: Optionally, run the command through the shell.
         :raise ConvertError: If the process exists with a non-zero code.
         :raise ConvertTimeoutError: If the process times out.
         :return: A tuple with the captured stdout and stderr outputs in string format.
@@ -214,6 +216,7 @@ class ConverterABC(ABC):
                 timeout=self.process_timeout
                 if self.timeout is None or self.process_timeout is None
                 else (self.timeout or None),
+                shell=shell,
             )
         except TimeoutExpired as err:
             raise ConvertTimeoutError(self.file, f"The process timed out after {err.timeout}s", err)

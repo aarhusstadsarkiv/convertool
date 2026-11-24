@@ -119,6 +119,7 @@ def run_process(
     env: bool = True,
     capture_output: bool = True,
     timeout: float | None = None,
+    shell: bool = False,
 ) -> tuple[str, str, CompletedProcess[str]]:
     """
     Run process and capture output.
@@ -131,6 +132,7 @@ def run_process(
     :param env: If ``True`` to use the system's env command (if available).
     :param capture_output: Whether to capture the output of ``subprocess.run``. Default: ``True``.
     :param timeout: Optionally, a timeout.
+    :param shell: If ``True``, use the system shell to run the command.
     :raise CalledProcessError: If the process exists with a non-zero code.
     :raise TimeoutExpired: If the process times out.
     :return: A tuple with the captured stdout and stderr outputs in string format.
@@ -145,8 +147,9 @@ def run_process(
             errors="replace",
             check=True,
             timeout=timeout,
+            shell=shell,
         )
-        return process.stdout, process.stderr, process
+        return process.stdout or "", process.stderr or "", process
     except FileNotFoundError:
         raise CalledProcessError(127, command, "", f"Command not found {command}")
 
