@@ -98,6 +98,10 @@ class SymphovertConverter(ConverterABC):
             pyautogui.press("enter")
             sleep(2)
 
+            # Symphony opens an extra menu when ctrl+shift+s is used, Escape closes it
+            pyautogui.press("escape")
+            sleep(2)
+
             check_result_attempt: int = 0
 
             while True:
