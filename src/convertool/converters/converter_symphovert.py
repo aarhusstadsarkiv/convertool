@@ -66,6 +66,9 @@ class SymphovertConverter(ConverterABC):
         if pyautogui is None:
             raise MissingDependency(["pyautogui"])
 
+        with contextlib.suppress(ConvertError, ConvertTimeoutError):
+            self.run_process(self.dependencies["taskkill"][0], "/f", "/im", Path(self.dependencies["symphony"][0]).name)
+
         self.run_process(self.dependencies["symphony"][0])
         sleep(2)
 
